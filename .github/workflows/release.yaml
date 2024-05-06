@@ -91,6 +91,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           body_path: ${{ github.workspace }}-CHANGELOG.txt
-          files: .tv/app/build/outputs/apk/*/release/*.apk
+          files: ./tv/app/build/outputs/apk/*/release/*.apk
         env:
           GITHUB_TOKEN: ${{ github.token }} # 给最高的权限
