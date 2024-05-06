@@ -16,7 +16,7 @@ def edit_gradle_file(version):
     if "v" in version:
         version = version.replace("v","")
     current_dir = os.getcwd()  # 获取当前目录
-    parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir))  # 获取上级目录
+    parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir,"tv"))  # 获取上级目录
     with open(os.path.join(parent_dir,"app","build.gradle"),"rb") as f:
         content = str(f.read(),encoding='utf-8')
     matches = re.findall('versionName "([^"]*)"', content)
