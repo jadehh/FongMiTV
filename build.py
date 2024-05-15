@@ -5,7 +5,7 @@
 # @Date     : 2024/5/6 16:39
 # @Email    : jadehh@1ive.com
 # @Software : Samples
-# @Desc     : 2024 05/14 00:24
+# @Desc     : 2024 05/15 10:33
 import os
 import argparse
 import re
@@ -22,7 +22,6 @@ def edit_gradle_file(version):
     matches = re.findall('versionName "([^"]*)"', content)
     content = content.replace(matches[0],version)
     content = content.split("'proguard-rules.pro'")[0] + "'proguard-rules.pro'" + "\n\t\t\tsigningConfig signingConfigs.debug" +  content.split("'proguard-rules.pro'")[1].replace("\n\t\t\tsigningConfig signingConfigs.debug","")
-    content = content.replace("&&","||")
     with open(os.path.join(parent_dir,"app","build.gradle"),"wb") as f:
         f.write(content.encode("utf-8"))
 
