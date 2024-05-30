@@ -24,6 +24,9 @@
     <!-- Download -->
     <string name="downloading">下載中</string>
     <string name="download_finish">下載完成</string>
+    <string name="download_size">下載:%1$s/%2$s</string>
+    <string name="download_speed">速度:%1$s</string>
+    <string name="download_status">已暫停</string>
 
 
     <!-- Device -->

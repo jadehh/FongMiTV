@@ -36,12 +36,12 @@
                 app:layout_scrollFlags="scroll|enterAlways" />
 
             <ImageView
-                android:id="@+id/searchIcon"
+                android:id="@+id/settingIcon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="right"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_action_search" />
+                android:src="@drawable/ic_nav_setting" />
 
         </LinearLayout>
 
