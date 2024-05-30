@@ -28,6 +28,9 @@
     <string name="download_size">下载:%1$s/%2$s</string>
     <string name="download_speed">速度:%1$s</string>
     <string name="download_status">已暂停</string>
+    <string name="download_remaining_time">剩余时间</string>
+    <string name="download_delete_file">删除文件</string>
+    <string name="download_open">打开</string>
 
 
     <!-- Device -->

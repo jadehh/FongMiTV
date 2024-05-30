@@ -11,12 +11,12 @@
             android:gravity="center"
             android:padding="@dimen/default_pad">
             <ImageView
-                android:id="@+id/file_icon"
+                android:id="@+id/downloadIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_video"/>
             <ImageView
-                android:id="@+id/file_icon2"
+                android:id="@+id/downloadPlayIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_video_player"
@@ -41,6 +41,7 @@
                     android:textSize="@dimen/filename_item_text_size"
                     android:lines="2"
                     android:text="@string/app_name"
+                    android:textColor="@color/white"
                     android:ellipsize="end" />
 
                 <LinearLayout
@@ -107,10 +108,11 @@
                         android:padding="2dp"
                         />
                     <TextView
-                        android:id="@+id/remaining_time"
+                        android:id="@+id/downloadRemainingTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="8sp"
+                        android:text="@string/download_remaining_time"
                         android:textColor="@color/white"
                         android:paddingLeft="@dimen/default_pad2"/>
                     <com.daimajia.numberprogressbar.NumberProgressBar
