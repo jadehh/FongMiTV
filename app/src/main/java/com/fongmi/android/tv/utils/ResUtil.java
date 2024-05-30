@@ -1,5 +1,6 @@
 package com.fongmi.android.tv.utils;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -21,6 +22,7 @@ import android.view.animation.AnimationUtils;
 
 import androidx.annotation.AnimRes;
 import androidx.annotation.ArrayRes;
+import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
@@ -117,6 +119,10 @@ public class ResUtil {
 
     public static String[] getStringArray(@ArrayRes int resId) {
         return App.get().getResources().getStringArray(resId);
+    }
+
+    public static int getColor(@ColorRes int resId){
+        return App.get().getResources().getColor(resId);
     }
 
     public static Drawable getDrawable(@DrawableRes int resId) {

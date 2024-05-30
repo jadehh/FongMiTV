@@ -8,6 +8,8 @@
     <string name="nav_vod">点播</string>
     <string name="nav_live">直播</string>
     <string name="nav_setting">设置</string>
+    <string name="nav_downloading">下载</string>
+
 
     <!-- Vod -->
     <string name="vod_home">推荐</string>
@@ -19,6 +21,10 @@
     <string name="detail_quality">画质</string>
     <string name="detail_content">简介</string>
     <string name="detail_search">快搜“<xliff:g name="name">%s</xliff:g>”</string>
+
+    <!-- Download -->
+    <string name="downloading">下载中</string>
+    <string name="download_finish">下载完成</string>
 
     <!-- Device -->
     <string name="device_select">选择装置</string>

@@ -8,6 +8,7 @@
     <string name="nav_vod">Vod</string>
     <string name="nav_live">Live</string>
     <string name="nav_setting">Setting</string>
+    <string name="nav_downloading">Downloading</string>
 
     <!-- Vod -->
     <string name="vod_home">Home</string>
@@ -19,6 +20,11 @@
     <string name="detail_quality">Quality</string>
     <string name="detail_content">Summary</string>
     <string name="detail_search">Searching <xliff:g name="name">%s</xliff:g></string>
+
+    <!-- Download -->
+    <string name="downloading">Downloading</string>
+    <string name="download_finish">Download Finish</string>
+
 
     <!-- Device -->
     <string name="device_select">Select devices</string>
