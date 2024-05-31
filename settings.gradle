@@ -34,4 +34,5 @@ include ':youtube'
 include ':jianpian'
 include ':forcetech'
 include ':ijkplayer'
+include ':pyramid'
 rootProject.name = "TV"

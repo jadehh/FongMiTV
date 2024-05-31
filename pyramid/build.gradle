@@ -14,8 +14,9 @@ android {
             version "3.8"
             pip {
                 install "lxml"
-                install "requests"
+                install "requests==2.24.0"
                 install 'pycryptodome'
+                install 'soupsieve==2.4'
                 install 'beautifulsoup4'
             }
         }
