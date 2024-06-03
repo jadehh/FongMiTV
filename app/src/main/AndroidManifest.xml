@@ -85,6 +85,7 @@
                 <action android:name="${applicationId}.pause" />
             </intent-filter>
         </receiver>
+        <service android:name=".server.DownloadingService"/>
 
     </application>
 </manifest>

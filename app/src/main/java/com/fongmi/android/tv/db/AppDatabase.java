@@ -13,6 +13,7 @@ import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.Setting;
 import com.fongmi.android.tv.bean.Config;
 import com.fongmi.android.tv.bean.Device;
+import com.fongmi.android.tv.bean.DownloadTask;
 import com.fongmi.android.tv.bean.History;
 import com.fongmi.android.tv.bean.Keep;
 import com.fongmi.android.tv.bean.Live;
@@ -25,6 +26,7 @@ import com.fongmi.android.tv.db.dao.KeepDao;
 import com.fongmi.android.tv.db.dao.LiveDao;
 import com.fongmi.android.tv.db.dao.SiteDao;
 import com.fongmi.android.tv.db.dao.TrackDao;
+import com.fongmi.android.tv.db.dao.DownloadDao;
 import com.fongmi.android.tv.utils.FileUtil;
 import com.fongmi.android.tv.utils.Util;
 import com.github.catvod.utils.Path;
@@ -34,7 +36,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-@Database(entities = {Keep.class, Site.class, Live.class, Track.class, Config.class, Device.class, History.class}, version = AppDatabase.VERSION)
+@Database(entities = {Keep.class, Site.class, Live.class, Track.class, Config.class, Device.class, History.class, DownloadTask.class}, version = AppDatabase.VERSION)
 public abstract class AppDatabase extends RoomDatabase {
 
     public static final int VERSION = 30;
@@ -119,6 +121,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract LiveDao getLiveDao();
 
     public abstract TrackDao getTrackDao();
+
+    public abstract DownloadDao getDownloadDao();
 
     public abstract ConfigDao getConfigDao();
 

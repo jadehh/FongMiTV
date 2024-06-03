@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 30,
-    "identityHash": "0e0f8a59490a282acc85e2c2f5f133a7",
+    "identityHash": "f21a46cf194237f312ae19fc58aaea27",
     "entities": [
       {
         "tableName": "Keep",
@@ -206,7 +206,7 @@
       },
       {
         "tableName": "Config",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `type` INTEGER NOT NULL, `time` INTEGER NOT NULL, `url` TEXT, `json` TEXT, `name` TEXT, `home` TEXT, `logo` TEXT, `parse` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `type` INTEGER NOT NULL, `time` INTEGER NOT NULL, `url` TEXT, `json` TEXT, `name` TEXT, `logo` TEXT, `home` TEXT, `parse` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -245,14 +245,14 @@
             "notNull": false
           },
           {
-            "fieldPath": "home",
-            "columnName": "home",
+            "fieldPath": "logo",
+            "columnName": "logo",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "logo",
-            "columnName": "logo",
+            "fieldPath": "home",
+            "columnName": "home",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -453,12 +453,121 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "DownloadTask",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `taskId` INTEGER NOT NULL, `taskStatus` INTEGER NOT NULL, `fileSize` INTEGER NOT NULL, `taskType` INTEGER NOT NULL, `downloadSize` INTEGER NOT NULL, `downloadSpeed` INTEGER NOT NULL, `url` TEXT, `hash` TEXT, `file` INTEGER, `fileName` TEXT, `localPath` TEXT, `thumbnailPath` TEXT, `createTime` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "taskId",
+            "columnName": "taskId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskStatus",
+            "columnName": "taskStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileSize",
+            "columnName": "fileSize",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskType",
+            "columnName": "taskType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "downloadSize",
+            "columnName": "downloadSize",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "downloadSpeed",
+            "columnName": "downloadSpeed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hash",
+            "columnName": "hash",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "file",
+            "columnName": "file",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "fileName",
+            "columnName": "fileName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "localPath",
+            "columnName": "localPath",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "thumbnailPath",
+            "columnName": "thumbnailPath",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createTime",
+            "columnName": "createTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_DownloadTask_id_url",
+            "unique": true,
+            "columnNames": [
+              "id",
+              "url"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_DownloadTask_id_url` ON `${TABLE_NAME}` (`id`, `url`)"
+          }
+        ],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0e0f8a59490a282acc85e2c2f5f133a7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f21a46cf194237f312ae19fc58aaea27')"
     ]
   }
 }

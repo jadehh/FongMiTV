@@ -2,6 +2,7 @@ package com.fongmi.android.tv.player.extractor;
 
 import android.net.Uri;
 
+import com.fongmi.android.tv.download.DownloadSource;
 import com.fongmi.android.tv.player.Source;
 import com.github.catvod.utils.Path;
 import com.p2p.P2PClass;
@@ -11,7 +12,7 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JianPian implements Source.Extractor {
+public class JianPian implements Source.Extractor, DownloadSource.Extractor {
 
     private P2PClass p2p;
     private String path;
@@ -33,6 +34,10 @@ public class JianPian implements Source.Extractor {
         stop();
         start(url);
         return "http://127.0.0.1:" + p2p.port + "/" + URLEncoder.encode(Uri.parse(path).getLastPathSegment(), "GBK");
+    }
+
+    @Override
+    public void download(String url) throws Exception {
     }
 
     private void start(String url) {

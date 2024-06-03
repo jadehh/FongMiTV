@@ -105,13 +105,16 @@
             android:supportsPictureInPicture="true"
             android:theme="@style/AppTheme.Live" />
 
+
         <activity
-            android:name=".ui.fragment.DownloadFragment"
+            android:name=".ui.activity.DownloadManageActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="true"
             android:launchMode="singleTop"
             android:resizeableActivity="true"
-            android:screenOrientation="fullUser"
-            android:supportsPictureInPicture="true" />
+            android:screenOrientation="sensorLandscape"
+            android:supportsPictureInPicture="true"
+            android:theme="@style/AppTheme.Live" />
 
         <activity
             android:name=".ui.activity.ScanActivity"

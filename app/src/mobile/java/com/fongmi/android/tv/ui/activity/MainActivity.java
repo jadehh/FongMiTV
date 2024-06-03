@@ -32,7 +32,6 @@ import com.fongmi.android.tv.receiver.ShortcutReceiver;
 import com.fongmi.android.tv.server.Server;
 import com.fongmi.android.tv.ui.base.BaseActivity;
 import com.fongmi.android.tv.ui.custom.FragmentStateManager;
-import com.fongmi.android.tv.ui.fragment.DownloadFragment;
 import com.fongmi.android.tv.ui.fragment.SettingCustomFragment;
 import com.fongmi.android.tv.ui.fragment.SettingFragment;
 import com.fongmi.android.tv.ui.fragment.SettingPlayerFragment;
@@ -96,7 +95,6 @@ public class MainActivity extends BaseActivity implements NavigationBarView.OnIt
                 if (position == 1) return SettingFragment.newInstance();
                 if (position == 2) return SettingPlayerFragment.newInstance();
                 if (position == 3) return SettingCustomFragment.newInstance();
-                if (position == 4) return DownloadFragment.newInstance();
                 return null;
             }
         };
@@ -148,6 +146,11 @@ public class MainActivity extends BaseActivity implements NavigationBarView.OnIt
         return false;
     }
 
+    private boolean openDownload(){
+        DownloadManageActivity.start(this);
+        return false;
+    }
+
     private boolean addShortcut(View view) {
         ShortcutInfoCompat info = new ShortcutInfoCompat.Builder(this, getString(R.string.nav_live)).setIcon(IconCompat.createWithResource(this, R.mipmap.ic_launcher)).setIntent(new Intent(Intent.ACTION_VIEW, null, this, LiveActivity.class)).setShortLabel(getString(R.string.nav_live)).build();
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(this, ShortcutReceiver.class).setAction(ShortcutReceiver.ACTION), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
@@ -182,7 +185,7 @@ public class MainActivity extends BaseActivity implements NavigationBarView.OnIt
         if (mBinding.navigation.getSelectedItemId() == item.getItemId()) return false;
         if (item.getItemId() == R.id.vod) return mManager.change(0);
         if (item.getItemId() == R.id.setting) return mManager.change(1);
-        if (item.getItemId() == R.id.downloading) return mManager.change(4);
+        if (item.getItemId() == R.id.downloading) return openDownload();
         if (item.getItemId() == R.id.live) return openLive();
         return false;
     }
@@ -212,7 +215,6 @@ public class MainActivity extends BaseActivity implements NavigationBarView.OnIt
             else finish();
         }
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();

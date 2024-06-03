@@ -27,4 +27,15 @@ public class Constant {
     public static final int TIMEOUT_TRANSMIT = 60 * 1000;
     //搜尋線程數量
     public static final int THREAD_POOL = 5;
+
+    //迅雷下载类型
+    public static final int THUNDER_TYPE = 0;
+
+    //开启下载消息类型
+    public static final int DOWNLOAD_START_MESSAGE_TYPE = 0;
+    //改变下载消息类型
+    public static final int DOWNLOAD_SWITCH_MESSAGE_TYPE = 1;
+
+    //更新下载消息类型
+    public static final int DOWNLOAD_UPDATE_MESSAGE_TYPE = 3;
 }
