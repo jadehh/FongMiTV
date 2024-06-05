@@ -91,7 +91,7 @@
                         android:layout_height="@dimen/file_item_btn_icon_height"
                         android:layout_weight="1"
                         android:layout_gravity="right"
-                        android:src="@drawable/ic_delete" />
+                        android:src="@drawable/ic_download_delete" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>

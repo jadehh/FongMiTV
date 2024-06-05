@@ -26,7 +26,7 @@ import com.fongmi.android.tv.db.dao.KeepDao;
 import com.fongmi.android.tv.db.dao.LiveDao;
 import com.fongmi.android.tv.db.dao.SiteDao;
 import com.fongmi.android.tv.db.dao.TrackDao;
-import com.fongmi.android.tv.db.dao.DownloadDao;
+import com.fongmi.android.tv.db.dao.DownloadTaskDao;
 import com.fongmi.android.tv.utils.FileUtil;
 import com.fongmi.android.tv.utils.Util;
 import com.github.catvod.utils.Path;
@@ -122,7 +122,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract TrackDao getTrackDao();
 
-    public abstract DownloadDao getDownloadDao();
+    public abstract DownloadTaskDao getDownloadTaskDao();
 
     public abstract ConfigDao getConfigDao();
 

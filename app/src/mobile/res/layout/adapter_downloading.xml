@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -14,7 +16,7 @@
                 android:id="@+id/downloadIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_video"/>
+                android:src="@drawable/ic_download_video"/>
             <ImageView
                 android:id="@+id/downloadPlayIcon"
                 android:layout_width="wrap_content"
@@ -77,18 +79,18 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1">
                     <ImageView
-                        android:id="@+id/start_task"
+                        android:id="@+id/startTask"
                         android:layout_width="0dp"
                         android:layout_height="@dimen/file_item_btn_icon_height"
                         android:layout_weight="1"
-                        android:src="@drawable/ic_stop" />
+                        android:src="@drawable/ic_download_stop" />
 
                     <ImageView
-                        android:id="@+id/dele_task"
+                        android:id="@+id/deleteTask"
                         android:layout_width="0dp"
                         android:layout_height="@dimen/file_item_btn_icon_height"
                         android:layout_weight="1"
-                        android:src="@drawable/ic_delete" />
+                        android:src="@drawable/ic_download_delete" />
                     </LinearLayout>
                 </LinearLayout>
                 <LinearLayout
@@ -132,4 +134,4 @@
         android:background="@color/white_50"
         android:layout_marginLeft="@dimen/default_pad"
         android:layout_marginRight="@dimen/default_pad"/>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>

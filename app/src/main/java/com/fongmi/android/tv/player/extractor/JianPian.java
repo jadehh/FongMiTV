@@ -2,6 +2,7 @@ package com.fongmi.android.tv.player.extractor;
 
 import android.net.Uri;
 
+import com.fongmi.android.tv.bean.DownloadTask;
 import com.fongmi.android.tv.download.DownloadSource;
 import com.fongmi.android.tv.player.Source;
 import com.github.catvod.utils.Path;
@@ -10,6 +11,7 @@ import com.p2p.P2PClass;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class JianPian implements Source.Extractor, DownloadSource.Extractor {
@@ -21,6 +23,26 @@ public class JianPian implements Source.Extractor, DownloadSource.Extractor {
     @Override
     public boolean match(String scheme, String host) {
         return "tvbox-xg".equals(scheme) || "jianpian".equals(scheme) || "ftp".equals(scheme);
+    }
+
+    @Override
+    public boolean downloadMatch(String scheme, String host) {
+        return false;
+    }
+
+    @Override
+    public List<DownloadTask> startDownload(String url) {
+        return null;
+    }
+
+    @Override
+    public List<DownloadTask> resumeDownload(DownloadTask task) {
+        return null;
+    }
+
+    @Override
+    public void stopDownload(DownloadTask task) {
+
     }
 
     private void init() {
@@ -36,9 +58,6 @@ public class JianPian implements Source.Extractor, DownloadSource.Extractor {
         return "http://127.0.0.1:" + p2p.port + "/" + URLEncoder.encode(Uri.parse(path).getLastPathSegment(), "GBK");
     }
 
-    @Override
-    public void download(String url) throws Exception {
-    }
 
     private void start(String url) {
         try {
@@ -69,6 +88,8 @@ public class JianPian implements Source.Extractor, DownloadSource.Extractor {
             e.printStackTrace();
         }
     }
+
+
 
     @Override
     public void exit() {

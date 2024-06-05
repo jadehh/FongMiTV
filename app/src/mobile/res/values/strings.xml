@@ -27,9 +27,16 @@
     <string name="download_size">Download:%1$s/%2$s</string>
     <string name="download_speed">Speed:%1$s</string>
     <string name="download_status">Pause</string>
+    <string name="download_stop">Stop</string>
+    <string name="download_connect">Connecting</string>
+    <string name="download_fail">Fail</string>
+    <string name="download_waiting">Waiting</string>
+    <string name="download_downloading">Downloading</string>
     <string name="download_remaining_time">Remaining Time</string>
     <string name="download_delete_file">File is Delete</string>
     <string name="download_open">Open</string>
+
+
 
 
 

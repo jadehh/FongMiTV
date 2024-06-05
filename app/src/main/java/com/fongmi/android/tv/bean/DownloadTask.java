@@ -13,14 +13,18 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
-@Entity(indices = @Index(value = {"id","url"}, unique = true))
+@Entity(indices = @Index(value = {"id", "url"}, unique = true))
 public class DownloadTask {
 
     @PrimaryKey(autoGenerate = true)
     @SerializedName("id")
     private Integer id;
+
+    @SerializedName("parentId")
+    private int parentId;
 
     @SerializedName("taskId")
     private long taskId;
@@ -46,7 +50,7 @@ public class DownloadTask {
     private String hash;
 
     @SerializedName("file")
-    private Boolean file;
+    private Boolean file = false;
 
     @SerializedName("fileName")
     private String fileName;
@@ -60,7 +64,23 @@ public class DownloadTask {
     @SerializedName("createTime")
     private long createTime;
 
+    @SerializedName("updateTime")
+    private long updateTime;
 
+    public static DownloadTask objectFrom(String str) {
+        return App.gson().fromJson(str, DownloadTask.class);
+    }
+
+    public static List<DownloadTask> arrayFrom(String str) {
+        Type listType = new TypeToken<List<DownloadTask>>() {
+        }.getType();
+        List<DownloadTask> items = App.gson().fromJson(str, listType);
+        return items == null ? Collections.emptyList() : items;
+    }
+
+    public static List<DownloadTask> find(String url) {
+        return AppDatabase.get().getDownloadTaskDao().find(url);
+    }
 
     public Integer getId() {
         return id;
@@ -68,6 +88,14 @@ public class DownloadTask {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public int getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(int parentId) {
+        this.parentId = parentId;
     }
 
     public long getTaskId() {
@@ -78,16 +106,13 @@ public class DownloadTask {
         this.taskId = taskId;
     }
 
-
     public int getTaskStatus() {
         return taskStatus;
     }
 
-
     public void setTaskStatus(int taskStatus) {
         this.taskStatus = taskStatus;
     }
-
 
     public long getFileSize() {
         return fileSize;
@@ -104,9 +129,6 @@ public class DownloadTask {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
-
-
-
 
     public int getTaskType() {
         return taskType;
@@ -147,6 +169,7 @@ public class DownloadTask {
     public void setDownloadSpeed(long downloadSpeed) {
         this.downloadSpeed = downloadSpeed;
     }
+
     public String getHash() {
         return hash;
     }
@@ -179,23 +202,38 @@ public class DownloadTask {
         this.createTime = createTime;
     }
 
-
-    public static DownloadTask objectFrom(String str) {
-        return App.gson().fromJson(str, DownloadTask.class);
+    public long getUpdateTime() {
+        return updateTime;
     }
 
-    public static List<DownloadTask> arrayFrom(String str) {
-        Type listType = new TypeToken<List<DownloadTask>>() {}.getType();
-        List<DownloadTask> items = App.gson().fromJson(str, listType);
-        return items == null ? Collections.emptyList() : items;
-    }
-
-    public static List<DownloadTask> find(int id) {
-        return AppDatabase.get().getDownloadDao().find(id);
+    public void setUpdateTime(long updateTime) {
+        this.updateTime = updateTime;
     }
 
     public void save() {
-        AppDatabase.get().getDownloadDao().insert(this);
+        if (AppDatabase.get().getDownloadTaskDao().find(this.url).size() > 0) update();
+        else insert();
+    }
+
+    public void update() {
+        if (this.id == null) {
+            this.id = AppDatabase.get().getDownloadTaskDao().find(this.url).get(0).getId();
+        }
+        this.updateTime = new Date().getTime();
+        AppDatabase.get().getDownloadTaskDao().update(this);
+    }
+
+    public void insert() {
+        this.createTime = new Date().getTime();
+        AppDatabase.get().getDownloadTaskDao().insert(this);
+    }
+
+    public List<DownloadTask> getSubDownloadTasks() {
+        if (this.getFile()){
+            return AppDatabase.get().getDownloadTaskDao().find(this.getId());
+        }else{
+            return AppDatabase.get().getDownloadTaskDao().find(this.getUrl());
+        }
     }
 
     @NonNull

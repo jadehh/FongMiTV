@@ -31,6 +31,15 @@ public class Constant {
     //迅雷下载类型
     public static final int THUNDER_TYPE = 0;
 
+
+    //0连接中 1下载中 2下载完成 3失败
+    public static final int DOWNLOAD_CONNECTION = 0;
+    public static final int DOWNLOAD_LOADING = 1;
+    public static final int DOWNLOAD_SUCCESS = 2;
+    public static final int DOWNLOAD_FAIL = 3;
+    public static final int DOWNLOAD_STOP = 4;
+    public static final int DOWNLOAD_WAIT = 5;
+
     //开启下载消息类型
     public static final int DOWNLOAD_START_MESSAGE_TYPE = 0;
     //改变下载消息类型

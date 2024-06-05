@@ -1,6 +1,7 @@
 package com.fongmi.android.tv.ui.fragment;
 
 
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -13,23 +14,33 @@ import com.fongmi.android.tv.Constant;
 import com.fongmi.android.tv.bean.DownloadTask;
 import com.fongmi.android.tv.bean.Msg;
 import com.fongmi.android.tv.databinding.FragmentDownloadingBinding;
+import com.fongmi.android.tv.download.DownloadSource;
 import com.fongmi.android.tv.event.MessageEvent;
 import com.fongmi.android.tv.ui.adapter.DownloadingAdapter;
 import com.fongmi.android.tv.ui.base.BaseFragment;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DownloadingFrament extends BaseFragment implements DownloadingAdapter.OnClickListener{
+public class DownloadingFragment extends BaseFragment implements DownloadingAdapter.OnClickListener{
 
     FragmentDownloadingBinding mBinding;
 
     private final List<DownloadTask> list = new ArrayList<>();
 
     private DownloadingAdapter mAdapter;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+    }
 
     @Override
     protected ViewBinding getBinding(@NonNull LayoutInflater inflater, @Nullable ViewGroup container) {
@@ -51,16 +62,16 @@ public class DownloadingFrament extends BaseFragment implements DownloadingAdapt
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void onMessageEvent(MessageEvent event) {
         Msg msg = event.getMessage();
-        if (msg.getType() == Constant.DOWNLOAD_UPDATE_MESSAGE_TYPE)refreshData( (List<DownloadTask>) msg.getObj());
+        if (msg.getType() == Constant.DOWNLOAD_UPDATE_MESSAGE_TYPE) refreshData( (List<DownloadTask>) msg.getObj());
     }
 
     @Override
     public void startTask(DownloadTask task) {
-
+        DownloadSource.get().resumeDownload(task);
     }
     @Override
-    public void sopTask(DownloadTask task) {
-
+    public void stopTask(DownloadTask task) {
+        DownloadSource.get().stopDownload(task);
     }
 
     @Override
