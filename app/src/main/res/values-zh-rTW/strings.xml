@@ -99,6 +99,8 @@
     <string name="setting_restore">恢復</string>
     <string name="setting_version">版本</string>
     <string name="setting_about">關於</string>
+    <string name="setting_keep_sync">收藏同步</string>
+    <string name="setting_history_sync">歷史同步</string>
     <string name="setting_storage">權限</string>
     <string name="setting_off">關閉</string>
     <string name="setting_on">開啟</string>
@@ -180,6 +182,10 @@
     <string name="copied">已複製</string>
     <string name="backed">備份成功</string>
     <string name="config_refreshed">接口已刷新</string>
+
+    <!-- Device -->
+    <string name="device_select">選擇裝置</string>
+    <string name="device_offline">裝置已離線</string>
 
     <!-- UNIT -->
     <string name="all">全部</string>

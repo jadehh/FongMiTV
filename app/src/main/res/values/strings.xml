@@ -99,6 +99,8 @@
     <string name="setting_restore">Restore</string>
     <string name="setting_version">Version</string>
     <string name="setting_about">About</string>
+    <string name="setting_keep_sync">Keep</string>
+    <string name="setting_history_sync">Sync History</string>
     <string name="setting_storage">Permission</string>
     <string name="setting_off">Off</string>
     <string name="setting_on">On</string>
@@ -179,6 +181,10 @@
     <string name="copied">Copied</string>
     <string name="backed">Backup successful</string>
     <string name="config_refreshed">Config rereshed</string>
+
+    <!-- Device -->
+    <string name="device_select">Select Device</string>
+    <string name="device_offline">Device is offline</string>
 
     <!-- UNIT -->
     <string name="all">All</string>

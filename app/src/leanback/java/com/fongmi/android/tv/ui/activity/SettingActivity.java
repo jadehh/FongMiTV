@@ -38,6 +38,7 @@ import com.fongmi.android.tv.ui.dialog.LiveDialog;
 import com.fongmi.android.tv.ui.dialog.ProxyDialog;
 import com.fongmi.android.tv.ui.dialog.RestoreDialog;
 import com.fongmi.android.tv.ui.dialog.SiteDialog;
+import com.fongmi.android.tv.ui.dialog.SyncDialog;
 import com.fongmi.android.tv.utils.FileUtil;
 import com.fongmi.android.tv.utils.Notify;
 import com.fongmi.android.tv.utils.ResUtil;
@@ -128,6 +129,8 @@ public class SettingActivity extends BaseActivity implements RestoreCallback, Co
         mBinding.custom.setOnClickListener(this::onCustom);
         mBinding.doh.setOnClickListener(this::setDoh);
         mBinding.about.setOnClickListener(this::onAbout);
+        mBinding.syncKeep.setOnClickListener(this::onSyncKeep);
+        mBinding.syncHistory.setOnClickListener(this::onSyncHistory);
     }
 
     @Override
@@ -289,6 +292,14 @@ public class SettingActivity extends BaseActivity implements RestoreCallback, Co
 
     private void onAbout(View view) {
         mBinding.aboutText.setText(BuildConfig.FLAVOR_mode + "-" + BuildConfig.FLAVOR_api + "-" + BuildConfig.FLAVOR_abi);
+    }
+
+    private void onSyncKeep(View view){
+        SyncDialog.create(this).keep().show();
+    }
+
+    private void onSyncHistory(View view){
+        SyncDialog.create(this).history().show();
     }
 
     private void setDoh(View view) {
