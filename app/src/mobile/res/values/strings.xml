@@ -24,8 +24,8 @@
     <!-- Download -->
     <string name="downloading">Downloading</string>
     <string name="download_finish">Download Finish</string>
-    <string name="download_size">Download:%1$s/%2$s</string>
-    <string name="download_speed">Speed:%1$s</string>
+    <string name="download_size">%1$s / %2$s</string>
+    <string name="download_speed">%1$s / s </string>
     <string name="download_status">Pause</string>
     <string name="download_stop">Stop</string>
     <string name="download_connect">Connecting</string>

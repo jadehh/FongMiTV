@@ -47,26 +47,18 @@ public class DownloadingAdapter extends RecyclerView.Adapter<DownloadingAdapter.
         holder.binding.downloadSpeed.setText((String.format(ResUtil.getString(R.string.download_speed), FileUtil.byteCountToDisplaySize(task.getDownloadSpeed()))));
         if (task.getDownloadSize() != 0 && task.getFileSize() != 0) {
             holder.binding.numberProgressBar.setProgress((int) (BigDecimal.valueOf((float) task.getDownloadSize() / task.getFileSize()).setScale(2, RoundingMode.HALF_UP).doubleValue() * 100));
-            long speed = task.getDownloadSpeed() == 0 ? 1 : task.getDownloadSpeed();
-            long time = (0L) / speed;
-            holder.binding.downloadRemainingTime.setText(String.format(ResUtil.getString(R.string.download_remaining_time), TimeUtil.formatFromSecond((int) time)));
         }
         int status = task.getTaskStatus();
         if ((status == Constant.DOWNLOAD_STOP) || (status == Constant.DOWNLOAD_CONNECTION && task.getTaskId() == 0)) {
             holder.binding.startTask.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_download));
-            holder.binding.downloadStatus.setText(ResUtil.getString(R.string.download_stop));
         } else if (status == Constant.DOWNLOAD_CONNECTION) {
             holder.binding.startTask.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_connent));
-            holder.binding.downloadStatus.setText(ResUtil.getString(R.string.download_connect));
         } else if (status == Constant.DOWNLOAD_FAIL) {
             holder.binding.startTask.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_fail));
-            holder.binding.downloadStatus.setText(ResUtil.getString(R.string.download_fail));
         } else if (status == Constant.DOWNLOAD_WAIT) {
             holder.binding.startTask.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_wait));
-            holder.binding.downloadStatus.setText(ResUtil.getString(R.string.download_waiting));
         } else {
             holder.binding.startTask.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_stop));
-            holder.binding.downloadStatus.setText(ResUtil.getString(R.string.download_downloading));
         }
         holder.binding.startTask.setOnClickListener(v -> startTask(task));
         holder.binding.deleteTask.setOnClickListener(v -> deleteTask(task));

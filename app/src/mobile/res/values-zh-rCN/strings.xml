@@ -25,8 +25,8 @@
     <!-- Download -->
     <string name="downloading">下载中</string>
     <string name="download_finish">下载完成</string>
-    <string name="download_size">下载:%1$s/%2$s</string>
-    <string name="download_speed">速度:%1$s</string>
+    <string name="download_size">%1$s / %2$s</string>
+    <string name="download_speed">%1$s / s </string>
     <string name="download_status">已暂停</string>
     <string name="download_stop">已暂停</string>
     <string name="download_connect">连接中</string>
