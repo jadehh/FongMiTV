@@ -90,4 +90,9 @@ public class Epg {
         for (int i = 0; i < getList().size(); i++) if (getList().get(i).isSelected()) return i;
         return -1;
     }
+
+    public int getInRange() {
+        for (int i = 0; i < getList().size(); i++) if (getList().get(i).isInRange()) return i;
+        return -1;
+    }
 }

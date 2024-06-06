@@ -4,6 +4,8 @@ plugins {
 }
 
 android {
+    namespace 'com.undcover.freedom.pyramid'
+
     compileSdk 34
     flavorDimensions = ["abi"]
 

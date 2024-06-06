@@ -57,8 +57,8 @@ import com.fongmi.android.tv.utils.FileChooser;
 import com.fongmi.android.tv.utils.FileUtil;
 import com.fongmi.android.tv.utils.Notify;
 import com.fongmi.android.tv.utils.ResUtil;
+import com.fongmi.android.tv.utils.UrlUtil;
 import com.github.catvod.net.OkHttp;
-import com.github.catvod.utils.Trans;
 import com.google.common.net.HttpHeaders;
 import com.permissionx.guolindev.PermissionX;
 
@@ -182,7 +182,7 @@ public class VodFragment extends BaseFragment implements SiteCallback, FilterCal
     private Result handle(Result result) {
         List<Class> types = new ArrayList<>();
         for (Class type : result.getTypes()) if (result.getFilters().containsKey(type.getTypeId())) type.setFilters(result.getFilters().get(type.getTypeId()));
-        for (String cate : getSite().getCategories()) for (Class type : result.getTypes()) if (Trans.s2t(cate).equals(type.getTypeName())) types.add(type);
+        for (String cate : getSite().getCategories()) for (Class type : result.getTypes()) if (cate.equals(type.getTypeName())) types.add(type);
         result.setTypes(types);
         return result;
     }
@@ -293,7 +293,7 @@ public class VodFragment extends BaseFragment implements SiteCallback, FilterCal
     }
 
     private void setLogo() {
-        Glide.with(this).load(VodConfig.get().getConfig().getLogo()).circleCrop().override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).error(R.drawable.ic_logo).listener(getListener()).into(mBinding.logo);
+        Glide.with(this).load(UrlUtil.convert(VodConfig.get().getConfig().getLogo())).circleCrop().override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).error(R.drawable.ic_logo).listener(getListener()).into(mBinding.logo);
     }
 
     private RequestListener<Drawable> getListener() {

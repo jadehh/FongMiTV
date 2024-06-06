@@ -81,11 +81,9 @@ public class Players implements Player.Listener, IMediaPlayer.Listener, Analytic
     private Sub sub;
 
     private long position;
-    private float speed;
     private int player;
     private int error;
     private int retry;
-    private boolean danmuSync;
 
     public static boolean isExo(int type) {
         return type == EXO;
@@ -112,7 +110,6 @@ public class Players implements Player.Listener, IMediaPlayer.Listener, Analytic
         builder = new StringBuilder();
         runnable = ErrorEvent::timeout;
         formatter = new Formatter(builder, Locale.getDefault());
-        danmuSync = Setting.isDanmuSync();
         createSession(activity);
         return this;
     }
@@ -256,7 +253,7 @@ public class Players implements Player.Listener, IMediaPlayer.Listener, Analytic
     }
 
     public boolean canAdjustSpeed() {
-        return isIjk() || (isExo() && !Setting.isTunnel());
+        return isIjk() || !Setting.isTunnel();
     }
 
     public boolean haveTrack(int type) {
@@ -308,8 +305,8 @@ public class Players implements Player.Listener, IMediaPlayer.Listener, Analytic
     }
 
     public String setSpeed(float speed) {
-        if (exoPlayer != null && !Setting.isTunnel()) exoPlayer.setPlaybackSpeed(this.speed = speed);
-        if (ijkPlayer != null) ijkPlayer.setSpeed(this.speed = speed);
+        if (exoPlayer != null && !Setting.isTunnel()) exoPlayer.setPlaybackSpeed(speed);
+        if (ijkPlayer != null) ijkPlayer.setSpeed(speed);
         return getSpeedText();
     }
 
@@ -689,8 +686,7 @@ public class Players implements Player.Listener, IMediaPlayer.Listener, Analytic
 
     @Override
     public void updateTimer(DanmakuTimer timer) {
-        if (danmuSync) App.post(() -> timer.update(getPosition()));
-        else if (speed != 1) timer.add((long) (timer.lastInterval() * (speed - 1)));
+
     }
 
     @Override

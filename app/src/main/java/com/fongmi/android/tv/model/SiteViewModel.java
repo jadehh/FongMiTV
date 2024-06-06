@@ -259,7 +259,8 @@ public class SiteViewModel extends ViewModel {
     private Result fetchPic(Site site, Result result) throws Exception {
         if (site.getType() > 2 || result.getList().isEmpty() || result.getList().get(0).getVodPic().length() > 0) return result;
         ArrayList<String> ids = new ArrayList<>();
-        for (Vod item : result.getList()) ids.add(item.getVodId());
+        if (site.getCategories().isEmpty()) for (Vod item : result.getList()) ids.add(item.getVodId());
+        else for (Vod item : result.getList()) if (site.getCategories().contains(item.getTypeName())) ids.add(item.getVodId());
         ArrayMap<String, String> params = new ArrayMap<>();
         params.put("ac", site.getType() == 0 ? "videolist" : "detail");
         params.put("ids", TextUtils.join(",", ids));

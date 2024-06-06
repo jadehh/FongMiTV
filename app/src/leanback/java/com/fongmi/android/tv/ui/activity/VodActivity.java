@@ -31,7 +31,6 @@ import com.fongmi.android.tv.ui.presenter.TypePresenter;
 import com.fongmi.android.tv.utils.KeyUtil;
 import com.fongmi.android.tv.utils.ResUtil;
 import com.github.catvod.utils.Prefers;
-import com.github.catvod.utils.Trans;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,7 +109,7 @@ public class VodActivity extends BaseActivity implements TypePresenter.OnClickLi
 
     private List<Class> getTypes(Result result) {
         List<Class> items = new ArrayList<>();
-        for (String cate : getSite().getCategories()) for (Class item : result.getTypes()) if (Trans.s2t(cate).equals(item.getTypeName())) items.add(item);
+        for (String cate : getSite().getCategories()) for (Class item : result.getTypes()) if (cate.equals(item.getTypeName())) items.add(item);
         return items;
     }
 

@@ -57,6 +57,44 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/seek"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/shape_widget"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:id="@+id/action"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_widget_rewind" />
+
+        <TextView
+            android:id="@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            tools:text="00:00:00" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center"
+        android:layout_marginTop="24dp"
+        android:src="@drawable/ic_widget_forward"
+        android:visibility="gone" />
+
+    <LinearLayout
         android:id="@+id/bright"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -173,7 +211,7 @@
             tools:text="來源 1" />
 
         <TextView
-            android:id="@+id/time"
+            android:id="@+id/clock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"

@@ -3,6 +3,8 @@ plugins {
 }
 
 android {
+    namespace 'com.ghost.thunder'
+
     compileSdk 34
 
     defaultConfig {

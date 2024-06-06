@@ -15,6 +15,7 @@
 
         <LinearLayout
             android:orientation="horizontal"
+            android:layout_marginTop="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -23,8 +24,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="12dp"
                 android:text="@string/nav_setting"
                 android:textColor="@color/white"
                 android:textSize="20sp"
@@ -35,8 +35,7 @@
                 android:id="@+id/transmit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="12dp"
                 android:padding="7dp"
                 android:scaleType="fitCenter"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -46,7 +45,6 @@
                 android:id="@+id/pull"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:padding="7dp"
                 android:scaleType="fitCenter"

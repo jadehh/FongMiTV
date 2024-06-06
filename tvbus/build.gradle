@@ -3,6 +3,8 @@ plugins {
 }
 
 android {
+    namespace 'com.tvbus.engine'
+
     compileSdk 34
 
     defaultConfig {

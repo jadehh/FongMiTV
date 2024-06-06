@@ -14,6 +14,7 @@ import com.fongmi.android.tv.Setting;
 import com.fongmi.android.tv.databinding.FragmentSettingCustomBinding;
 import com.fongmi.android.tv.event.RefreshEvent;
 import com.fongmi.android.tv.ui.base.BaseFragment;
+import com.fongmi.android.tv.utils.LanguageUtil;
 import com.fongmi.android.tv.utils.ResUtil;
 import com.fongmi.android.tv.utils.Util;
 import com.github.catvod.utils.Shell;
@@ -44,7 +45,6 @@ public class SettingCustomFragment extends BaseFragment {
     @Override
     protected void initView() {
         mBinding.sizeText.setText((size = ResUtil.getStringArray(R.array.select_size))[Setting.getSize()]);
-        mBinding.danmuSyncText.setText(getSwitch(Setting.isDanmuSync()));
         mBinding.speedText.setText(getSpeedText());
         mBinding.incognitoText.setText(getSwitch(Setting.isIncognito()));
         mBinding.aggregatedSearchText.setText(getSwitch(Setting.isAggregatedSearch()));
@@ -56,9 +56,7 @@ public class SettingCustomFragment extends BaseFragment {
 
     @Override
     protected void initEvent() {
-        mBinding.title.setOnLongClickListener(this::onTitle);
         mBinding.size.setOnClickListener(this::setSize);
-        mBinding.danmuSync.setOnClickListener(this::setDanmuSync);
         mBinding.speed.setOnClickListener(this::setSpeed);
         mBinding.speed.setOnLongClickListener(this::resetSpeed);
         mBinding.incognito.setOnClickListener(this::setIncognito);
@@ -71,11 +69,6 @@ public class SettingCustomFragment extends BaseFragment {
 
     }
 
-    private boolean onTitle(View view) {
-        mBinding.danmuSync.setVisibility(View.VISIBLE);
-        return true;
-    }
-
     private void setSize(View view) {
         new MaterialAlertDialogBuilder(getActivity()).setTitle(R.string.setting_size).setNegativeButton(R.string.dialog_negative, null).setSingleChoiceItems(size, Setting.getSize(), (dialog, which) -> {
             mBinding.sizeText.setText(size[which]);
@@ -83,11 +76,6 @@ public class SettingCustomFragment extends BaseFragment {
             RefreshEvent.size();
             dialog.dismiss();
         }).show();
-    }
-
-    private void setDanmuSync(View view) {
-        Setting.putDanmuSync(!Setting.isDanmuSync());
-        mBinding.danmuSyncText.setText(getSwitch(Setting.isDanmuSync()));
     }
 
     private String getSpeedText() {
@@ -133,6 +121,7 @@ public class SettingCustomFragment extends BaseFragment {
         new MaterialAlertDialogBuilder(getActivity()).setTitle(R.string.setting_language).setNegativeButton(R.string.dialog_negative, null).setSingleChoiceItems(lang, Setting.getLanguage(), (dialog, which) -> {
             mBinding.languageText.setText(lang[which]);
             Setting.putLanguage(which);
+            LanguageUtil.setLocale(LanguageUtil.getLocale(Setting.getLanguage()));
             dialog.dismiss();
             Util.restartApp(getActivity());
         }).show();

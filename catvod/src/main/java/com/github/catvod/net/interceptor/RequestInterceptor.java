@@ -3,7 +3,6 @@ package com.github.catvod.net.interceptor;
 import androidx.annotation.NonNull;
 
 import com.github.catvod.Proxy;
-import com.github.catvod.net.OkCookieJar;
 import com.github.catvod.utils.Util;
 import com.google.common.net.HttpHeaders;
 
@@ -23,7 +22,6 @@ public class RequestInterceptor implements Interceptor {
         URI uri = request.url().uri();
         String url = request.url().toString();
         Request.Builder builder = request.newBuilder();
-        OkCookieJar.sync(url, request.header(HttpHeaders.COOKIE));
         boolean local = url.contains(":" + Proxy.getPort() + "/");
         if (url.contains("+") && local) builder.url(url.replace("+", "%2B"));
         if (url.contains("gitcode.net")) builder.header(HttpHeaders.USER_AGENT, Util.CHROME);

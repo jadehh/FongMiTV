@@ -91,7 +91,7 @@ public class CastActivity extends BaseActivity implements CustomKeyDownCast.List
     @Override
     protected void initView() {
         bindService(new Intent(this, DLNARendererService.class), this, Context.BIND_AUTO_CREATE);
-        mClock = Clock.create(mBinding.widget.time);
+        mClock = Clock.create(mBinding.widget.clock);
         mKeyDown = CustomKeyDownCast.create(this);
         mPlayers = new Players().init(this);
         mParser = new DIDLParser();
@@ -146,7 +146,6 @@ public class CastActivity extends BaseActivity implements CustomKeyDownCast.List
     private void setVideoView() {
         mPlayers.set(getExo(), getIjk());
         mPlayers.setPlayer(Setting.getPlayer());
-        mBinding.control.speed.setText(mPlayers.getSpeedText());
         findViewById(R.id.timeBar).setNextFocusUpId(R.id.reset);
         getExo().getSubtitleView().setStyle(ExoUtil.getCaptionStyle());
         getIjk().getSubtitleView().setStyle(ExoUtil.getCaptionStyle());
@@ -159,7 +158,9 @@ public class CastActivity extends BaseActivity implements CustomKeyDownCast.List
 
     private void setPlayerView() {
         getIjk().setPlayer(mPlayers.getPlayer());
+        mBinding.control.speed.setText(mPlayers.getSpeedText());
         mBinding.control.player.setText(mPlayers.getPlayerText());
+        mBinding.control.speed.setEnabled(mPlayers.canAdjustSpeed());
         getExo().setVisibility(mPlayers.isExo() ? View.VISIBLE : View.GONE);
         getIjk().setVisibility(mPlayers.isIjk() ? View.VISIBLE : View.GONE);
         mBinding.control.decode.setVisibility(mPlayers.isExo() ? View.VISIBLE : View.GONE);

@@ -3,6 +3,8 @@ plugins {
 }
 
 android {
+    namespace 'com.forcetech'
+
     compileSdk 34
 
     defaultConfig {

@@ -197,7 +197,7 @@ public class VodConfig {
             if (sites.contains(site)) continue;
             site.setApi(parseApi(site.getApi()));
             site.setExt(parseExt(site.getExt()));
-            sites.add(site.sync());
+            sites.add(site.trans().sync());
         }
         for (Site site : sites) {
             if (site.getKey().equals(config.getHome())) {
@@ -323,7 +323,7 @@ public class VodConfig {
 
     public List<Parse> getParses(int type, String flag) {
         List<Parse> items = new ArrayList<>();
-        for (Parse item : getParses(type)) if (item.getExt().getFlag().contains(flag)) items.add(item);
+        for (Parse item : getParses(type)) if (item.getExt().getFlag().isEmpty() || item.getExt().getFlag().contains(flag)) items.add(item);
         if (items.isEmpty()) items.addAll(getParses(type));
         return items;
     }

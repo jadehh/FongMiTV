@@ -311,7 +311,7 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         mObserveSearch = this::setSearch;
         mDialogs = new ArrayList<>();
         mBroken = new ArrayList<>();
-        mClock = Clock.create(Arrays.asList(mBinding.display.time, mBinding.control.time));
+        mClock = Clock.create(Arrays.asList(mBinding.display.clock, mBinding.control.time));
         mR0 = this::stopService;
         mR1 = this::hideControl;
         mR2 = this::setTraffic;
@@ -939,10 +939,10 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInPictureInPictureMode()) pictureMode = true;
         boolean controlVisible = isVisible(mBinding.control.getRoot());
         boolean visible = (!controlVisible || isLock()) && !pictureMode;
-        mBinding.display.time.setVisibility(Setting.isDisplayTime() && visible  ? View.VISIBLE : View.GONE);
+        mBinding.display.clock.setVisibility(Setting.isDisplayTime() && visible  ? View.VISIBLE : View.GONE);
         mBinding.display.netspeed.setVisibility(Setting.isDisplaySpeed() && visible ? View.VISIBLE : View.GONE);
         mBinding.display.duration.setVisibility(Setting.isDisplayDuration() && visible ? View.VISIBLE : View.GONE);
-        mBinding.display.progress.setVisibility(Setting.isDisplayMiniProgress() && visible ? View.VISIBLE : View.GONE);
+        mBinding.display.progress.setVisibility(Setting.isDisplayMiniProgress() && visible && (mPlayers.getDuration() > 60000) ? View.VISIBLE : View.GONE);
     }
 
     private void onTimeChangeDisplaySpeed() {
@@ -951,7 +951,7 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         long position = mPlayers.getPosition();
         if (Setting.isDisplaySpeed() && visible) Traffic.setSpeed(mBinding.display.netspeed);
         if (Setting.isDisplayDuration() && visible && position > 0) mBinding.display.duration.setText(mPlayers.getPositionTime(0) + "/" + mPlayers.getDurationTime());
-        if (Setting.isDisplayMiniProgress() && visible && position > 0) mBinding.display.progress.setProgress((int)(position * 100 / mPlayers.getDuration()));
+        if (Setting.isDisplayMiniProgress() && visible && position > 0 && (mPlayers.getDuration() > 60000)) mBinding.display.progress.setProgress((int)(position * 100 / mPlayers.getDuration()));
         showDisplayInfo();
     }
 
@@ -1131,6 +1131,7 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         if (Setting.isIncognito() && mHistory.getKey().equals(getHistoryKey())) mHistory.delete();
         mBinding.control.action.opening.setText(mHistory.getOpening() == 0 ? getString(R.string.play_op) : mPlayers.stringToTime(mHistory.getOpening()));
         mBinding.control.action.ending.setText(mHistory.getEnding() == 0 ? getString(R.string.play_ed) : mPlayers.stringToTime(mHistory.getEnding()));
+        mHistory.setVodPic(item.getVodPic());
         mPlayers.setPlayer(getPlayer());
         setScale(getScale());
         setPlayerView();
@@ -1141,7 +1142,6 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         History history = new History();
         history.setKey(getHistoryKey());
         history.setCid(VodConfig.getCid());
-        history.setVodPic(item.getVodPic());
         history.setVodName(item.getVodName());
         history.findEpisode(item.getVodFlags());
         history.setSpeed(Setting.getPlaySpeed());
@@ -1645,8 +1645,8 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
     @Override
     public void onSeek(int time) {
         mBinding.widget.action.setImageResource(time > 0 ? R.drawable.ic_widget_forward : R.drawable.ic_widget_rewind);
-        mBinding.widget.seek.setVisibility(View.VISIBLE);
         mBinding.widget.time.setText(mPlayers.getPositionTime(time));
+        mBinding.widget.seek.setVisibility(View.VISIBLE);
         hideProgress();
     }
 

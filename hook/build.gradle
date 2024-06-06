@@ -3,6 +3,8 @@ plugins {
 }
 
 android {
+    namespace 'com.fongmi.hook'
+
     compileSdk 34
 
     defaultConfig {

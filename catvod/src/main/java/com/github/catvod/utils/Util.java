@@ -75,12 +75,11 @@ public class Util {
 
     public static String md5(File file) {
         try {
-            if (!file.exists()) return "";
             MessageDigest digest = MessageDigest.getInstance("MD5");
             FileInputStream fis = new FileInputStream(file);
-            byte[] byteArray = new byte[1024];
+            byte[] bytes = new byte[4096];
             int count;
-            while ((count = fis.read(byteArray)) != -1) digest.update(byteArray, 0, count);
+            while ((count = fis.read(bytes)) != -1) digest.update(bytes, 0, count);
             fis.close();
             StringBuilder sb = new StringBuilder();
             for (byte b : digest.digest()) sb.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));

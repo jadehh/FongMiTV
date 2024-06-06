@@ -3,6 +3,8 @@ plugins {
 }
 
 android {
+    namespace 'com.p2p'
+
     compileSdk 34
 
     defaultConfig {

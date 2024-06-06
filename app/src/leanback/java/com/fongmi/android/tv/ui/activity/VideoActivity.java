@@ -319,7 +319,7 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
     protected void initView() {
         mKeyDown = CustomKeyDownVod.create(this, mBinding.video);
         mFrameParams = mBinding.video.getLayoutParams();
-        mClock = Clock.create(mBinding.display.time);
+        mClock = Clock.create(mBinding.display.clock);
         mDanmakuContext = DanmakuContext.create();
         mPlayers = new Players().init(this);
         mBroken = new ArrayList<>();
@@ -784,10 +784,10 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
     }
 
     private void showDisplayInfo() {
-        mBinding.display.time.setVisibility(Setting.isDisplayTime() || isVisible(mBinding.widget.info)  ? View.VISIBLE : View.GONE);
+        mBinding.display.clock.setVisibility(Setting.isDisplayTime() || isVisible(mBinding.widget.info)  ? View.VISIBLE : View.GONE);
         mBinding.display.netspeed.setVisibility(Setting.isDisplaySpeed() && !isVisible(mBinding.control.getRoot()) ? View.VISIBLE : View.GONE);
         mBinding.display.duration.setVisibility(Setting.isDisplayDuration() && !isVisible(mBinding.control.getRoot()) ? View.VISIBLE : View.GONE);
-        mBinding.display.progress.setVisibility(Setting.isDisplayMiniProgress() && !isVisible(mBinding.control.getRoot()) ? View.VISIBLE : View.GONE);
+        mBinding.display.progress.setVisibility(Setting.isDisplayMiniProgress() && !isVisible(mBinding.control.getRoot()) && (mPlayers.getDuration() > 60000) ? View.VISIBLE : View.GONE);
     }
 
     private void onTimeChangeDisplaySpeed() {
@@ -795,7 +795,7 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
         long position = mPlayers.getPosition();
         if (Setting.isDisplaySpeed() && visible) Traffic.setSpeed(mBinding.display.netspeed);
         if (Setting.isDisplayDuration() && visible && position > 0) mBinding.display.duration.setText(mPlayers.getPositionTime(0) + "/" + mPlayers.getDurationTime());
-        if (Setting.isDisplayMiniProgress() && visible && position > 0) mBinding.display.progress.setProgress((int)(position * 100 / mPlayers.getDuration()));
+        if (Setting.isDisplayMiniProgress() && visible && position > 0 && (mPlayers.getDuration() > 60000)) mBinding.display.progress.setProgress((int)(position * 100 / mPlayers.getDuration()));
         showDisplayInfo();
     }
 
@@ -1227,6 +1227,7 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
         if (Setting.isIncognito() && mHistory.getKey().equals(getHistoryKey())) mHistory.delete();
         mBinding.control.opening.setText(mHistory.getOpening() == 0 ? getString(R.string.play_op) : mPlayers.stringToTime(mHistory.getOpening()));
         mBinding.control.ending.setText(mHistory.getEnding() == 0 ? getString(R.string.play_ed) : mPlayers.stringToTime(mHistory.getEnding()));
+        mHistory.setVodPic(item.getVodPic());
         mPlayers.setPlayer(getPlayer());
         setScale(getScale());
         setPlayerView();
@@ -1237,7 +1238,6 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
         History history = new History();
         history.setKey(getHistoryKey());
         history.setCid(VodConfig.getCid());
-        history.setVodPic(item.getVodPic());
         history.setVodName(item.getVodName());
         history.findEpisode(item.getVodFlags());
         history.setSpeed(Setting.getPlaySpeed());
@@ -1666,8 +1666,8 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
 
     @Override
     public void onSeekTo(int time) {
-        mKeyDown.resetTime();
         mPlayers.seekTo(time);
+        mKeyDown.resetTime();
         showProgress();
         onPlay();
     }

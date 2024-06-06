@@ -15,10 +15,12 @@ import com.fongmi.android.tv.Setting;
 import com.fongmi.android.tv.db.AppDatabase;
 import com.fongmi.android.tv.gson.ExtAdapter;
 import com.github.catvod.utils.Json;
+import com.github.catvod.utils.Trans;
 import com.google.gson.JsonElement;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -203,6 +205,10 @@ public class Site implements Parcelable {
         return categories == null ? Collections.emptyList() : categories;
     }
 
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
+    }
+
     public JsonElement getHeader() {
         return header;
     }
@@ -251,6 +257,14 @@ public class Site implements Parcelable {
 
     public Headers getHeaders() {
         return Headers.of(Json.toMap(getHeader()));
+    }
+
+    public Site trans() {
+        if (Trans.pass()) return this;
+        List<String> categories = new ArrayList<>();
+        for (String cate : getCategories()) categories.add(Trans.s2t(cate));
+        setCategories(categories);
+        return this;
     }
 
     public Site sync() {

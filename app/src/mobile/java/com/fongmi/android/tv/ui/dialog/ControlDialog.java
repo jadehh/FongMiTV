@@ -129,7 +129,7 @@ public class ControlDialog extends BaseDialog implements ParseAdapter.OnClickLis
 
     private void displayTime() {
         boolean display = Setting.isDisplayTime();
-        parent.display.time.setVisibility(!display ? View.VISIBLE : View.GONE);
+        parent.display.clock.setVisibility(!display ? View.VISIBLE : View.GONE);
         Setting.putDisplayTime(!display);
         binding.dptime.setActivated(!display);
     }

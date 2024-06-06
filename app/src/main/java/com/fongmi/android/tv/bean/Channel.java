@@ -23,6 +23,8 @@ public class Channel {
 
     @SerializedName("urls")
     private List<String> urls;
+    @SerializedName("tvgName")
+    private String tvgName;
     @SerializedName("number")
     private String number;
     @SerializedName("logo")
@@ -86,6 +88,14 @@ public class Channel {
 
     public Channel(String name) {
         this.name = name;
+    }
+
+    public String getTvgName() {
+        return TextUtils.isEmpty(tvgName) ? getName() : tvgName;
+    }
+
+    public void setTvgName(String tvgName) {
+        this.tvgName = tvgName;
     }
 
     public List<String> getUrls() {
@@ -326,8 +336,8 @@ public class Channel {
         if (!live.getCatchup().isEmpty() && getCatchup().isEmpty()) setCatchup(live.getCatchup());
         if (live.getReferer().length() > 0 && getReferer().isEmpty()) setReferer(live.getReferer());
         if (live.getPlayerType() != -1 && getPlayerType() == -1) setPlayerType(live.getPlayerType());
-        if (!getEpg().startsWith("http")) setEpg(live.getEpg().replace("{name}", getName()).replace("{epg}", getEpg()));
-        if (!getLogo().startsWith("http")) setLogo(live.getLogo().replace("{name}", getName()).replace("{logo}", getLogo()));
+        if (!getEpg().startsWith("http")) setEpg(live.getEpg().replace("{name}", getTvgName()).replace("{epg}", getEpg()));
+        if (!getLogo().startsWith("http")) setLogo(live.getLogo().replace("{name}", getTvgName()).replace("{logo}", getLogo()));
     }
 
     public void setLine(String line) {
@@ -346,6 +356,7 @@ public class Channel {
         setPlayerType(item.getPlayerType());
         setCatchup(item.getCatchup());
         setReferer(item.getReferer());
+        setTvgName(item.getTvgName());
         setHeader(item.getHeader());
         setNumber(item.getNumber());
         setOrigin(item.getOrigin());

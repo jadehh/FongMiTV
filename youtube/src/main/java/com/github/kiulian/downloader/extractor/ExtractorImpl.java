@@ -42,7 +42,6 @@ public class ExtractorImpl implements Extractor {
     @Override
     public JSONObject extractInitialDataFromHtml(String html) throws YoutubeException {
         String ytInitialData = null;
-
         for (Pattern pattern : YT_INITIAL_DATA_PATTERNS) {
             Matcher matcher = pattern.matcher(html);
             if (matcher.find()) {
@@ -64,7 +63,6 @@ public class ExtractorImpl implements Extractor {
         String ytPlayerConfig = null;
         for (Pattern pattern : YT_PLAYER_CONFIG_PATTERNS) {
             Matcher matcher = pattern.matcher(html);
-
             if (matcher.find()) {
                 ytPlayerConfig = matcher.group(1);
                 break;
@@ -73,7 +71,6 @@ public class ExtractorImpl implements Extractor {
         if (ytPlayerConfig == null) {
             throw new YoutubeException.BadPageException("Could not find player config on web page");
         }
-
         try {
             JSONObject config = JSON.parseObject(ytPlayerConfig);
             if (config.containsKey("args")) {
@@ -89,11 +86,9 @@ public class ExtractorImpl implements Extractor {
     @Override
     public List<String> extractSubtitlesLanguagesFromXml(String xml) throws YoutubeException {
         Matcher matcher = SUBTITLES_LANG_CODE_PATTERN.matcher(xml);
-
         if (!matcher.find()) {
             throw new YoutubeException.BadPageException("Could not find any language code in subtitles xml");
         }
-
         List<String> languages = new ArrayList<>();
         do {
             String language = matcher.group(1);

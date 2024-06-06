@@ -80,7 +80,7 @@ public class LiveViewModel extends ViewModel {
         execute(URL, () -> {
             item.setMsg(null);
             Source.get().stop();
-            item.setUrl(item.getCurrent() + item.getCatchup().format(data));
+            item.setUrl(item.getCatchup().format(item.getCurrent(), data));
             return item;
         });
     }

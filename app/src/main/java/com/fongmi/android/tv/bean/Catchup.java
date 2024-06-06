@@ -1,5 +1,6 @@
 package com.fongmi.android.tv.bean;
 
+import android.net.Uri;
 import android.text.TextUtils;
 
 import com.google.gson.annotations.SerializedName;
@@ -29,6 +30,12 @@ public class Catchup {
 
     public static Catchup create() {
         return new Catchup();
+    }
+
+    public static Catchup decide(Catchup major, Catchup minor) {
+        if (!major.isEmpty()) return major;
+        if (!minor.isEmpty()) return minor;
+        return null;
     }
 
     public String getType() {
@@ -71,10 +78,25 @@ public class Catchup {
         return getSource().isEmpty();
     }
 
-    public String format(EpgData data) {
+    private boolean isAppend() {
+        return getType().equals("append");
+    }
+
+    private boolean isDefault() {
+        return getType().equals("default");
+    }
+
+    private String format(String url, String result) {
+        if (!TextUtils.isEmpty(Uri.parse(url).getQuery())) result = result.replace("?", "&");
+        if (url.contains("/PLTV/")) url = url.replace("/PLTV/", "/TVOD/");
+        return url + result;
+    }
+
+    public String format(String url, EpgData data) {
         String result = getSource();
+        if (data.isInRange()) return url;
         Matcher matcher = Pattern.compile("(\\$\\{[^}]*\\})").matcher(result);
         while (matcher.find()) result = result.replace(matcher.group(1), data.format(matcher.group(1)));
-        return result;
+        return isDefault() ? result : format(url, result);
     }
 }

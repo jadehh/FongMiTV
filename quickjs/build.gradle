@@ -3,6 +3,8 @@ plugins {
 }
 
 android {
+    namespace 'com.fongmi.android.tv.quickjs'
+
     compileSdk 34
 
     defaultConfig {

@@ -13,6 +13,9 @@ import com.fongmi.android.tv.Setting;
 import com.fongmi.android.tv.databinding.ActivitySettingCustomBinding;
 import com.fongmi.android.tv.event.RefreshEvent;
 import com.fongmi.android.tv.impl.CacheDirCallback;
+import com.fongmi.android.tv.impl.LanguageCallback;
+import com.fongmi.android.tv.impl.MenuKeyCallback;
+import com.fongmi.android.tv.impl.X5WebViewCallback;
 import com.fongmi.android.tv.ui.base.BaseActivity;
 import com.fongmi.android.tv.ui.dialog.ButtonsDialog;
 import com.fongmi.android.tv.ui.dialog.CacheDirDialog;
@@ -20,14 +23,16 @@ import com.fongmi.android.tv.ui.dialog.DisplayDialog;
 import com.fongmi.android.tv.ui.dialog.LanguageDialog;
 import com.fongmi.android.tv.ui.dialog.MenuKeyDialog;
 import com.fongmi.android.tv.ui.dialog.X5WebViewDialog;
+import com.fongmi.android.tv.utils.LanguageUtil;
 import com.fongmi.android.tv.utils.ResUtil;
+import com.fongmi.android.tv.utils.Util;
 import com.github.catvod.utils.Shell;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.permissionx.guolindev.PermissionX;
 import com.tencent.smtt.sdk.QbSdk;
 import java.util.Locale;
 
-public class SettingCustomActivity extends BaseActivity implements CacheDirCallback {
+public class SettingCustomActivity extends BaseActivity implements MenuKeyCallback, X5WebViewCallback, LanguageCallback, CacheDirCallback {
 
     private ActivitySettingCustomBinding mBinding;
     private String[] quality;
@@ -167,10 +172,6 @@ public class SettingCustomActivity extends BaseActivity implements CacheDirCallb
         MenuKeyDialog.create(this).show();
     }
 
-    public void setHomeMenuText() {
-        mBinding.homeMenuKeyText.setText((ResUtil.getStringArray(R.array.select_home_menu_key))[Setting.getHomeMenuKey()]);
-    }
-
     private void setAggregatedSearch(View view) {
         Setting.putAggregatedSearch(!Setting.isAggregatedSearch());
         mBinding.aggregatedSearchText.setText(getSwitch(Setting.isAggregatedSearch()));
@@ -208,11 +209,6 @@ public class SettingCustomActivity extends BaseActivity implements CacheDirCallb
         LanguageDialog.create(this).show();
     }
 
-    public void setLanguageText() {
-        mBinding.languageText.setText((ResUtil.getStringArray(R.array.select_language))[Setting.getLanguage()]);
-    }
-
-
     private void setParseWebview(View view) {
         int index = Setting.getParseWebView();
         Setting.putParseWebView(index = index == parseWebview.length - 1 ? 0 : ++index);
@@ -240,6 +236,41 @@ public class SettingCustomActivity extends BaseActivity implements CacheDirCallb
     public void setCacheDir(String dir) {
         Setting.putThunderCacheDir(dir);
         mBinding.cacheDirText.setText(dir);
+    }
+
+    @Override
+    public void setLanguage(int lang) {
+        Setting.putLanguage(lang);
+        LanguageUtil.setLocale(LanguageUtil.getLocale(Setting.getLanguage()));
+        mBinding.languageText.setText((ResUtil.getStringArray(R.array.select_language))[Setting.getLanguage()]);
+        Util.restartApp(this);
+    }
+
+    @Override
+    public void onX5Success() {
+        int index = 1;
+        Setting.putParseWebView(index);
+        mBinding.parseWebviewText.setText(parseWebview[index]);
+    }
+
+    @Override
+    public void onX5Error() {
+        int index = 0;
+        Setting.putParseWebView(index);
+        mBinding.parseWebviewText.setText(parseWebview[index]);
+    }
+
+    @Override
+    public void onX5Cancel() {
+        int index = 0;
+        Setting.putParseWebView(index);
+        mBinding.parseWebviewText.setText(parseWebview[index]);
+    }
+
+    @Override
+    public void onMenuKeyItemClick(int position) {
+        Setting.putHomeMenuKey(position);
+        mBinding.homeMenuKeyText.setText((ResUtil.getStringArray(R.array.select_home_menu_key))[Setting.getHomeMenuKey()]);
     }
 
 }

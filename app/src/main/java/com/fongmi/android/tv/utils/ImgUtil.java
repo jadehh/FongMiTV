@@ -1,9 +1,6 @@
 package com.fongmi.android.tv.utils;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.View;
@@ -27,7 +24,6 @@ import com.fongmi.android.tv.Setting;
 import com.github.catvod.utils.Json;
 import com.google.common.net.HttpHeaders;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
 import jahirfiquitiva.libs.textdrawable.TextDrawable;
@@ -89,32 +85,6 @@ public class ImgUtil {
     private static void addHeader(LazyHeaders.Builder builder, String header) {
         Map<String, String> map = Json.toMap(Json.parse(header));
         for (Map.Entry<String, String> entry : map.entrySet()) builder.addHeader(UrlUtil.fixHeader(entry.getKey()), entry.getValue());
-    }
-
-    public static byte[] resize(byte[] bytes) {
-        Bitmap bitmap = crop(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        return baos.toByteArray();
-    }
-
-    private static Bitmap crop(Bitmap source) {
-        int newWidth = ResUtil.getScreenWidth();
-        int newHeight = ResUtil.getScreenHeight();
-        int sourceWidth = source.getWidth();
-        int sourceHeight = source.getHeight();
-        float xScale = (float) newWidth / sourceWidth;
-        float yScale = (float) newHeight / sourceHeight;
-        float scale = Math.max(xScale, yScale);
-        float scaledWidth = scale * sourceWidth;
-        float scaledHeight = scale * sourceHeight;
-        float left = (newWidth - scaledWidth) / 2;
-        float top = (newHeight - scaledHeight) / 2;
-        RectF rectF = new RectF(left, top, left + scaledWidth, top + scaledHeight);
-        Bitmap dest = Bitmap.createBitmap(newWidth, newHeight, source.getConfig());
-        Canvas canvas = new Canvas(dest);
-        canvas.drawBitmap(source, null, rectF, null);
-        return dest;
     }
 
     private static RequestListener<Bitmap> getListener(ImageView view) {

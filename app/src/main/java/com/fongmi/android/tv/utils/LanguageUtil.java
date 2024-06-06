@@ -1,30 +1,30 @@
 package com.fongmi.android.tv.utils;
 
-import android.content.res.Resources;
+import android.app.Application;
+import com.fongmi.android.tv.App;
+import com.fongmi.android.tv.Setting;
+import com.yariksoffice.lingver.Lingver;
 
 import java.util.Locale;
 
 public class LanguageUtil {
-    public static void setLanguage(Resources resources, int lang) {
-        resources.getConfiguration().locale = getLocale(lang);
-        resources.updateConfiguration(resources.getConfiguration(), resources.getDisplayMetrics());
+
+    public static void init(Application application) {
+        Lingver.init(application, getLocale(Setting.getLanguage()));
+    }
+
+    public static void setLocale(Locale locale) {
+        Lingver.getInstance().setLocale(App.get(), locale);
     }
 
     public static int locale() {
-        if (Locale.getDefault().getLanguage().equals("zh")) {
-            if (Locale.getDefault().getCountry().equals("TW")) {
-                return 2;
-            } else {
-                return 1;
-            }
-        } else {
-            return 0;
-        }
+        if (!Locale.getDefault().getLanguage().equals("zh")) return 0;
+        if (Locale.getDefault().getCountry().equals("CN")) return 1;
+        return 2;
     }
 
-    private static Locale getLocale(int lang) {
-        if (lang == 0) return Locale.ENGLISH;
-        else if (lang == 1) return Locale.SIMPLIFIED_CHINESE;
+    public static Locale getLocale(int lang) {
+        if (lang == 1) return Locale.SIMPLIFIED_CHINESE;
         else if (lang == 2) return Locale.TRADITIONAL_CHINESE;
         else return Locale.ENGLISH;
     }

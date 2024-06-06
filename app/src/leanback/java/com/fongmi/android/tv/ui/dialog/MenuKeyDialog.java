@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.Setting;
 import com.fongmi.android.tv.databinding.DialogMenuBinding;
-import com.fongmi.android.tv.ui.activity.SettingCustomActivity;
+import com.fongmi.android.tv.impl.MenuKeyCallback;
 import com.fongmi.android.tv.ui.adapter.MenuAdapter;
 import com.fongmi.android.tv.ui.custom.SpaceItemDecoration;
 import com.fongmi.android.tv.utils.ResUtil;
@@ -22,6 +22,7 @@ import java.util.List;
 
 public class MenuKeyDialog implements MenuAdapter.OnClickListener {
     private final DialogMenuBinding binding;
+    private final MenuKeyCallback callback;
     private final MenuAdapter adapter;
     private final AlertDialog dialog;
 
@@ -35,6 +36,7 @@ public class MenuKeyDialog implements MenuAdapter.OnClickListener {
     public MenuKeyDialog(Activity activity) {
         String[] items = ResUtil.getStringArray(R.array.select_home_menu_key);
         List<String> mItems = new ArrayList<>(Arrays.asList(items));
+        this.callback = (MenuKeyCallback) activity;
         this.adapter = new MenuAdapter(this, mItems);
         this.activity = activity;
         this.binding = DialogMenuBinding.inflate(LayoutInflater.from(activity));
@@ -79,8 +81,7 @@ public class MenuKeyDialog implements MenuAdapter.OnClickListener {
     @Override
     public void onItemClick(int position) {
         if (dialog != null) dialog.dismiss();
-        Setting.putHomeMenuKey(position);
-        ((SettingCustomActivity) activity).setHomeMenuText();
+        callback.onMenuKeyItemClick(position);
     }
 
 }

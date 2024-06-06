@@ -232,7 +232,7 @@
             tools:text="來源 1" />
 
         <TextView
-            android:id="@+id/time"
+            android:id="@+id/clock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"

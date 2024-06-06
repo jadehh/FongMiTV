@@ -9,25 +9,22 @@ import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.Setting;
-import com.fongmi.android.tv.databinding.DialogMenuBinding;
-import com.fongmi.android.tv.ui.activity.SettingCustomActivity;
-import com.fongmi.android.tv.ui.adapter.MenuAdapter;
+import com.fongmi.android.tv.databinding.DialogLanguageBinding;
+import com.fongmi.android.tv.impl.LanguageCallback;
+import com.fongmi.android.tv.ui.adapter.LanguageAdapter;
 import com.fongmi.android.tv.ui.custom.SpaceItemDecoration;
 import com.fongmi.android.tv.utils.ResUtil;
-import com.fongmi.android.tv.utils.Util;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class LanguageDialog implements MenuAdapter.OnClickListener {
-    private final DialogMenuBinding binding;
-    private final MenuAdapter adapter;
+public class LanguageDialog implements LanguageAdapter.OnClickListener {
+    private final DialogLanguageBinding binding;
+    private final LanguageCallback callback;
+    private final LanguageAdapter adapter;
     private final AlertDialog dialog;
-
-    private final Activity activity;
-
 
     public static LanguageDialog create(Activity activity) {
         return new LanguageDialog(activity);
@@ -36,9 +33,9 @@ public class LanguageDialog implements MenuAdapter.OnClickListener {
     public LanguageDialog(Activity activity) {
         String[] items = ResUtil.getStringArray(R.array.select_language);
         List<String> mItems = new ArrayList<>(Arrays.asList(items));
-        this.adapter = new MenuAdapter(this, mItems);
-        this.activity = activity;
-        this.binding = DialogMenuBinding.inflate(LayoutInflater.from(activity));
+        this.callback = (LanguageCallback) activity;
+        this.adapter = new LanguageAdapter(this, mItems);
+        this.binding = DialogLanguageBinding.inflate(LayoutInflater.from(activity));
         this.dialog = new MaterialAlertDialogBuilder(activity).setView(binding.getRoot()).create();
     }
 
@@ -80,8 +77,6 @@ public class LanguageDialog implements MenuAdapter.OnClickListener {
     @Override
     public void onItemClick(int position) {
         if (dialog != null) dialog.dismiss();
-        Setting.putLanguage(position);
-        ((SettingCustomActivity) activity).setLanguageText();
-        Util.restartApp(activity);
+        callback.setLanguage(position);
     }
 }

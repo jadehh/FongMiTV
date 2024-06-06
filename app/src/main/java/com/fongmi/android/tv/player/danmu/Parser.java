@@ -24,10 +24,8 @@ import master.flame.danmaku.danmaku.util.DanmakuUtils;
 public class Parser extends BaseDanmakuParser {
 
     private final Danmu danmu;
-    private BaseDanmaku item;
     private float scaleX;
     private float scaleY;
-    private int index;
 
     public Parser(String path) {
         this.danmu = Danmu.fromXml(getContent(path));
@@ -45,11 +43,9 @@ public class Parser extends BaseDanmakuParser {
         for (Danmu.Data data : danmu.getData()) {
             String[] values = data.getParam().split(",");
             if (values.length < 4) continue;
-            setParam(values);
-            setText(data.getText());
-            synchronized (result.obtainSynchronizer()) {
-                result.addItem(item);
-            }
+            BaseDanmaku item = createDanmaku(values);
+            setText(item, data.getText());
+            result.addItem(item);
         }
         return result;
     }
@@ -62,27 +58,27 @@ public class Parser extends BaseDanmakuParser {
         return this;
     }
 
-    private void setParam(String[] values) {
+    private BaseDanmaku createDanmaku(String[] values) {
         int type = Integer.parseInt(values[1]);
         long time = (long) (Float.parseFloat(values[0]) * 1000);
         float size = Float.parseFloat(values[2]) * (mDispDensity - 0.6f);
         int color = (int) ((0x00000000ff000000L | Long.parseLong(values[3])) & 0x00000000ffffffffL);
-        item = mContext.mDanmakuFactory.createDanmaku(type, mContext);
+        BaseDanmaku item = mContext.mDanmakuFactory.createDanmaku(type, mContext);
         item.setTime(time);
         item.setTimer(mTimer);
         item.textSize = size;
         item.textColor = color;
         item.textShadowColor = color <= Color.BLACK ? Color.WHITE : Color.BLACK;
         item.flags = mContext.mGlobalFlagValues;
+        return item;
     }
 
-    private void setText(String text) {
-        item.index = index++;
+    private void setText(BaseDanmaku item, String text) {
         DanmakuUtils.fillText(item, decodeXmlString(text));
-        if (item.getType() == BaseDanmaku.TYPE_SPECIAL && text.startsWith("[") && text.endsWith("]")) setSpecial();
+        if (item.getType() == BaseDanmaku.TYPE_SPECIAL && text.startsWith("[") && text.endsWith("]")) setSpecial(item);
     }
 
-    private void setSpecial() {
+    private void setSpecial(BaseDanmaku item) {
         String[] textArr = null;
         try {
             JSONArray jsonArray = new JSONArray(item.text);

@@ -1,6 +1,5 @@
 package com.fongmi.android.tv.api.config;
 
-import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 
 import com.fongmi.android.tv.App;
@@ -10,7 +9,6 @@ import com.fongmi.android.tv.bean.Config;
 import com.fongmi.android.tv.event.RefreshEvent;
 import com.fongmi.android.tv.impl.Callback;
 import com.fongmi.android.tv.utils.FileUtil;
-import com.fongmi.android.tv.utils.ImgUtil;
 import com.fongmi.android.tv.utils.Notify;
 import com.github.catvod.net.OkHttp;
 import com.github.catvod.utils.Asset;
@@ -21,7 +19,6 @@ import java.io.IOException;
 
 public class WallConfig {
 
-    private Drawable drawable;
     private Config config;
     private boolean sync;
 
@@ -39,12 +36,6 @@ public class WallConfig {
 
     public static String getDesc() {
         return get().getConfig().getDesc();
-    }
-
-    public static Drawable drawable(Drawable drawable) {
-        if (get().drawable != null) return drawable;
-        get().setDrawable(drawable);
-        return drawable;
     }
 
     public static void load(Config config, Callback callback) {
@@ -71,10 +62,6 @@ public class WallConfig {
         return config == null ? Config.wall() : config;
     }
 
-    public void setDrawable(Drawable drawable) {
-        this.drawable = drawable;
-    }
-
     public void load(Callback callback) {
         App.execute(() -> loadConfig(callback));
     }
@@ -96,7 +83,7 @@ public class WallConfig {
     private File write(File file) throws IOException {
         if (getUrl().startsWith("file")) Path.copy(Path.local(getUrl()), file);
         else if (getUrl().startsWith("assets")) Path.copy(Asset.open(getUrl()), file);
-        else if (getUrl().startsWith("http")) Path.write(file, ImgUtil.resize(OkHttp.newCall(getUrl()).execute().body().bytes()));
+        else if (getUrl().startsWith("http")) Path.write(file, OkHttp.newCall(getUrl()).execute().body().bytes());
         else file.delete();
         return file;
     }
