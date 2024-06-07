@@ -51,31 +51,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/default_pad2"
-                android:text="172MB / 60MB"
+                android:text="172MB"
+                android:gravity="center"
                 android:textColor="@color/text"
                 android:textSize="@dimen/filename_item_text_size" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:gravity="end">
-
-                <TextView
-                    android:id="@+id/downloadSpeed"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/default_pad2"
-                    android:text="10 MB / s"
-                    android:textColor="@color/text"
-                    android:textSize="@dimen/filename_item_text_size" />
-
-
-                <ImageView
-                    android:id="@+id/startTask"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_download_stop" />
 
                 <ImageView
                     android:id="@+id/deleteTask"
@@ -86,15 +70,6 @@
 
             </LinearLayout>
         </LinearLayout>
-
-        <com.daimajia.numberprogressbar.NumberProgressBar
-            android:id="@+id/numberProgressBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            tools:visibility="visible">
-
-        </com.daimajia.numberprogressbar.NumberProgressBar>
 
 
     </LinearLayout>

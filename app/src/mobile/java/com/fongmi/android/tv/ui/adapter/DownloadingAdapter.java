@@ -25,7 +25,7 @@ public class DownloadingAdapter extends RecyclerView.Adapter<DownloadingAdapter.
 
 
     private final DownloadingAdapter.OnClickListener mListener;
-    private final List<DownloadTask> list;
+    public final List<DownloadTask> list;
 
 
     public DownloadingAdapter(OnClickListener mListener, List<DownloadTask> list) {
@@ -61,7 +61,7 @@ public class DownloadingAdapter extends RecyclerView.Adapter<DownloadingAdapter.
             holder.binding.startTask.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_stop));
         }
         holder.binding.startTask.setOnClickListener(v -> startTask(task));
-        holder.binding.deleteTask.setOnClickListener(v -> deleteTask(task));
+        holder.binding.deleteTask.setOnClickListener(v -> deleteTask(task,holder));
         if (task.getFile()){
             holder.binding.downloadIcon.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_floder));
         }else{
@@ -81,8 +81,9 @@ public class DownloadingAdapter extends RecyclerView.Adapter<DownloadingAdapter.
             mListener.stopTask(task);
         }
     }
-    private void deleteTask(DownloadTask task) {
+    private void deleteTask(DownloadTask task,@NonNull DownloadingAdapter.ViewHolder holder) {
         mListener.deleTask(task);
+        holder.binding.numberProgressBar.setProgress(0);
     }
 
     private void downloadIcon(DownloadTask task){

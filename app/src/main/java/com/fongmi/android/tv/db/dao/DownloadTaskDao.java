@@ -1,6 +1,7 @@
 package com.fongmi.android.tv.db.dao;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Query;
 
 import com.fongmi.android.tv.bean.DownloadTask;
@@ -19,6 +20,8 @@ public abstract class DownloadTaskDao extends BaseDao<DownloadTask> {
     @Query("SELECT * FROM DownloadTask WHERE taskStatus != :taskStatus  ORDER BY createTime ")
     public abstract List<DownloadTask> findLoadingTask(int taskStatus);
 
-    @Query("SELECT * FROM DownloadTask WHERE taskStatus = :taskStatus1 OR taskStatus = :taskStatus2 And taskId=0")
-    public abstract List<DownloadTask> findDowningTask(int taskStatus1,int taskStatus2);
+    @Query("SELECT * FROM DownloadTask WHERE taskStatus == :taskStatus  ORDER BY createTime ")
+    public abstract List<DownloadTask> findSuccessTask(int taskStatus);
+    @Query("DELETE FROM DownloadTask WHERE id = :id")
+    public abstract void delete(int id);
 }

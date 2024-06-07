@@ -62,7 +62,9 @@ public class DownloadingFragment extends BaseFragment implements DownloadingAdap
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void onMessageEvent(MessageEvent event) {
         Msg msg = event.getMessage();
-        if (msg.getType() == Constant.DOWNLOAD_UPDATE_MESSAGE_TYPE) refreshData( (List<DownloadTask>) msg.getObj());
+        if (msg.getType() == Constant.DOWNLOAD_UPDATE_MESSAGE_TYPE){
+            refreshData( (List<DownloadTask>) msg.getObj());
+        }
     }
 
     @Override
@@ -71,7 +73,7 @@ public class DownloadingFragment extends BaseFragment implements DownloadingAdap
     }
     @Override
     public void stopTask(DownloadTask task) {
-        DownloadSource.get().stopDownload(task);
+        DownloadSource.get().stopDownload(task,false);
     }
 
     @Override
@@ -81,7 +83,7 @@ public class DownloadingFragment extends BaseFragment implements DownloadingAdap
 
     @Override
     public void deleTask(DownloadTask task) {
-
+        DownloadSource.get().delete(task);
     }
 
     @Override

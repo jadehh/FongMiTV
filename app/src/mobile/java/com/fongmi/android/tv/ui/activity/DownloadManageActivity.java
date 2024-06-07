@@ -72,7 +72,8 @@ public class DownloadManageActivity extends BaseActivity {
                 changeTab(position);
             }
         });
-
+        mBinding.downloading.setOnClickListener(v->clickTab(0));
+        mBinding.downloadFinish.setOnClickListener(v->clickTab(1));
         mBinding.settingIcon.setOnClickListener(this::test);
     }
 
@@ -86,10 +87,22 @@ public class DownloadManageActivity extends BaseActivity {
         }
     }
 
+    private void clickTab(int index) {
+        mBinding.pager.arrowScroll(index+1);
+        if (index == 0) {
+            mBinding.downloading.setTextColor(ResUtil.getColor(R.color.white));
+            mBinding.downloadFinish.setTextColor(ResUtil.getColor(com.github.bassaer.library.R.color.grey_500));
+        } else {
+            mBinding.downloadFinish.setTextColor(getResources().getColor(R.color.white));
+            mBinding.downloading.setTextColor(getResources().getColor(com.github.bassaer.library.R.color.grey_500));
+        }
+    }
+
     private void test(View view) {
         Logger.t(TAG).d("先使用测试按钮，创建一个正在下载的任务");
         String url1 = "magnet:?xt=urn:btih:ff33292e9f14f4a49f6ee996e91672dfa1735937&dn=[www.domp4.cc]我叫白小飞.EP08.HD1080p.mp4&tr=https://tracker.iriseden.fr:443/announce&tr=https://tr.highstar.shop:443/announce&tr=https://tr.fuckbitcoin.xyz:443/announce&tr=https://tr.doogh.club:443/announce&tr=https://tr.burnabyhighstar.com:443/announce&tr=https://t.btcland.xyz:443/announce&tr=http://vps02.net.orel.ru:80/announce&tr=https://tracker.kuroy.me:443/announce&tr=http://tr.cili001.com:8070/announce&tr=http://t.overflow.biz:6969/announce&tr=http://t.nyaatracker.com:80/announce&tr=http://open.acgnxtracker.com:80/announce&tr=http://nyaa.tracker.wf:7777/announce&tr=http://home.yxgz.vip:6969/announce&tr=http://buny.uk:6969/announce&tr=https://tracker.tamersunion.org:443/announce&tr=https://tracker.nanoha.org:443/announce&tr=https://tracker.loligirl.cn:443/announce&tr=udp://bubu.mapfactor.com:6969/announce&tr=http://share.camoe.cn:8080/announce&tr=udp://movies.zsw.ca:6969/announce&tr=udp://ipv4.tracker.harry.lu:80/announce&tr=udp://tracker.sylphix.com:6969/announce&tr=http://95.216.22.207:9001/announce";
         String url2 = "https://download-cdn.jetbrains.com/idea/ideaIU-2024.1.2.exe?_ga=2.103997184.1095914730.1716882988-886861707.1704695179&_gl=1*1ij1pqk*_ga*ODg2ODYxNzA3LjE3MDQ2OTUxNzk.*_ga_9J976DJZ68*MTcxNjg4Mjk4Ny40My4xLjE3MTY4ODU0MzEuNjAuMC4w";
+        String url3 = "https://down.sandai.net/thunder11/XunLeiWebSetup12.0.12.2510xl11.exe";
         if (AppDatabase.get().getDownloadTaskDao().find(url1).size() > 0){
             Notify.show("任务添加失败");
         }else{
@@ -100,6 +113,12 @@ public class DownloadManageActivity extends BaseActivity {
             Notify.show("任务添加失败");
         }else{
             DownloadSource.get().startDownload(url2);
+            Notify.show("任务添加成功");
+        }
+        if (AppDatabase.get().getDownloadTaskDao().find(url3).size() > 0){
+            Notify.show("任务添加失败");
+        }else{
+            DownloadSource.get().startDownload(url3);
             Notify.show("任务添加成功");
         }
     }

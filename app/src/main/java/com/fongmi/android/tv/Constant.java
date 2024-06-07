@@ -41,10 +41,7 @@ public class Constant {
     public static final int DOWNLOAD_WAIT = 5;
 
     //开启下载消息类型
-    public static final int DOWNLOAD_START_MESSAGE_TYPE = 0;
-    //改变下载消息类型
-    public static final int DOWNLOAD_SWITCH_MESSAGE_TYPE = 1;
+    public static final int DOWNLOAD_UPDATE_MESSAGE_TYPE = 0;
+    public static final int DOWNLOAD_Success_MESSAGE_TYPE = 1;
 
-    //更新下载消息类型
-    public static final int DOWNLOAD_UPDATE_MESSAGE_TYPE = 3;
 }

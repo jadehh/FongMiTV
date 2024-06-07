@@ -11,6 +11,7 @@ import com.fongmi.android.tv.db.AppDatabase;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Date;
@@ -221,6 +222,20 @@ public class DownloadTask {
         }
         this.updateTime = new Date().getTime();
         AppDatabase.get().getDownloadTaskDao().update(this);
+    }
+
+
+
+    public void delete(){
+        if (this.getFile()){
+            List<DownloadTask> tasks= AppDatabase.get().getDownloadTaskDao().find(this.getId());
+            for (DownloadTask task:tasks){
+                new File(task.getLocalPath()).delete();
+                AppDatabase.get().getDownloadTaskDao().delete(task.getId());
+            }
+        }
+        new File(this.getLocalPath()).delete();
+        AppDatabase.get().getDownloadTaskDao().delete(this.getId());
     }
 
     public void insert() {

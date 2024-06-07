@@ -20,10 +20,18 @@ import java.util.List;
 public class DownloadUpdateUI {
     private static final String TAG = DownloadUpdateUI.class.getSimpleName();
     private static DownloadUpdateUI downloadUpdateUI;
-    private List<DownloadTask> tasks;
+
+    private List<DownloadTask> downloadingTasks;
+
+    private List<DownloadTask> downloadSuccessTasks;
+
+    private TaskModelImp taskModelImp;
+
 
     public DownloadUpdateUI() {
-        tasks = new ArrayList<>();
+        downloadingTasks = new ArrayList<>();
+        downloadSuccessTasks = new ArrayList<>();
+        taskModelImp = new TaskModelImp();
     }
 
     public static synchronized DownloadUpdateUI getInstance() {
@@ -33,9 +41,9 @@ public class DownloadUpdateUI {
         return downloadUpdateUI;
     }
 
-    public void downUpdate() {
-        tasks.clear();
-        TaskModelImp taskModelImp = new TaskModelImp();
+
+    private void downloading(){
+        downloadingTasks.clear();
         List<DownloadTask> downloadTasks = taskModelImp.findLoadingTask();
         for (DownloadTask task : downloadTasks) {
             int taskStatus = task.getTaskStatus();
@@ -47,10 +55,30 @@ public class DownloadUpdateUI {
                 setFileDownloadTask(task);
             }
             if (task.getParentId() == 0){
-                tasks.add(task);
+                downloadingTasks.add(task);
             }
         }
-        EventBus.getDefault().postSticky(new MessageEvent(new Msg(Constant.DOWNLOAD_UPDATE_MESSAGE_TYPE, tasks)));
+        EventBus.getDefault().postSticky(new MessageEvent(new Msg(Constant.DOWNLOAD_UPDATE_MESSAGE_TYPE, downloadingTasks)));
+    }
+
+
+    private void downloadSuccess(){
+        downloadSuccessTasks.clear();
+        List<DownloadTask> downloadTasks = taskModelImp.findSuccessTask();
+        for (DownloadTask task : downloadTasks) {
+            if (task.getParentId() == 0){
+                downloadSuccessTasks.add(task);
+            }
+            if (task.getTaskId() != 0){
+                finishTask(task);
+            }
+        }
+        EventBus.getDefault().postSticky(new MessageEvent(new Msg(Constant.DOWNLOAD_Success_MESSAGE_TYPE, downloadSuccessTasks)));
+    }
+
+    public void downUpdate() {
+       downloading();
+       downloadSuccess();
     }
 
     public void setFileDownloadTask(DownloadTask fileDownloadTask) {
@@ -75,6 +103,9 @@ public class DownloadUpdateUI {
         task.setTaskStatus(taskInfo.mTaskStatus);
         task.setDownloadSpeed(taskInfo.mDownloadSpeed);
         if (taskInfo.mTaskId != 0) {
+            if (taskInfo.mFileSize == taskInfo.mDownloadSize){
+                task.setTaskStatus(Constant.DOWNLOAD_SUCCESS);
+            }
             task.setFileSize(taskInfo.mFileSize);
             task.setDownloadSize(taskInfo.mDownloadSize);
         } else {
@@ -83,6 +114,10 @@ public class DownloadUpdateUI {
             Logger.t(TAG).d("获取下载进度失败");
         }
         task.update();
+    }
+
+    private void finishTask(DownloadTask task){
+        DownloadSource.get().stopDownload(task,true);
     }
 }
 

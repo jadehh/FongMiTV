@@ -15,8 +15,7 @@ public class TaskModelImp {
         return AppDatabase.get().getDownloadTaskDao().findLoadingTask(Constant.DOWNLOAD_SUCCESS);
     }
 
-    public List<DownloadTask> findDowningTask() {
-        return AppDatabase.get().getDownloadTaskDao().findDowningTask(Constant.DOWNLOAD_LOADING,Constant.DOWNLOAD_CONNECTION);
+    public List<DownloadTask> findSuccessTask() {
+        return AppDatabase.get().getDownloadTaskDao().findSuccessTask(Constant.DOWNLOAD_SUCCESS);
     }
-
 }

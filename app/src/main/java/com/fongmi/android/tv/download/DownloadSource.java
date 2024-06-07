@@ -49,14 +49,22 @@ public class DownloadSource {
         }
     }
 
-    public void stopDownload(DownloadTask task) {
+    public void stopDownload(DownloadTask task,boolean isFinish) {
         List<DownloadTask> downloadTasks = task.getSubDownloadTasks();
         for (DownloadTask downloadTask : downloadTasks) {
             extractors.get(task.getTaskType()).stopDownload(downloadTask);
             downloadTask.setDownloadSpeed(0);
-            downloadTask.setTaskStatus(Constant.DOWNLOAD_STOP);
+            if (isFinish){
+                downloadTask.setTaskId(0);
+                downloadTask.setTaskStatus(Constant.DOWNLOAD_SUCCESS);
+            }
+            else downloadTask.setTaskStatus(Constant.DOWNLOAD_STOP);
             downloadTask.update();
         }
+    }
+    public void delete(DownloadTask task){
+        stopDownload(task,false);
+        task.delete();
     }
 
     private int saveDB(List<DownloadTask> downloadTasks) {
