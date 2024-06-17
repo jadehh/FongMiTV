@@ -56,7 +56,7 @@ public class Local implements Process {
         for (String k : files.keySet()) {
             String fn = params.get(k);
             File temp = new File(files.get(k));
-            if (fn.toLowerCase().endsWith(".zip")) FileUtil.unzip(temp, Path.root(path));
+            if (fn.toLowerCase().endsWith(".zip")) FileUtil.extractZip(temp, Path.root(path));
             else Path.copy(temp, Path.root(path, fn));
         }
         return Nano.success();

@@ -35,8 +35,16 @@ public class Epg {
         }
     }
 
+    public static Epg create(String key, String date) {
+        Epg item = new Epg();
+        item.setKey(key);
+        item.setDate(date);
+        item.setList(new ArrayList<>());
+        return item;
+    }
+
     public String getKey() {
-        return key;
+        return TextUtils.isEmpty(key) ? "" : key;
     }
 
     public void setKey(String key) {
@@ -45,6 +53,10 @@ public class Epg {
 
     public String getDate() {
         return TextUtils.isEmpty(date) ? "" : date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public List<EpgData> getList() {

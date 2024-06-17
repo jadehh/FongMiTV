@@ -22,20 +22,10 @@
             android:focusable="true">
 
             <androidx.media3.ui.PlayerView
-                android:id="@+id/surface"
+                android:id="@+id/exo"
                 style="@style/Player.Vod"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone"
-                app:surface_type="surface_view" />
-
-            <androidx.media3.ui.PlayerView
-                android:id="@+id/texture"
-                style="@style/Player.Vod"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone"
-                app:surface_type="texture_view" />
+                android:layout_height="match_parent" />
 
             <tv.danmaku.ijk.media.player.ui.IjkVideoView
                 android:id="@+id/ijk"

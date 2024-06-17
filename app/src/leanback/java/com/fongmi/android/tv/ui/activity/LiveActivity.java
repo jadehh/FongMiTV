@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.support.v4.media.MediaMetadataCompat;
 import android.view.KeyEvent;
 import android.view.View;
 
@@ -105,7 +104,7 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, GroupP
     }
 
     private PlayerView getExo() {
-        return Setting.getRender() == 0 ? mBinding.surface : mBinding.texture;
+        return mBinding.exo;
     }
 
     private IjkVideoView getIjk() {
@@ -407,13 +406,7 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, GroupP
 
     private boolean onChoose() {
         if (mPlayers.isEmpty()) return false;
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.putExtra("headers", mPlayers.getHeaderArray());
-        intent.putExtra("title", mBinding.widget.name.getText());
-        intent.setDataAndType(mPlayers.getUri(), "video/*");
-        startActivity(Util.getChooser(intent));
+        mPlayers.choose(this, mBinding.widget.title.getText());
         return true;
     }
 
@@ -590,9 +583,13 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, GroupP
 
     @Override
     public void onItemClick(Channel item) {
-        mGroup.setPosition(mBinding.channel.getSelectedPosition());
-        setChannel(item.group(mGroup));
-        hideUI();
+        if (item.getData().getList().size() > 0 && item.isSelected() && mChannel != null) {
+            showEpg(item);
+        } else {
+            mGroup.setPosition(mBinding.channel.getSelectedPosition());
+            setChannel(item.group(mGroup));
+            hideUI();
+        }
     }
 
     @Override
@@ -664,7 +661,7 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, GroupP
     }
 
     private void setEpg(Epg epg) {
-        if (mChannel != null && mChannel.getName().equals(epg.getKey())) setEpg();
+        if (mChannel != null && mChannel.getTvgName().equals(epg.getKey())) setEpg();
     }
 
     private void fetch() {
@@ -756,7 +753,6 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, GroupP
                 setMetadata();
                 hideProgress();
                 mPlayers.reset();
-                setSpeedVisible();
                 setTrackVisible(true);
                 mBinding.widget.size.setText(mPlayers.getSizeText());
                 break;
@@ -766,12 +762,9 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, GroupP
         }
     }
 
-    private void setSpeedVisible() {
-        mBinding.control.speed.setVisibility(mPlayers.isVod() ? View.VISIBLE : View.GONE);
-    }
-
     private void setTrackVisible(boolean visible) {
         mBinding.control.text.setVisibility(visible && mPlayers.haveTrack(C.TRACK_TYPE_TEXT) ? View.VISIBLE : View.GONE);
+        mBinding.control.speed.setVisibility(visible && mPlayers.isVod() ? View.VISIBLE : View.GONE);
         mBinding.control.audio.setVisibility(visible && mPlayers.haveTrack(C.TRACK_TYPE_AUDIO) ? View.VISIBLE : View.GONE);
         mBinding.control.video.setVisibility(visible && mPlayers.haveTrack(C.TRACK_TYPE_VIDEO) ? View.VISIBLE : View.GONE);
     }
@@ -779,17 +772,13 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, GroupP
     private void setMetadata() {
         String title = mBinding.widget.name.getText().toString();
         String artist = mBinding.widget.play.getText().toString();
-        MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
-        builder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, title);
-        builder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist);
-        builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, getIjk().getDefaultArtwork());
-        builder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mPlayers.getDuration());
-        mPlayers.setMetadata(builder.build());
+        mPlayers.setMetadata(title, artist, mBinding.exo);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onErrorEvent(ErrorEvent event) {
-        if (mPlayers.addRetry() > event.getRetry()) checkError(event);
+        if (event.getCode() / 1000 == 4 && mPlayers.isExo() && Players.isHard(Players.EXO)) onDecode();
+        else if (mPlayers.addRetry() > event.getRetry()) checkError(event);
         else fetch();
     }
 

@@ -53,21 +53,30 @@ public class FileChooser {
         show("*/*");
     }
 
+    public void show(Uri uri) {
+        show(uri, "*/*");
+    }
+
     public void show(String mimeType) {
-        show(mimeType, new String[]{"*/*"}, REQUEST_PICK_FILE);
+        show(mimeType, new String[]{"*/*"}, null, REQUEST_PICK_FILE);
     }
 
     public void show(String[] mimeTypes) {
-        show("*/*", mimeTypes, REQUEST_PICK_FILE);
+        show("*/*", mimeTypes, null, REQUEST_PICK_FILE);
     }
 
-    public void show(String mimeType, String[] mimeTypes, int code) {
+    public void show(Uri uri, String mimeType) {
+        show(mimeType, new String[]{"*/*"}, uri, REQUEST_PICK_FILE);
+    }
+
+    public void show(String mimeType, String[] mimeTypes, Uri uri, int code) {
         Intent intent = new Intent(Util.isTvBox() ? Intent.ACTION_GET_CONTENT : Intent.ACTION_OPEN_DOCUMENT);
         intent.setType(mimeType);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
         intent.putExtra("android.content.extra.SHOW_ADVANCED", true);
+        if (uri != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
         if (intent.resolveActivity(App.get().getPackageManager()) == null) return;
         if (fragment != null) fragment.startActivityForResult(Intent.createChooser(intent, ""), code);
     }
@@ -190,6 +199,10 @@ public class FileChooser {
         } else {
             return MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         }
+    }
+
+    public static Uri getUri(String path) {
+        return Uri.parse("content://com.android.externalstorage.documents/document/primary:" + path);
     }
 
     private static boolean isExternalStorageDocument(Uri uri) {

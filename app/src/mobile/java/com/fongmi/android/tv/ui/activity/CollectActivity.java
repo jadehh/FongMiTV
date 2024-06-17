@@ -128,10 +128,10 @@ public class CollectActivity extends BaseActivity implements CustomScroller.Call
         mBinding.recycler.setHasFixedSize(true);
         mBinding.recycler.addOnScrollListener(mScroller);
         mBinding.recycler.setAdapter(mSearchAdapter = new SearchAdapter(this));
-        mBinding.wordRecycler.setHasFixedSize(true);
+        mBinding.wordRecycler.setHasFixedSize(false);
         mBinding.wordRecycler.setAdapter(mWordAdapter = new WordAdapter(this));
         mBinding.wordRecycler.setLayoutManager(new FlexboxLayoutManager(this, FlexDirection.ROW));
-        mBinding.recordRecycler.setHasFixedSize(true);
+        mBinding.recordRecycler.setHasFixedSize(false);
         mBinding.recordRecycler.setAdapter(mRecordAdapter = new RecordAdapter(this));
         mBinding.recordRecycler.setLayoutManager(new FlexboxLayoutManager(this, FlexDirection.ROW));
     }

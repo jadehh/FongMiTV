@@ -69,7 +69,7 @@ public class CastActivity extends BaseActivity implements CustomKeyDownCast.List
     private int scale;
 
     private PlayerView getExo() {
-        return Setting.getRender() == 0 ? mBinding.surface : mBinding.texture;
+        return mBinding.exo;
     }
 
     private IjkVideoView getIjk() {
@@ -350,17 +350,13 @@ public class CastActivity extends BaseActivity implements CustomKeyDownCast.List
     }
 
     private void setMetadata() {
-        String title = mBinding.widget.title.getText().toString();
-        MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
-        builder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, title);
-        builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, getIjk().getDefaultArtwork());
-        builder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mPlayers.getDuration());
-        mPlayers.setMetadata(builder.build());
+        mPlayers.setMetadata(mBinding.widget.title.getText().toString(), "", mBinding.exo);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onErrorEvent(ErrorEvent event) {
-        if (mPlayers.addRetry() > event.getRetry()) onError(event);
+        if (event.getCode() / 1000 == 4 && mPlayers.isExo() && Players.isHard(Players.EXO)) onDecode();
+        else if (mPlayers.addRetry() > event.getRetry()) onError(event);
         else onReset();
     }
 

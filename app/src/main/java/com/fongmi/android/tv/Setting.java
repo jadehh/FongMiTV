@@ -194,6 +194,14 @@ public class Setting {
         Prefers.put("background", background);
     }
 
+    public static int getRtsp() {
+        return Prefers.getInt("rtsp");
+    }
+
+    public static void putRtsp(int rtsp) {
+        Prefers.put("rtsp", rtsp);
+    }
+
     public static int getSiteMode() {
         return Prefers.getInt("site_mode", 1);
     }

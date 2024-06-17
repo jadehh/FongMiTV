@@ -77,7 +77,7 @@ public abstract class AppDatabase extends RoomDatabase {
         App.execute(() -> {
             File restore = Path.restore();
             if (!restore.exists()) return;
-            FileUtil.unzip(file, restore);
+            FileUtil.extractZip(file, restore);
             File db = new File(restore, NAME);
             File wal = new File(restore, NAME + "-wal");
             File shm = new File(restore, NAME + "-shm");

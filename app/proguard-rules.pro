@@ -1,3 +1,6 @@
+# TV
+-keep class com.fongmi.android.tv.bean.** { *; }
+
 # Gson
 -keepattributes Signature
 -keepattributes *Annotation*
@@ -91,9 +94,6 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
-
-# bean
--keep class com.fongmi.android.tv.bean.** { *; }
 
 # x5
 -dontwarn dalvik.**

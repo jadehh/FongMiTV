@@ -42,4 +42,12 @@
         android:textStyle="bold"
         tools:text="CNN" />
 
+    <ImageView
+        android:id="@+id/epg"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="4dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_action_arrow" />
+
 </com.fongmi.android.tv.ui.custom.CustomLeftRightLayout>

@@ -142,6 +142,11 @@ public class PlaybackService extends Service {
     }
 
     @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        stopSelf();
+    }
+
+    @Override
     public void onDestroy() {
         EventBus.getDefault().unregister(this);
         getManager().cancel(ID);

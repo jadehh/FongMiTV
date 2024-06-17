@@ -353,7 +353,7 @@ public class SettingFragment extends BaseFragment implements ConfigCallback, Sit
     }
 
     private void onRestore(View view) {
-        FileChooser.from(this).type(FileChooser.TYPE_RESTORE).show();
+        FileChooser.from(this).type(FileChooser.TYPE_RESTORE).show(FileChooser.getUri("TV"));
     }
 
     private void onTransmit(View view) {

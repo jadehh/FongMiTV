@@ -89,6 +89,10 @@ public class Path {
         return mkdir(new File(cache() + File.separator + "exo"));
     }
 
+    public static File epg() {
+        return mkdir(new File(cache() + File.separator + "epg"));
+    }
+
     public static File jpa() {
         return mkdir(new File(cache() + File.separator + "jpa"));
     }
@@ -115,6 +119,10 @@ public class Path {
 
     public static File files(String name) {
         return new File(files(), name);
+    }
+
+    public static File epg(String name) {
+        return new File(epg(), name);
     }
 
     public static File js(String name) {

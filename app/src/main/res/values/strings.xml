@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools" xmlns:xliff="http://schemas.android.com/apk/res-auto" tools:ignore="MissingTranslation">
 
     <!-- App -->
-    <string name="app_name">TV</string>
+    <string name="app_name">OKTV</string>
     <string name="app_exit">Press back again to exit</string>
 
     <!-- Vod -->
@@ -124,6 +124,7 @@
     <string name="player_exo_tunnel">Tunnel mode</string>
     <string name="player_exo_http">HTTP method</string>
     <string name="player_exo_buffer">Buffer time</string>
+    <string name="player_rtsp">RTSP channel</string>
     <string name="player_ua">User-Agent</string>
 
     <!-- Search -->
@@ -318,6 +319,11 @@
         <item>Select audio track</item>
         <item>Select video track</item>
         <item>Select subtitle track</item>
+    </string-array>
+
+    <string-array name="select_rtsp">
+        <item>UDP</item>
+        <item>TCP</item>
     </string-array>
 
 </resources>

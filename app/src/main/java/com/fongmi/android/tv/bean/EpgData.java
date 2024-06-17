@@ -36,8 +36,16 @@ public class EpgData {
         return TextUtils.isEmpty(start) ? "" : start;
     }
 
+    public void setStart(String start) {
+        this.start = start;
+    }
+
     public String getEnd() {
         return TextUtils.isEmpty(end) ? "" : end;
+    }
+
+    public void setEnd(String end) {
+        this.end = end;
     }
 
     public boolean isSelected() {

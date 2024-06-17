@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.support.v4.media.MediaMetadataCompat;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -280,7 +279,7 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
     }
 
     private PlayerView getExo() {
-        return Setting.getRender() == 0 ? mBinding.surface : mBinding.texture;
+        return mBinding.exo;
     }
 
     private IjkVideoView getIjk() {
@@ -359,6 +358,8 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
         mBinding.control.opening.setDownListener(this::onOpeningSub);
         mBinding.control.loop.setOnClickListener(view -> onLoop());
         mBinding.control.danmu.setOnClickListener(view -> onDanmu());
+        mBinding.control.danmu.setUpListener(this::onDanmuAdd);
+        mBinding.control.danmu.setDownListener(this::onDanmuSub);
         mBinding.control.next.setOnClickListener(view -> checkNext());
         mBinding.control.prev.setOnClickListener(view -> checkPrev());
         mBinding.control.episodes.setOnClickListener(view -> onEpisodes());
@@ -453,19 +454,24 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
         setSubtitle(16);
     }
 
-    private void setDanmuView() {
-        int maxLine = Setting.getDanmuLine(3);
-        mPlayers.setDanmuView(mBinding.danmaku);
+    private void setDanmuViewSettings() {
         float[] range = {2.4f, 1.8f, 1.2f, 0.8f};
         float speed = range[Setting.getDanmuSpeed()];
         float alpha = Setting.getDanmuAlpha() / 100.0f;
-        float sizeScale = Setting.getDanmuSize();
+        float sizeScale = isFullscreen() ? 1.2f * Setting.getDanmuSize() : 0.8f * Setting.getDanmuSize();
+        int maxLine = Setting.getDanmuLine(3);
         HashMap<Integer, Integer> maxLines = new HashMap<>();
         maxLines.put(BaseDanmaku.TYPE_FIX_TOP, maxLine);
         maxLines.put(BaseDanmaku.TYPE_SCROLL_RL, maxLine);
         maxLines.put(BaseDanmaku.TYPE_SCROLL_LR, maxLine);
         maxLines.put(BaseDanmaku.TYPE_FIX_BOTTOM, maxLine);
-        mDanmakuContext.setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3).setMaximumLines(maxLines).setScrollSpeedFactor(speed).setDanmakuTransparency(alpha).setDanmakuMargin(12).setScaleTextSize(sizeScale);
+        mDanmakuContext.setMaximumLines(maxLines).setScrollSpeedFactor(speed).setDanmakuTransparency(alpha).setScaleTextSize(sizeScale);
+    }
+
+    private void setDanmuView() {
+        mPlayers.setDanmuView(mBinding.danmaku);
+        setDanmuViewSettings();
+        mDanmakuContext.setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3).setDanmakuMargin(8);
         mBinding.control.danmu.setActivated(Setting.isDanmu());
     }
 
@@ -882,6 +888,22 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
         showDanmu();
     }
 
+    private void onDanmuAdd() {
+        int line = Setting.getDanmuLine(3);
+        line = Math.min(line + 1, 15);
+        Setting.putDanmuLine(line);
+        mBinding.control.danmu.setText(line + ResUtil.getString(R.string.lines));
+        setDanmuViewSettings();
+    }
+
+    private void onDanmuSub() {
+        int line = Setting.getDanmuLine(3);
+        line = Math.max(line - 1, 1);
+        Setting.putDanmuLine(line);
+        mBinding.control.danmu.setText(line + ResUtil.getString(R.string.lines));
+        setDanmuViewSettings();
+    }
+
     private void showDanmu() {
         if (Setting.isDanmu()) mBinding.danmaku.show();
         else mBinding.danmaku.hide();
@@ -1020,15 +1042,7 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
 
     private boolean onChoose() {
         if (mPlayers.isEmpty()) return false;
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.putExtra("return_result", true);
-        intent.putExtra("headers", mPlayers.getHeaderArray());
-        intent.putExtra("position", (int) mPlayers.getPosition());
-        intent.putExtra("title", mBinding.widget.title.getText());
-        intent.setDataAndType(mPlayers.getUri(), "video/*");
-        startActivityForResult(Util.getChooser(intent), 1001);
+        mPlayers.choose(this, mBinding.widget.title.getText());
         return true;
     }
 
@@ -1113,11 +1127,27 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
         mBinding.widget.center.setVisibility(View.GONE);
     }
 
+    private void setControlNextFocus() {
+        int count = mBinding.control.actionLayout.getChildCount();
+        for(int i=0; i<count-1; i++) {
+            View btn = mBinding.control.actionLayout.getChildAt(i);
+            if (btn == null || !isVisible(btn)) continue;
+            for(int j=i+1; j<count; j++) {
+                View next = mBinding.control.actionLayout.getChildAt(j);
+                if (next == null || !isVisible(next)) continue;
+                btn.setNextFocusRightId(next.getId());
+                next.setNextFocusLeftId(btn.getId());
+                break;
+            }
+        }
+    }
+
     private void showControl(View view) {
         mBinding.control.danmu.setVisibility(mBinding.danmaku.isPrepared() ? View.VISIBLE : View.GONE);
         mBinding.control.getRoot().setVisibility(View.VISIBLE);
         mBinding.control.episodes.setVisibility(Setting.getFullscreenMenuKey() == 0 ? View.VISIBLE : View.GONE);
         view.requestFocus();
+        setControlNextFocus();
         setR1Callback();
     }
 
@@ -1374,18 +1404,14 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
         String title = mHistory == null ? getName() : mHistory.getVodName();
         String artist = mEpisodeAdapter.size() == 0 ? "" : getEpisode().getName();
         artist = title.equals(artist) ? "" : getString(R.string.play_now, artist);
-        MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
-        builder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, title);
-        builder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist);
-        builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, getIjk().getDefaultArtwork());
-        builder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mPlayers.getDuration());
-        mPlayers.setMetadata(builder.build());
+        mPlayers.setMetadata(title, artist, mBinding.exo);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onErrorEvent(ErrorEvent event) {
         if (isBackground()) return;
-        if (mPlayers.addRetry() > event.getRetry()) checkError(event);
+        if (event.getCode() / 1000 == 4 && mPlayers.isExo() && Players.isHard(Players.EXO)) onDecode();
+        else if (mPlayers.addRetry() > event.getRetry()) checkError(event);
         else onRefresh();
     }
 

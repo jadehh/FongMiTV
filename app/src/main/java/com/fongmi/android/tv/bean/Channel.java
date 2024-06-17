@@ -336,8 +336,8 @@ public class Channel {
         if (!live.getCatchup().isEmpty() && getCatchup().isEmpty()) setCatchup(live.getCatchup());
         if (live.getReferer().length() > 0 && getReferer().isEmpty()) setReferer(live.getReferer());
         if (live.getPlayerType() != -1 && getPlayerType() == -1) setPlayerType(live.getPlayerType());
-        if (!getEpg().startsWith("http")) setEpg(live.getEpg().replace("{name}", getTvgName()).replace("{epg}", getEpg()));
-        if (!getLogo().startsWith("http")) setLogo(live.getLogo().replace("{name}", getTvgName()).replace("{logo}", getLogo()));
+        if (!getEpg().startsWith("http") && live.getEpg().contains("{")) setEpg(live.getEpg().replace("{name}", getTvgName()).replace("{epg}", getEpg()));
+        if (!getLogo().startsWith("http") && live.getLogo().contains("{")) setLogo(live.getLogo().replace("{name}", getTvgName()).replace("{logo}", getLogo()));
     }
 
     public void setLine(String line) {

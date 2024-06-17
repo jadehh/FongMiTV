@@ -184,6 +184,10 @@ public class Live {
         return TextUtils.isEmpty(epg) ? "" : epg;
     }
 
+    public void setEpg(String epg) {
+        this.epg = epg;
+    }
+
     public String getUa() {
         return TextUtils.isEmpty(ua) ? "" : ua;
     }

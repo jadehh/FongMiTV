@@ -1,7 +1,7 @@
 <resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
 
     <!-- App -->
-    <string name="app_name">影視</string>
+    <string name="app_name">OK影視</string>
     <string name="app_exit">再按一次返回鍵退出</string>
 
     <!-- Vod -->
@@ -124,6 +124,7 @@
     <string name="player_exo_tunnel">隧道模式</string>
     <string name="player_exo_http">連線方式</string>
     <string name="player_exo_buffer">緩衝時間</string>
+    <string name="player_rtsp">RTSP 通道</string>
     <string name="player_ua">User-Agent</string>
 
     <!-- Search -->
@@ -314,6 +315,11 @@
         <item>選擇音軌</item>
         <item>選擇視軌</item>
         <item>選擇字幕</item>
+    </string-array>
+
+    <string-array name="select_rtsp">
+        <item>UDP</item>
+        <item>TCP</item>
     </string-array>
 
 </resources>

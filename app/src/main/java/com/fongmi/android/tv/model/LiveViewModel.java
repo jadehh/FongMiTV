@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.fongmi.android.tv.Constant;
+import com.fongmi.android.tv.api.EpgParser;
 import com.fongmi.android.tv.api.LiveParser;
 import com.fongmi.android.tv.api.config.VodConfig;
 import com.fongmi.android.tv.bean.Channel;
@@ -53,6 +54,7 @@ public class LiveViewModel extends ViewModel {
         execute(LIVE, () -> {
             VodConfig.get().setRecent(item.getJar());
             LiveParser.start(item);
+            EpgParser.start(item);
             verify(item);
             return item;
         });
@@ -62,7 +64,7 @@ public class LiveViewModel extends ViewModel {
         String date = formatDate.format(new Date());
         String url = item.getEpg().replace("{date}", date);
         execute(EPG, () -> {
-            if (!item.getData().equal(date)) item.setData(Epg.objectFrom(OkHttp.string(url), item.getName(), formatTime));
+            if (!item.getData().equal(date)) item.setData(Epg.objectFrom(OkHttp.string(url), item.getTvgName(), formatTime));
             return item.getData().selected();
         });
     }
