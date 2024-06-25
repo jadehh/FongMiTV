@@ -160,6 +160,7 @@
     <string name="error_play_timeout">連線逾時</string>
     <string name="error_detail">暫無播放資料</string>
     <string name="error_empty">找不到資料</string>
+    <string name="error_download">下載失敗</string>
 
     <!-- Update -->
     <string name="update_version">發現新版本 <xliff:g name="name">%s</xliff:g></string>

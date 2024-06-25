@@ -7,6 +7,7 @@ import android.os.SystemClock;
 import com.fongmi.android.tv.Constant;
 import com.fongmi.android.tv.bean.DownloadTask;
 import com.fongmi.android.tv.bean.Episode;
+import com.fongmi.android.tv.db.AppDatabase;
 import com.fongmi.android.tv.download.DownloadSource;
 import com.fongmi.android.tv.exception.ExtractException;
 import com.fongmi.android.tv.player.Source;
@@ -23,7 +24,6 @@ import com.xunlei.downloadlib.parameter.XLTaskInfo;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -35,7 +35,7 @@ public class Thunder implements Source.Extractor, DownloadSource.Extractor {
     private int time = 0;
 
     @Override
-    public List<DownloadTask> startDownload(String url) {
+    public List<DownloadTask> startDownload(String name,String url) {
         List<DownloadTask> downloadTasks = new ArrayList<>();
         if (UrlUtil.scheme(url).equals("magnet")) {
             boolean torrent = Sniffer.isTorrent(url);
@@ -51,26 +51,26 @@ public class Thunder implements Source.Extractor, DownloadSource.Extractor {
                     sleep();
                 }
             List<TorrentFileInfo> medias = XLTaskHelper.get().getTorrentInfo(taskId.getSaveFile()).getMedias();
-            downloadTasks.add(getDownloadTask(taskId));
+            downloadTasks.add(getDownloadTask(name,taskId));
             for (TorrentFileInfo media : medias) {
                 downloadTasks.add(downloadTorrentTask(Uri.parse(media.getPlayUrl())));
             }
             XLTaskHelper.get().stopTask(taskId);
         } else {
-            downloadTasks.add(downloadThunderTask(url));
+            downloadTasks.add(downloadThunderTask(name,url));
         }
         return downloadTasks;
     }
 
     @Override
     public List<DownloadTask> resumeDownload(DownloadTask task) {
-       return  startDownload(task.getUrl());
+       return  startDownload(task.getFileName(),task.getUrl());
     }
 
-    private DownloadTask downloadThunderTask(String url) {
+    private DownloadTask downloadThunderTask(String name,String url) {
         File folder = Path.thunder(Util.md5(url));
         taskId = XLTaskHelper.get().addThunderTask(url, folder);
-        return getDownloadTask(taskId);
+        return getDownloadTask(name,taskId);
     }
 
 
@@ -129,7 +129,7 @@ public class Thunder implements Source.Extractor, DownloadSource.Extractor {
             taskId.mRealUrl = uri.getPath();
             taskId.mFileName = name;
         }
-        return getDownloadTask(taskId);
+        return getDownloadTask("",taskId);
     }
 
     @Override
@@ -140,12 +140,45 @@ public class Thunder implements Source.Extractor, DownloadSource.Extractor {
     }
 
     @Override
+    public void delete(DownloadTask task) {
+        if (task.getFile()){
+            List<DownloadTask> tasks= AppDatabase.get().getDownloadTaskDao().find(task.getId());
+            for (DownloadTask downloadTask:tasks){
+                new File(downloadTask.getLocalPath()).delete();
+                AppDatabase.get().getDownloadTaskDao().delete(task.getId());
+            }
+        }else{
+            new File(task.getLocalPath()).delete();
+        }
+    }
+
+    @Override
+    public void getDownloadingTask(DownloadTask task) {
+        XLTaskInfo taskInfo = XLTaskHelper.get().getDwonloadTaskInfo(task.getTaskId());
+        task.setTaskId(taskInfo.mTaskId);
+        task.setTaskStatus(taskInfo.mTaskStatus);
+        task.setDownloadSpeed(taskInfo.mDownloadSpeed);
+        if (taskInfo.mTaskId != 0) {
+            if (taskInfo.mFileSize == taskInfo.mDownloadSize){
+                task.setTaskStatus(Constant.DOWNLOAD_SUCCESS);
+            }
+            task.setFileSize(taskInfo.mFileSize);
+            task.setDownloadSize(taskInfo.mDownloadSize);
+        } else {
+            task.setTaskId(0);
+            task.setTaskStatus(Constant.DOWNLOAD_STOP);
+            Logger.t(TAG).d("获取下载进度失败");
+        }
+        task.update();
+    }
+
+    @Override
     public void stopDownload(DownloadTask task) {
         XLTaskHelper.get().stopDownloadTask(task.getTaskId());
     }
 
 
-    private DownloadTask getDownloadTask(GetTaskId taskId) {
+    private DownloadTask getDownloadTask(String name,GetTaskId taskId) {
         DownloadTask task = new DownloadTask();
         XLTaskInfo taskInfo = XLTaskHelper.get().getDwonloadTaskInfo(taskId.mTaskId);
         task.setTaskType(Constant.THUNDER_TYPE);
@@ -155,7 +188,8 @@ public class Thunder implements Source.Extractor, DownloadSource.Extractor {
         task.setDownloadSpeed(taskInfo.mDownloadSpeed);
         task.setTaskId(taskId.getTaskId());
         task.setUrl(taskId.getRealUrl());
-        task.setFileName(taskId.getFileName());
+        if (name.length() > 0) task.setFileName(name);
+        else  task.setFileName(taskId.getFileName());
         task.setLocalPath(taskId.getSaveFile().getAbsolutePath());
         return task;
     }

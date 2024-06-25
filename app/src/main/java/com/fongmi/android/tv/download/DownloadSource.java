@@ -2,13 +2,15 @@ package com.fongmi.android.tv.download;
 
 import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.Constant;
+import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.bean.DownloadTask;
 import com.fongmi.android.tv.db.AppDatabase;
+import com.fongmi.android.tv.impl.Callback;
 import com.fongmi.android.tv.player.extractor.JianPian;
 import com.fongmi.android.tv.player.extractor.Thunder;
-import com.fongmi.android.tv.utils.Download;
+import com.fongmi.android.tv.utils.Notify;
+import com.fongmi.android.tv.utils.ResUtil;
 import com.fongmi.android.tv.utils.UrlUtil;
-import com.xunlei.downloadlib.parameter.GetTaskId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,16 @@ public class DownloadSource {
     public DownloadSource() {
         extractors = new ArrayList<>();
         extractors.add(new Thunder());
-        extractors.add(new JianPian());
+    }
+
+
+    public void addJianpianExtractor(Callback callback){
+        if (extractors.size() != 2){
+            JianPian jianPian = new JianPian();
+            jianPian.downloadInit();
+            extractors.add(jianPian);
+        }
+        callback.success();
     }
 
     public static DownloadSource get() {
@@ -40,29 +51,47 @@ public class DownloadSource {
         saveDB(tasks);
     }
 
-    public void startDownload(String url) {
-        //支持单文件下载,支持多文件下载,多文件下载,是一个下载文件夹对应多个文件
+    public void download(String name,String url,Callback callback){
         Extractor extractor = getExtractor(url);
         if (extractor != null) {
-            List<DownloadTask> tasks = extractor.startDownload(url);
-            saveDB(tasks);
+            List<DownloadTask> tasks = extractor.startDownload(name,url);
+            if (tasks != null){
+                saveDB(tasks);
+                App.post(() -> callback.success(ResUtil.getString(R.string.download_success_msg)));
+            }else{
+                App.post(() -> callback.error(Notify.getError(R.string.error_download, new Exception(ResUtil.getString(R.string.download_fail_msg)))));
+            }
+        }else{
+            App.post(() -> callback.error(Notify.getError(R.string.error_download, new Exception(ResUtil.getString(R.string.download_not_support_msg)))));
+        }
+    }
+
+    public void startDownload(String name, String url, Callback callback) {
+        if (AppDatabase.get().getDownloadTaskDao().find(url).size() > 0){
+            App.post(() -> callback.error(Notify.getError(R.string.error_download, new Exception(ResUtil.getString(R.string.download_exists)))));
+        }else{
+            App.execute(() -> download(name,url,callback));
         }
     }
 
     public void stopDownload(DownloadTask task,boolean isFinish) {
-        List<DownloadTask> downloadTasks = task.getSubDownloadTasks();
-        for (DownloadTask downloadTask : downloadTasks) {
-            extractors.get(task.getTaskType()).stopDownload(downloadTask);
-            downloadTask.setDownloadSpeed(0);
-            if (isFinish){
-                downloadTask.setTaskId(0);
-                downloadTask.setTaskStatus(Constant.DOWNLOAD_SUCCESS);
-            }
-            else downloadTask.setTaskStatus(Constant.DOWNLOAD_STOP);
-            downloadTask.update();
+        extractors.get(task.getTaskType()).stopDownload(task);
+        task.setDownloadSpeed(0);
+        if (isFinish){
+            task.setTaskId(0);
+            task.setTaskStatus(Constant.DOWNLOAD_SUCCESS);
         }
+        else task.setTaskStatus(Constant.DOWNLOAD_STOP);
+        task.update();
     }
+
+    public void getDownloadingTask(DownloadTask task) {
+        extractors.get(task.getTaskType()).getDownloadingTask(task);
+    }
+
+
     public void delete(DownloadTask task){
+        extractors.get(task.getTaskType()).delete(task);
         stopDownload(task,false);
         task.delete();
     }
@@ -110,13 +139,18 @@ public class DownloadSource {
 
         boolean downloadMatch(String scheme, String host);
 
-        List<DownloadTask> startDownload(String url);
+        List<DownloadTask> startDownload(String name,String url);
 
         List<DownloadTask> resumeDownload(DownloadTask task);
 
         void stop();
 
+        void delete(DownloadTask task);
+
+        void getDownloadingTask(DownloadTask task);
+
         void stopDownload(DownloadTask task);
+
 
         void exit();
     }

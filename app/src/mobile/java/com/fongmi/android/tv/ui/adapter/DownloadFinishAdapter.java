@@ -1,6 +1,7 @@
 package com.fongmi.android.tv.ui.adapter;
 
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,8 @@ import com.fongmi.android.tv.bean.DownloadTask;
 import com.fongmi.android.tv.databinding.AdapterDownloadFinishBinding;
 import com.fongmi.android.tv.utils.FileUtil;
 import com.fongmi.android.tv.utils.ResUtil;
+import com.fongmi.android.tv.utils.Util;
+
 
 import java.util.List;
 
@@ -36,14 +39,27 @@ public class DownloadFinishAdapter extends RecyclerView.Adapter<DownloadFinishAd
     public void onBindViewHolder(@NonNull DownloadFinishAdapter.ViewHolder holder, int position) {
         DownloadTask task = list.get(position);
         if (task.getFile()){
-            holder.binding.downloadIcon.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_floder));
+            holder.binding.openFile.setVisibility(View.VISIBLE);
+            holder.binding.openFile.setOnClickListener(v->openFile(task));
+            holder.binding.downloadIcon.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_folder));
         }else{
-            holder.binding.downloadIcon.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_video));
+            switch (Util.getFileType(task.getFileName())){
+                case 1:
+                    holder.binding.downloadIcon.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_video));
+                    break;
+                case 2:
+                    holder.binding.downloadIcon.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_exe));
+                    break;
+                default:
+                    holder.binding.downloadIcon.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_file));
+                    break;
+            }
         }
         holder.binding.fileName.setText(task.getFileName());
         holder.binding.deleteTask.setOnClickListener(v-> deleTask(task));
         holder.binding.downloadSize.setText(FileUtil.byteCountToDisplaySize(task.getFileSize()));
         holder.binding.downloadIcon.setOnClickListener(v -> downloadIcon(task));
+        holder.binding.getRoot().setOnClickListener(v -> downloadIcon(task));
     }
 
 
@@ -55,6 +71,11 @@ public class DownloadFinishAdapter extends RecyclerView.Adapter<DownloadFinishAd
         mListener.deleTask(task);
     }
 
+    private void openFile(DownloadTask task){
+        mListener.openFile(task);
+    }
+
+
     @Override
     public int getItemCount() {
         return list.size();
@@ -64,6 +85,7 @@ public class DownloadFinishAdapter extends RecyclerView.Adapter<DownloadFinishAd
         void openFile(DownloadTask task);
         void deleTask(DownloadTask task);
         void refreshData(List<DownloadTask> tasks);
+
     }
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final AdapterDownloadFinishBinding binding;

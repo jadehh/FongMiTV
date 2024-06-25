@@ -192,4 +192,15 @@ public class Util {
         activity.startActivity(intent);
     }
 
+    public static int getFileType(String fileName) {
+        String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
+        if (fileExtension.equals("mp4")){
+            return 1;
+        }else if (fileExtension.equals("exe")) {
+            return 2;
+        }
+        else{
+            return 0;
+        }
+    }
 }

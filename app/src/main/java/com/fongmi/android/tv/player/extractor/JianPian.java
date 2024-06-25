@@ -1,15 +1,21 @@
 package com.fongmi.android.tv.player.extractor;
 
 import android.net.Uri;
+import android.os.SystemClock;
+import android.telecom.Call;
 
+import com.fongmi.android.tv.App;
+import com.fongmi.android.tv.Constant;
 import com.fongmi.android.tv.bean.DownloadTask;
 import com.fongmi.android.tv.download.DownloadSource;
+import com.fongmi.android.tv.impl.Callback;
 import com.fongmi.android.tv.player.Source;
 import com.github.catvod.utils.Path;
 import com.p2p.P2PClass;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,27 +33,48 @@ public class JianPian implements Source.Extractor, DownloadSource.Extractor {
 
     @Override
     public boolean downloadMatch(String scheme, String host) {
-        return false;
+        return this.match(scheme,host);
     }
 
     @Override
-    public List<DownloadTask> startDownload(String url) {
+    public List<DownloadTask> startDownload(String name,String url) {try {
+            long taskId = p2p.P2Pdownload(getPathBytes(url));
+            SystemClock.sleep(500);
+            List <DownloadTask> taskList = new ArrayList<>();
+            DownloadTask downloadTask = new DownloadTask();
+            if (name.length() > 0) downloadTask.setFileName(name);
+            else downloadTask.setFileName(getFileName(url));
+            downloadTask.setTaskType(Constant.JIANPIAN_TYPE);
+            downloadTask.setTaskStatus(Constant.DOWNLOAD_LOADING);
+            downloadTask.setLocalPath(this.getLocalPath(url));
+            downloadTask.setUrl(url);
+            downloadTask.setTaskId(taskId);
+            taskList.add(downloadTask);
+            return taskList;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         return null;
     }
 
     @Override
     public List<DownloadTask> resumeDownload(DownloadTask task) {
-        return null;
+        return  startDownload(task.getFileName(),task.getUrl());
     }
 
     @Override
     public void stopDownload(DownloadTask task) {
-
+        p2p.P2Pdoxpause(getPathBytes(task.getUrl()));
     }
 
     private void init() {
         if (p2p == null) p2p = new P2PClass();
         if (pathPaused == null) pathPaused = new HashMap<>();
+    }
+
+
+    public void downloadInit(){
+        if (p2p == null) p2p = new P2PClass();
     }
 
     @Override
@@ -58,7 +85,34 @@ public class JianPian implements Source.Extractor, DownloadSource.Extractor {
         return "http://127.0.0.1:" + p2p.port + "/" + URLEncoder.encode(Uri.parse(path).getLastPathSegment(), "GBK");
     }
 
+    public String getPath(String url){
+        String downloadPath = URLDecoder.decode(url).split("\\|")[0];
+        downloadPath = downloadPath.replace("jianpian://pathtype=url&path=", "");
+        downloadPath = downloadPath.replace("tvbox-xg://", "").replace("tvbox-xg:", "");
+        downloadPath = downloadPath.replace("xg://", "ftp://").replace("xgplay://", "ftp://");
+        return downloadPath;
+    }
 
+    public String getFileName(String url){
+        String[] nameList = URLDecoder.decode(url).split("/");
+        return nameList[nameList.length-1];
+    }
+
+    public byte[] getPathBytes(String url){
+        try {
+            return getPath(url).getBytes("GBK") ;
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    public String getLocalPath(String url){
+        try {
+            return "http://127.0.0.1:" + p2p.port + "/" + URLEncoder.encode(Uri.parse(getPath(url)).getLastPathSegment(), "GBK");
+        }catch (Exception e){
+            return null;
+        }
+    }
     private void start(String url) {
         try {
             String lastPath = path;
@@ -89,7 +143,30 @@ public class JianPian implements Source.Extractor, DownloadSource.Extractor {
         }
     }
 
+    @Override
+    public void delete(DownloadTask task) {
+        p2p.P2Pdoxdel(getPathBytes(task.getUrl()));
+    }
 
+    @Override
+    public void getDownloadingTask(DownloadTask task) {
+        long downloadSpeed = p2p.P2Pgetspeed((int) task.getTaskId());
+        long downloadSize = p2p.P2Pgetdownsize((int)task.getTaskId());
+        long fileSize = p2p.P2Pgetfilesize((int)task.getTaskId());
+        if (fileSize == 0 && downloadSize == 0 && downloadSpeed == 0){
+            task.setDownloadSpeed(0);
+            task.setTaskStatus(Constant.DOWNLOAD_STOP);
+        }else{
+            task.setDownloadSpeed(downloadSpeed);
+            task.setDownloadSize(downloadSize);
+            task.setFileSize(fileSize);
+            if (downloadSize == fileSize ){
+                task.setTaskStatus(Constant.DOWNLOAD_SUCCESS);
+            }
+        }
+        task.update();
+
+    }
 
     @Override
     public void exit() {

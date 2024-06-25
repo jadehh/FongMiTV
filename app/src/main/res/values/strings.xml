@@ -159,6 +159,7 @@
     <string name="error_play_timeout">Timed out</string>
     <string name="error_detail">No play data</string>
     <string name="error_empty">Not found</string>
+    <string name="error_download">Download failed</string>
 
     <!-- Update -->
     <string name="update_version">New version <xliff:g name="name">%s</xliff:g></string>

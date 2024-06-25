@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_margin="@dimen/default_pad"
     android:background="@drawable/shape_accent"
     android:gravity="center_vertical"
     android:orientation="horizontal">
@@ -12,26 +12,27 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="@dimen/default_pad2"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="@dimen/default_pad2"
+            android:layout_marginTop="@dimen/default_pad2"
             android:orientation="horizontal">
 
             <ImageView
                 android:id="@+id/downloadIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:src="@drawable/ic_download_video" />
+                tools:src="@drawable/ic_download_folder" />
 
             <TextView
                 android:id="@+id/fileName"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="20dp"
+                android:layout_marginLeft="@dimen/default_pad"
                 android:gravity="center_vertical"
                 android:text="@string/app_name"
                 android:textColor="@color/text"
@@ -41,8 +42,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginStart="@dimen/default_pad2"
+            android:layout_marginTop="@dimen/default_pad2"
             android:orientation="horizontal">
 
 
@@ -50,9 +51,9 @@
                 android:id="@+id/downloadSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:padding="@dimen/default_pad2"
                 android:text="172MB"
-                android:gravity="center"
                 android:textColor="@color/text"
                 android:textSize="@dimen/filename_item_text_size" />
 
@@ -60,6 +61,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="end">
+
+                <ImageView
+                    android:id="@+id/openFile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_download_folder"
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/deleteTask"

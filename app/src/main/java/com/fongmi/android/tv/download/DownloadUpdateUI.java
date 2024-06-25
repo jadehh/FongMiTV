@@ -6,11 +6,6 @@ import com.fongmi.android.tv.bean.Msg;
 import com.fongmi.android.tv.db.AppDatabase;
 import com.fongmi.android.tv.event.MessageEvent;
 import com.fongmi.android.tv.impl.TaskModelImp;
-import com.fongmi.android.tv.player.extractor.Thunder;
-import com.fongmi.android.tv.utils.Download;
-import com.orhanobut.logger.Logger;
-import com.xunlei.downloadlib.XLTaskHelper;
-import com.xunlei.downloadlib.parameter.XLTaskInfo;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -49,7 +44,7 @@ public class DownloadUpdateUI {
             int taskStatus = task.getTaskStatus();
             long taskId = task.getTaskId();
             if (taskStatus != Constant.DOWNLOAD_STOP && taskStatus != Constant.DOWNLOAD_WAIT && taskId != 0 && !task.getFile()) {
-                getDownloadTask(task);
+                DownloadSource.get().getDownloadingTask(task);
             }
             if (task.getFile()){
                 setFileDownloadTask(task);
@@ -97,24 +92,6 @@ public class DownloadUpdateUI {
         fileDownloadTask.update();
     }
 
-    public void getDownloadTask(DownloadTask task) {
-        XLTaskInfo taskInfo = XLTaskHelper.get().getDwonloadTaskInfo(task.getTaskId());
-        task.setTaskId(taskInfo.mTaskId);
-        task.setTaskStatus(taskInfo.mTaskStatus);
-        task.setDownloadSpeed(taskInfo.mDownloadSpeed);
-        if (taskInfo.mTaskId != 0) {
-            if (taskInfo.mFileSize == taskInfo.mDownloadSize){
-                task.setTaskStatus(Constant.DOWNLOAD_SUCCESS);
-            }
-            task.setFileSize(taskInfo.mFileSize);
-            task.setDownloadSize(taskInfo.mDownloadSize);
-        } else {
-            task.setTaskId(0);
-            task.setTaskStatus(Constant.DOWNLOAD_STOP);
-            Logger.t(TAG).d("获取下载进度失败");
-        }
-        task.update();
-    }
 
     private void finishTask(DownloadTask task){
         DownloadSource.get().stopDownload(task,true);

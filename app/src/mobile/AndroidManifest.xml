@@ -115,6 +115,27 @@
             android:supportsPictureInPicture="true"
             android:theme="@style/AppTheme.Live" />
 
+
+        <activity
+            android:name=".ui.activity.DownloadFileActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:resizeableActivity="true"
+            android:screenOrientation="sensorLandscape"
+            android:supportsPictureInPicture="true"
+            android:theme="@style/AppTheme.Live" />
+
+        <activity
+            android:name=".ui.activity.DownloadUrlActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:resizeableActivity="true"
+            android:screenOrientation="sensorLandscape"
+            android:supportsPictureInPicture="true"
+            android:theme="@style/AppTheme.Live" />
+
         <activity
             android:name=".ui.activity.ScanActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout"

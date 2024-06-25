@@ -227,14 +227,6 @@ public class DownloadTask {
 
 
     public void delete(){
-        if (this.getFile()){
-            List<DownloadTask> tasks= AppDatabase.get().getDownloadTaskDao().find(this.getId());
-            for (DownloadTask task:tasks){
-                new File(task.getLocalPath()).delete();
-                AppDatabase.get().getDownloadTaskDao().delete(task.getId());
-            }
-        }
-        new File(this.getLocalPath()).delete();
         AppDatabase.get().getDownloadTaskDao().delete(this.getId());
     }
 

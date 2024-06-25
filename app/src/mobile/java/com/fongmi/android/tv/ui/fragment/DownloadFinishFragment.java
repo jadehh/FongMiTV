@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewbinding.ViewBinding;
 
@@ -15,8 +16,8 @@ import com.fongmi.android.tv.bean.Msg;
 import com.fongmi.android.tv.databinding.FragmentDownloadFinishBinding;
 import com.fongmi.android.tv.download.DownloadSource;
 import com.fongmi.android.tv.event.MessageEvent;
+import com.fongmi.android.tv.ui.activity.MainActivity;
 import com.fongmi.android.tv.ui.adapter.DownloadFinishAdapter;
-import com.fongmi.android.tv.ui.adapter.DownloadingAdapter;
 import com.fongmi.android.tv.ui.base.BaseFragment;
 
 import org.greenrobot.eventbus.EventBus;
@@ -30,9 +31,16 @@ public class DownloadFinishFragment extends BaseFragment implements DownloadFini
 
     private FragmentDownloadFinishBinding mBinding;
 
+    private final DownloadFinishFragment.OnClickListener mListener;
+
+
     private DownloadFinishAdapter mAdapter;
 
     private final List<DownloadTask> list = new ArrayList<>();
+
+    public DownloadFinishFragment(OnClickListener mListener) {
+        this.mListener = mListener;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,10 +74,14 @@ public class DownloadFinishFragment extends BaseFragment implements DownloadFini
         mBinding.recycler.setAdapter(mAdapter = new DownloadFinishAdapter(this,list));
     }
 
+    private MainActivity getRoot() {
+        return (MainActivity) getActivity();
+    }
+
 
     @Override
     public void openFile(DownloadTask task) {
-
+        this.mListener.openFile(task);
     }
 
     @Override
@@ -84,5 +96,9 @@ public class DownloadFinishFragment extends BaseFragment implements DownloadFini
             list.addAll(tasks);
             mAdapter.notifyDataSetChanged();
         }
+    }
+
+    public interface OnClickListener {
+        void openFile(DownloadTask task);
     }
 }

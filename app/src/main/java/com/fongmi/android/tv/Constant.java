@@ -31,6 +31,8 @@ public class Constant {
     //迅雷下载类型
     public static final int THUNDER_TYPE = 0;
 
+    public static final int JIANPIAN_TYPE = 1;
+
 
     //0连接中 1下载中 2下载完成 3失败
     public static final int DOWNLOAD_CONNECTION = 0;

@@ -22,7 +22,10 @@
     <string name="detail_search">Searching <xliff:g name="name">%s</xliff:g></string>
 
     <!-- Download -->
+    <string name="download">Download</string>
     <string name="downloading">Downloading</string>
+    <string name="download_url_hint">Please Input or Paste Download Url(Support:thunder://、ftp://、http:// ed2k://)</string>
+    <string name="start_download">Start Download</string>
     <string name="download_finish">Download Finish</string>
     <string name="download_size">%1$s / %2$s</string>
     <string name="download_speed">%1$s / s </string>
@@ -35,10 +38,11 @@
     <string name="download_remaining_time">Remaining Time</string>
     <string name="download_delete_file">File is Delete</string>
     <string name="download_open">Open</string>
-
-
-
-
+    <string name="download_success_msg">Get Download Url Success</string>
+    <string name="download_fail_msg">Download failed</string>
+    <string name="download_tools_msg">Not found download Tools</string>
+    <string name="download_exists">Download exists</string>
+    <string name="download_not_support_msg">Not support download</string>
 
     <!-- Device -->
     <string name="device_select">Select devices</string>

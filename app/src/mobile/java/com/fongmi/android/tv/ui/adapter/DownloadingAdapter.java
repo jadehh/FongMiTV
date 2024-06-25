@@ -1,7 +1,6 @@
 package com.fongmi.android.tv.ui.adapter;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -11,11 +10,9 @@ import com.fongmi.android.tv.Constant;
 import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.bean.DownloadTask;
 import com.fongmi.android.tv.databinding.AdapterDownloadingBinding;
-import com.fongmi.android.tv.ui.activity.DownloadManageActivity;
 import com.fongmi.android.tv.utils.FileUtil;
 import com.fongmi.android.tv.utils.ResUtil;
-import com.fongmi.android.tv.utils.TimeUtil;
-import com.fongmi.quickjs.bean.Res;
+import com.fongmi.android.tv.utils.Util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -24,8 +21,8 @@ import java.util.List;
 public class DownloadingAdapter extends RecyclerView.Adapter<DownloadingAdapter.ViewHolder> {
 
 
-    private final DownloadingAdapter.OnClickListener mListener;
     public final List<DownloadTask> list;
+    private final DownloadingAdapter.OnClickListener mListener;
 
 
     public DownloadingAdapter(OnClickListener mListener, List<DownloadTask> list) {
@@ -61,14 +58,25 @@ public class DownloadingAdapter extends RecyclerView.Adapter<DownloadingAdapter.
             holder.binding.startTask.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_stop));
         }
         holder.binding.startTask.setOnClickListener(v -> startTask(task));
-        holder.binding.deleteTask.setOnClickListener(v -> deleteTask(task,holder));
-        if (task.getFile()){
-            holder.binding.downloadIcon.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_floder));
-        }else{
-            holder.binding.downloadIcon.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_video));
+        holder.binding.deleteTask.setOnClickListener(v -> deleteTask(task, holder));
+        if (task.getFile()) {
+            holder.binding.downloadIcon.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_folder));
+        } else {
+            switch (Util.getFileType(task.getFileName())) {
+                case 1:
+                    holder.binding.downloadIcon.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_video));
+                    break;
+                case 2:
+                    holder.binding.downloadIcon.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_exe));
+                    break;
+                default:
+                    holder.binding.downloadIcon.setImageDrawable(ResUtil.getDrawable(R.drawable.ic_download_file));
+                    break;
+            }
         }
         holder.binding.downloadIcon.setOnClickListener(v -> downloadIcon(task));
     }
+
     private void startTask(DownloadTask task) {
         if (task.getTaskStatus() == Constant.DOWNLOAD_FAIL) {
             mListener.stopTask(task);
@@ -81,12 +89,13 @@ public class DownloadingAdapter extends RecyclerView.Adapter<DownloadingAdapter.
             mListener.stopTask(task);
         }
     }
-    private void deleteTask(DownloadTask task,@NonNull DownloadingAdapter.ViewHolder holder) {
+
+    private void deleteTask(DownloadTask task, @NonNull DownloadingAdapter.ViewHolder holder) {
         mListener.deleTask(task);
         holder.binding.numberProgressBar.setProgress(0);
     }
 
-    private void downloadIcon(DownloadTask task){
+    private void downloadIcon(DownloadTask task) {
         mListener.openFile(task);
     }
 
@@ -97,14 +106,21 @@ public class DownloadingAdapter extends RecyclerView.Adapter<DownloadingAdapter.
 
     public interface OnClickListener {
         void startTask(DownloadTask task);
+
         void stopTask(DownloadTask task);
+
         void openFile(DownloadTask task);
+
         void deleTask(DownloadTask task);
+
         void refreshData(List<DownloadTask> tasks);
+
         void alert(String msg, int msgType);
     }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final AdapterDownloadingBinding binding;
+
         ViewHolder(@NonNull AdapterDownloadingBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
