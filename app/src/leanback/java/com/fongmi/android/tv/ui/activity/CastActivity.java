@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.support.v4.media.MediaMetadataCompat;
 import android.view.KeyEvent;
 import android.view.View;
 
@@ -36,7 +35,7 @@ import com.fongmi.android.tv.event.ErrorEvent;
 import com.fongmi.android.tv.event.PlayerEvent;
 import com.fongmi.android.tv.event.RefreshEvent;
 import com.fongmi.android.tv.impl.SubtitleCallback;
-import com.fongmi.android.tv.player.ExoUtil;
+import com.fongmi.android.tv.player.exo.ExoUtil;
 import com.fongmi.android.tv.player.Players;
 import com.fongmi.android.tv.ui.base.BaseActivity;
 import com.fongmi.android.tv.ui.custom.CustomKeyDownCast;
@@ -93,10 +92,11 @@ public class CastActivity extends BaseActivity implements CustomKeyDownCast.List
         bindService(new Intent(this, DLNARendererService.class), this, Context.BIND_AUTO_CREATE);
         mClock = Clock.create(mBinding.widget.clock);
         mKeyDown = CustomKeyDownCast.create(this);
-        mPlayers = new Players().init(this);
+        mPlayers = Players.create(this);
         mParser = new DIDLParser();
         mR1 = this::hideControl;
         mR2 = this::setTraffic;
+        setSubtitleView();
         setVideoView();
         checkAction();
     }
@@ -147,13 +147,18 @@ public class CastActivity extends BaseActivity implements CustomKeyDownCast.List
         mPlayers.set(getExo(), getIjk());
         mPlayers.setPlayer(Setting.getPlayer());
         findViewById(R.id.timeBar).setNextFocusUpId(R.id.reset);
-        getExo().getSubtitleView().setStyle(ExoUtil.getCaptionStyle());
-        getIjk().getSubtitleView().setStyle(ExoUtil.getCaptionStyle());
         mBinding.control.reset.setText(ResUtil.getStringArray(R.array.select_reset)[0]);
         setScale(scale = Setting.getScale());
-        setSubtitle(Setting.getSubtitle());
         setPlayerView();
         setDecodeView();
+    }
+
+    private void setSubtitleView() {
+        setSubtitle(Setting.getSubtitle());
+        getExo().getSubtitleView().setStyle(ExoUtil.getCaptionStyle());
+        getIjk().getSubtitleView().setStyle(ExoUtil.getCaptionStyle());
+        getExo().getSubtitleView().setApplyEmbeddedStyles(!Setting.isCaption());
+        getIjk().getSubtitleView().setApplyEmbeddedStyles(!Setting.isCaption());
     }
 
     private void setPlayerView() {
@@ -210,7 +215,11 @@ public class CastActivity extends BaseActivity implements CustomKeyDownCast.List
     }
 
     private void onDecode() {
-        mPlayers.toggleDecode();
+        onDecode(true);
+    }
+
+    private void onDecode(boolean save) {
+        mPlayers.toggleDecode(save);
         mPlayers.set(getExo(), getIjk());
         setDecodeView();
         onReset();
@@ -350,12 +359,12 @@ public class CastActivity extends BaseActivity implements CustomKeyDownCast.List
     }
 
     private void setMetadata() {
-        mPlayers.setMetadata(mBinding.widget.title.getText().toString(), "", mBinding.exo);
+        mPlayers.setMetadata(mBinding.widget.title.getText().toString(), "", "");
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onErrorEvent(ErrorEvent event) {
-        if (event.getCode() / 1000 == 4 && mPlayers.isExo() && Players.isHard(Players.EXO)) onDecode();
+        if (event.getCode() / 1000 == 4 && mPlayers.isExo() && mPlayers.isHard()) onDecode(false);
         else if (mPlayers.addRetry() > event.getRetry()) onError(event);
         else onReset();
     }
@@ -382,6 +391,7 @@ public class CastActivity extends BaseActivity implements CustomKeyDownCast.List
 
     private void onStopped() {
         setState(RenderState.STOPPED);
+        mPlayers.reset();
         mPlayers.stop();
     }
 

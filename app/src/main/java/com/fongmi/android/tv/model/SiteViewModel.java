@@ -46,22 +46,30 @@ import okhttp3.Response;
 
 public class SiteViewModel extends ViewModel {
 
+    public MutableLiveData<Episode> ep;
     public MutableLiveData<Episode> episode;
     public MutableLiveData<Result> result;
     public MutableLiveData<Result> player;
     public MutableLiveData<Result> search;
     public MutableLiveData<Danmu> danmaku;
+    public MutableLiveData<Result> download;
     private ExecutorService executor;
 
     public SiteViewModel() {
+        this.ep = new MutableLiveData<>();
         this.episode = new MutableLiveData<>();
         this.result = new MutableLiveData<>();
         this.player = new MutableLiveData<>();
         this.search = new MutableLiveData<>();
+        this.download = new MutableLiveData<>();
     }
 
     public void setEpisode(Episode value) {
         episode.setValue(value);
+    }
+
+    public void setDownload(Episode value) {
+        ep.setValue(value);
     }
 
     public void homeContent() {
@@ -149,8 +157,8 @@ public class SiteViewModel extends ViewModel {
         });
     }
 
-    public void playerContent(String key, String flag, String id) {
-        execute(player, () -> {
+    public void executePlayer(MutableLiveData<Result> data, String key, String flag, String id) {
+        execute(data, () -> {
             Source.get().stop();
             Site site = VodConfig.get().getSite(key);
             if (site.getType() == 3) {
@@ -196,6 +204,14 @@ public class SiteViewModel extends ViewModel {
                 return result;
             }
         });
+    }
+
+    public void playerContent(String key, String flag, String id) {
+        executePlayer(player, key, flag, id);
+    }
+
+    public void download(String key, String flag, String id) {
+        executePlayer(download, key, flag, id);
     }
 
     public void searchContent(Site site, String keyword, boolean quick) throws Throwable {

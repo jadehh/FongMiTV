@@ -8,6 +8,10 @@ public class PlayerEvent {
 
     private final int state;
 
+    public static void prepare() {
+        EventBus.getDefault().post(new PlayerEvent(0));
+    }
+
     public static void ready() {
         EventBus.getDefault().post(new PlayerEvent(Player.STATE_READY));
     }

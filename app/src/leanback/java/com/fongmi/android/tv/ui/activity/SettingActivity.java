@@ -21,22 +21,21 @@ import com.fongmi.android.tv.bean.Site;
 import com.fongmi.android.tv.databinding.ActivitySettingBinding;
 import com.fongmi.android.tv.db.AppDatabase;
 import com.fongmi.android.tv.event.RefreshEvent;
+import com.fongmi.android.tv.impl.BackupCallback;
 import com.fongmi.android.tv.impl.Callback;
 import com.fongmi.android.tv.impl.ConfigCallback;
 import com.fongmi.android.tv.impl.DohCallback;
 import com.fongmi.android.tv.impl.LiveCallback;
 import com.fongmi.android.tv.impl.ProxyCallback;
-import com.fongmi.android.tv.impl.RestoreCallback;
 import com.fongmi.android.tv.impl.SiteCallback;
-import com.fongmi.android.tv.player.ExoUtil;
 import com.fongmi.android.tv.player.Source;
 import com.fongmi.android.tv.ui.base.BaseActivity;
+import com.fongmi.android.tv.ui.dialog.BackupDialog;
 import com.fongmi.android.tv.ui.dialog.ConfigDialog;
 import com.fongmi.android.tv.ui.dialog.DohDialog;
 import com.fongmi.android.tv.ui.dialog.HistoryDialog;
 import com.fongmi.android.tv.ui.dialog.LiveDialog;
 import com.fongmi.android.tv.ui.dialog.ProxyDialog;
-import com.fongmi.android.tv.ui.dialog.RestoreDialog;
 import com.fongmi.android.tv.ui.dialog.SiteDialog;
 import com.fongmi.android.tv.ui.dialog.SyncDialog;
 import com.fongmi.android.tv.utils.FileUtil;
@@ -54,7 +53,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SettingActivity extends BaseActivity implements RestoreCallback, ConfigCallback, SiteCallback, LiveCallback, DohCallback, ProxyCallback {
+public class SettingActivity extends BaseActivity implements BackupCallback, ConfigCallback, SiteCallback, LiveCallback, DohCallback, ProxyCallback {
 
     private ActivitySettingBinding mBinding;
     private String[] backup;
@@ -308,7 +307,6 @@ public class SettingActivity extends BaseActivity implements RestoreCallback, Co
 
     @Override
     public void setDoh(Doh doh) {
-        ExoUtil.reset();
         Source.get().stop();
         OkHttp.get().setDoh(doh);
         Notify.progress(getActivity());
@@ -323,7 +321,6 @@ public class SettingActivity extends BaseActivity implements RestoreCallback, Co
 
     @Override
     public void setProxy(String proxy) {
-        ExoUtil.reset();
         Source.get().stop();
         Setting.putProxy(proxy);
         OkHttp.get().setProxy(proxy);
@@ -355,7 +352,7 @@ public class SettingActivity extends BaseActivity implements RestoreCallback, Co
     }
 
     @Override
-    public void onRestore(File file) {
+    public void restore(File file) {
         PermissionX.init(this).permissions(Manifest.permission.WRITE_EXTERNAL_STORAGE).request((allGranted, grantedList, deniedList) -> AppDatabase.restore(file, new Callback() {
             @Override
             public void success() {
@@ -368,7 +365,9 @@ public class SettingActivity extends BaseActivity implements RestoreCallback, Co
     }
 
     private void onRestore(View view) {
-        RestoreDialog.create().callback(this).show(getActivity());
+        PermissionX.init(this).permissions(Manifest.permission.WRITE_EXTERNAL_STORAGE).request((allGranted, grantedList, deniedList) -> {
+            if (allGranted) BackupDialog.create(this).show();
+        });
     }
 
     private void initConfig() {

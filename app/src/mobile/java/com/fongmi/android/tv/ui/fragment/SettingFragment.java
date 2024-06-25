@@ -25,15 +25,16 @@ import com.fongmi.android.tv.bean.Site;
 import com.fongmi.android.tv.databinding.FragmentSettingBinding;
 import com.fongmi.android.tv.db.AppDatabase;
 import com.fongmi.android.tv.event.RefreshEvent;
+import com.fongmi.android.tv.impl.BackupCallback;
 import com.fongmi.android.tv.impl.Callback;
 import com.fongmi.android.tv.impl.ConfigCallback;
 import com.fongmi.android.tv.impl.LiveCallback;
 import com.fongmi.android.tv.impl.ProxyCallback;
 import com.fongmi.android.tv.impl.SiteCallback;
-import com.fongmi.android.tv.player.ExoUtil;
 import com.fongmi.android.tv.player.Source;
 import com.fongmi.android.tv.ui.activity.MainActivity;
 import com.fongmi.android.tv.ui.base.BaseFragment;
+import com.fongmi.android.tv.ui.dialog.BackupDialog;
 import com.fongmi.android.tv.ui.dialog.ConfigDialog;
 import com.fongmi.android.tv.ui.dialog.HistoryDialog;
 import com.fongmi.android.tv.ui.dialog.LiveDialog;
@@ -60,7 +61,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SettingFragment extends BaseFragment implements ConfigCallback, SiteCallback, LiveCallback, ProxyCallback {
+public class SettingFragment extends BaseFragment implements BackupCallback, ConfigCallback, SiteCallback, LiveCallback, ProxyCallback {
 
     private FragmentSettingBinding mBinding;
     private String[] backup;
@@ -306,7 +307,6 @@ public class SettingFragment extends BaseFragment implements ConfigCallback, Sit
     }
 
     private void setDoh(Doh doh) {
-        ExoUtil.reset();
         Source.get().stop();
         OkHttp.get().setDoh(doh);
         Notify.progress(getActivity());
@@ -321,7 +321,6 @@ public class SettingFragment extends BaseFragment implements ConfigCallback, Sit
 
     @Override
     public void setProxy(String proxy) {
-        ExoUtil.reset();
         Source.get().stop();
         Setting.putProxy(proxy);
         OkHttp.get().setProxy(proxy);
@@ -353,14 +352,14 @@ public class SettingFragment extends BaseFragment implements ConfigCallback, Sit
     }
 
     private void onRestore(View view) {
-        FileChooser.from(this).type(FileChooser.TYPE_RESTORE).show(FileChooser.getUri("TV"));
+        PermissionX.init(this).permissions(Manifest.permission.WRITE_EXTERNAL_STORAGE).request((allGranted, grantedList, deniedList) -> {
+            if (allGranted) BackupDialog.create(this).show();
+        });
     }
 
     private void onTransmit(View view) {
         PermissionX.init(this).permissions(Manifest.permission.WRITE_EXTERNAL_STORAGE).request((allGranted, grantedList, deniedList) -> {
-            if (allGranted) {
-                TransmitActionDialog.create(this).show();
-            }
+            if (allGranted) TransmitActionDialog.create(this).show();
         });
     }
 
@@ -377,7 +376,8 @@ public class SettingFragment extends BaseFragment implements ConfigCallback, Sit
         VodConfig.get().init().load(getCallback());
     }
 
-    private void restore(File file) {
+    @Override
+    public void restore(File file) {
         PermissionX.init(this).permissions(Manifest.permission.WRITE_EXTERNAL_STORAGE).request((allGranted, grantedList, deniedList) -> AppDatabase.restore(file, new Callback() {
             @Override
             public void success() {
@@ -421,7 +421,6 @@ public class SettingFragment extends BaseFragment implements ConfigCallback, Sit
         if (resultCode != Activity.RESULT_OK || requestCode != FileChooser.REQUEST_PICK_FILE) return;
         String path = FileChooser.getPathFromUri(getContext(), data.getData());
         if (FileChooser.type() == FileChooser.TYPE_APK) TransmitDialog.create().apk(path).show(getActivity());
-        else if (FileChooser.type() == FileChooser.TYPE_RESTORE) restore(new File(path));
         else if (FileChooser.type() == FileChooser.TYPE_PUSH_WALLPAPER) TransmitDialog.create().wallConfig(path).show(getActivity());
         else setConfig(Config.find("file:/" + path.replace(Path.rootPath(), ""), type));
     }

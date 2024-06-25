@@ -164,7 +164,12 @@ public class LiveConfig {
         parseConfig(object, null);
     }
 
-    private void setKeep(List<Group> items) {
+    public void setKeep(Channel channel) {
+        if (home == null || channel.getGroup().isHidden() || channel.getUrls().isEmpty()) return;
+        Setting.putKeep(home.getName() + AppDatabase.SYMBOL + channel.getGroup().getName() + AppDatabase.SYMBOL + channel.getName() + AppDatabase.SYMBOL + channel.getCurrent());
+    }
+
+    public void setKeep(List<Group> items) {
         List<String> key = new ArrayList<>();
         for (Keep keep : Keep.getLive()) key.add(keep.getKey());
         for (Group group : items) {
@@ -177,7 +182,7 @@ public class LiveConfig {
         }
     }
 
-    private int[] getKeep(List<Group> items) {
+    public int[] find(List<Group> items) {
         String[] splits = Setting.getKeep().split(AppDatabase.SYMBOL);
         if (splits.length < 4 || !getHome().getName().equals(splits[0])) return new int[]{1, 0};
         for (int i = 0; i < items.size(); i++) {
@@ -189,16 +194,6 @@ public class LiveConfig {
             }
         }
         return new int[]{1, 0};
-    }
-
-    public void setKeep(Channel channel) {
-        if (home == null || channel.getGroup().isHidden() || channel.getUrls().isEmpty()) return;
-        Setting.putKeep(home.getName() + AppDatabase.SYMBOL + channel.getGroup().getName() + AppDatabase.SYMBOL + channel.getName() + AppDatabase.SYMBOL + channel.getCurrent());
-    }
-
-    public int[] find(List<Group> items) {
-        setKeep(items);
-        return getKeep(items);
     }
 
     public int[] find(String number, List<Group> items) {

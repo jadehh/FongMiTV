@@ -52,7 +52,7 @@ public class CustomKeyDownLive extends GestureDetector.SimpleOnGestureListener {
         if (changeSpeed && e.getAction() == MotionEvent.ACTION_UP) listener.onSpeedEnd();
         if (changeBright && e.getAction() == MotionEvent.ACTION_UP) listener.onBrightEnd();
         if (changeVolume && e.getAction() == MotionEvent.ACTION_UP) listener.onVolumeEnd();
-        return e.getPointerCount() == 1 && detector.onTouchEvent(e);
+        return detector.onTouchEvent(e);
     }
 
     public void setLock(boolean lock) {

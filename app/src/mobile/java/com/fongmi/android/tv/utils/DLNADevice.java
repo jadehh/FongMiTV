@@ -1,4 +1,4 @@
-package com.fongmi.android.tv.cast;
+package com.fongmi.android.tv.utils;
 
 import com.android.cast.dlna.dmc.DLNACastManager;
 import com.fongmi.android.tv.bean.Device;
@@ -6,19 +6,19 @@ import com.fongmi.android.tv.bean.Device;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CastDevice {
+public class DLNADevice {
 
     private final List<org.fourthline.cling.model.meta.Device<?, ?, ?>> devices;
 
     private static class Loader {
-        static volatile CastDevice INSTANCE = new CastDevice();
+        static volatile DLNADevice INSTANCE = new DLNADevice();
     }
 
-    public static CastDevice get() {
+    public static DLNADevice get() {
         return Loader.INSTANCE;
     }
 
-    public CastDevice() {
+    public DLNADevice() {
         this.devices = new ArrayList<>();
     }
 

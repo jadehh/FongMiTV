@@ -35,7 +35,7 @@ public class TrackNameProvider {
         } else {
             trackName = joinWithSeparator(buildLanguageString(format), buildLabelString(format));
         }
-        return TextUtils.isEmpty(trackName) ? resources.getString(R.string.exo_track_unknown) : joinWithSeparator(trackName, buildMimeString(format));
+        return TextUtils.isEmpty(trackName) ? resources.getString(R.string.exo_track_unknown) : joinWithSeparator(trackName, buildFrameRateString(format.frameRate), buildMimeString(format));
     }
 
     public String getTrackName(ITrackInfo trackInfo) {
@@ -48,7 +48,7 @@ public class TrackNameProvider {
         } else {
             trackName = joinWithSeparator(buildLanguageString(trackInfo.getLanguage()));
         }
-        return TextUtils.isEmpty(trackName) ? resources.getString(R.string.exo_track_unknown) : joinWithSeparator(trackName, buildMimeString(trackInfo.getMimeType()));
+        return TextUtils.isEmpty(trackName) ? resources.getString(R.string.exo_track_unknown) : joinWithSeparator(trackName, buildFrameRateString(trackInfo.getFps()), buildMimeString(trackInfo.getMimeType()));
     }
 
     private String buildResolutionString(Format format) {
@@ -146,6 +146,11 @@ public class TrackNameProvider {
         if (format.width != Format.NO_VALUE || format.height != Format.NO_VALUE) return C.TRACK_TYPE_VIDEO;
         if (format.channelCount != Format.NO_VALUE || format.sampleRate != Format.NO_VALUE) return C.TRACK_TYPE_AUDIO;
         return C.TRACK_TYPE_UNKNOWN;
+    }
+
+    private String buildFrameRateString(float frameRate) {
+        if (frameRate <= 0) return "";
+        return (int) Math.floor(frameRate) + "FPS";
     }
 
     private String buildMimeString(Format format) {

@@ -50,7 +50,7 @@ public class Youtube implements Source.Extractor {
         for (VideoFormat format : videoFormats) video.append(getAdaptationSet(format, getVideoParam(format)));
         for (AudioFormat format : audioFormats) audio.append(getAdaptationSet(format, getAudioParam(format)));
         String mpd = String.format(Locale.getDefault(), MPD, info.details().lengthSeconds(), info.details().lengthSeconds(), video, audio);
-        return "data:application/dash+xml;base64," + Base64.encodeToString(mpd.getBytes(), 0);
+        return "data:application/dash+xml;base64," + Base64.encodeToString(mpd.getBytes(), Base64.DEFAULT);
     }
 
     private String getVideoParam(VideoFormat format) {

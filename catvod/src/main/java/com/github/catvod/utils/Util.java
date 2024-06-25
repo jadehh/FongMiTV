@@ -27,15 +27,27 @@ public class Util {
     public static final String CHROME = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36";
 
     public static String base64(String s) {
-        return base64(s.getBytes());
+        return base64(s, Base64.URL_SAFE | Base64.NO_PADDING);
+    }
+
+    public static String base64(String s, int flags) {
+        return base64(s.getBytes(), flags);
     }
 
     public static String base64(byte[] bytes) {
-        return Base64.encodeToString(bytes, Base64.DEFAULT | Base64.NO_WRAP);
+        return base64(bytes, Base64.DEFAULT);
+    }
+
+    public static String base64(byte[] bytes, int flags) {
+        return Base64.encodeToString(bytes, flags);
+    }
+
+    public static String decode(String s) {
+        return new String(Base64.decode(s, Base64.URL_SAFE | Base64.NO_PADDING));
     }
 
     public static String basic(String userInfo) {
-        return "Basic " + base64(userInfo);
+        return "Basic " + base64(userInfo, Base64.NO_WRAP);
     }
 
     public static byte[] hex2byte(String s) {

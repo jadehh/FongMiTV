@@ -22,10 +22,10 @@ import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.api.config.VodConfig;
 import com.fongmi.android.tv.bean.Device;
 import com.fongmi.android.tv.bean.History;
-import com.fongmi.android.tv.cast.CastDevice;
-import com.fongmi.android.tv.cast.CastVideo;
-import com.fongmi.android.tv.cast.ScanEvent;
-import com.fongmi.android.tv.cast.ScanTask;
+import com.fongmi.android.tv.utils.DLNADevice;
+import com.fongmi.android.tv.bean.CastVideo;
+import com.fongmi.android.tv.event.ScanEvent;
+import com.fongmi.android.tv.utils.ScanTask;
 import com.fongmi.android.tv.databinding.DialogDeviceBinding;
 import com.fongmi.android.tv.server.Server;
 import com.fongmi.android.tv.ui.activity.ScanActivity;
@@ -128,7 +128,7 @@ public class CastDialog extends BaseDialog implements DeviceAdapter.OnClickListe
 
     private void getDevice() {
         if (fm) adapter.addAll(Device.getAll());
-        adapter.addAll(CastDevice.get().getAll());
+        adapter.addAll(DLNADevice.get().getAll());
     }
 
     private void initDLNA() {
@@ -163,12 +163,12 @@ public class CastDialog extends BaseDialog implements DeviceAdapter.OnClickListe
 
     @Override
     public void onDeviceAdded(@NonNull org.fourthline.cling.model.meta.Device<?, ?, ?> device) {
-        adapter.addAll(CastDevice.get().add(device));
+        adapter.addAll(DLNADevice.get().add(device));
     }
 
     @Override
     public void onDeviceRemoved(@NonNull org.fourthline.cling.model.meta.Device<?, ?, ?> device) {
-        adapter.remove(CastDevice.get().remove(device));
+        adapter.remove(DLNADevice.get().remove(device));
     }
 
     @Override
@@ -205,14 +205,14 @@ public class CastDialog extends BaseDialog implements DeviceAdapter.OnClickListe
 
     @Override
     public void onItemClick(Device item) {
-        if (item.isDLNA()) control = DLNACastManager.INSTANCE.connectDevice(CastDevice.get().find(item), this);
+        if (item.isDLNA()) control = DLNACastManager.INSTANCE.connectDevice(DLNADevice.get().find(item), this);
         else OkHttp.newCall(client, item.getIp().concat("/action?do=cast"), body.build()).enqueue(this);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        CastDevice.get().disconnect();
+        DLNADevice.get().disconnect();
         EventBus.getDefault().unregister(this);
         DLNACastManager.INSTANCE.unregisterListener(this);
         DLNACastManager.INSTANCE.unbindCastService(App.get());

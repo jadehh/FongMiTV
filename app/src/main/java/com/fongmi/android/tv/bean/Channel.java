@@ -366,6 +366,7 @@ public class Channel {
         setLogo(item.getLogo());
         setName(item.getName());
         setUrls(item.getUrls());
+        setData(item.getData());
         setDrm(item.getDrm());
         setEpg(item.getEpg());
         setUa(item.getUa());
