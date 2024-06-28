@@ -1,16 +1,20 @@
 package com.fongmi.android.tv.download;
 
-import com.fongmi.android.tv.App;
+import android.os.SystemClock;
+
 import com.fongmi.android.tv.Constant;
 import com.fongmi.android.tv.R;
+import com.fongmi.android.tv.bean.Download;
 import com.fongmi.android.tv.bean.DownloadTask;
 import com.fongmi.android.tv.db.AppDatabase;
+import com.fongmi.android.tv.event.DownloadEvent;
 import com.fongmi.android.tv.impl.Callback;
+import com.fongmi.android.tv.player.Source;
 import com.fongmi.android.tv.player.extractor.JianPian;
 import com.fongmi.android.tv.player.extractor.Thunder;
-import com.fongmi.android.tv.utils.Notify;
 import com.fongmi.android.tv.utils.ResUtil;
 import com.fongmi.android.tv.utils.UrlUtil;
+import com.github.catvod.utils.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,14 +26,13 @@ public class DownloadSource {
     public DownloadSource() {
         extractors = new ArrayList<>();
         extractors.add(new Thunder());
+        extractors.add(new JianPian());
     }
 
 
-    public void addJianpianExtractor(Callback callback){
-        if (extractors.size() != 2){
-            JianPian jianPian = new JianPian();
-            jianPian.downloadInit();
-            extractors.add(jianPian);
+    public void initDownload(Callback callback){
+        for (Extractor extractor : extractors){
+            extractor.downloadInit();
         }
         callback.success();
     }
@@ -46,43 +49,104 @@ public class DownloadSource {
         return null;
     }
 
-    public void resumeDownload(DownloadTask task) {
-        List<DownloadTask> tasks = extractors.get(task.getTaskType()).resumeDownload(task);
-        saveDB(tasks);
-    }
-
-    public void download(String name,String url,Callback callback){
-        Extractor extractor = getExtractor(url);
-        if (extractor != null) {
-            List<DownloadTask> tasks = extractor.startDownload(name,url);
+    public void startTask(String name, List<Download> downloads) {
+        DownloadTask fileDownloadTask = new DownloadTask();
+        fileDownloadTask.setFileName(name);
+        String fileUrl = "";
+        for (Download download : downloads){
+            fileUrl = fileUrl + download.getDownloadUrl() + download.getDownloadName();
+        }
+        fileDownloadTask.setUrl(Util.md5(fileUrl));
+        fileDownloadTask.setFile(true);
+        fileDownloadTask.setTaskType(Constant.CUSTOM_DOWNLOAD_TYPE);
+        fileDownloadTask.update();
+        fileDownloadTask.reload();
+        int error_index = 0;
+        for (Download download :downloads){
+            List<DownloadTask> tasks = download(download.getDownloadName(), download.getDownloadUrl());
             if (tasks != null){
-                saveDB(tasks);
-                App.post(() -> callback.success(ResUtil.getString(R.string.download_success_msg)));
+                saveDB(fileDownloadTask.getId(),tasks);
             }else{
-                App.post(() -> callback.error(Notify.getError(R.string.error_download, new Exception(ResUtil.getString(R.string.download_fail_msg)))));
+                error_index = error_index + 1;
             }
-        }else{
-            App.post(() -> callback.error(Notify.getError(R.string.error_download, new Exception(ResUtil.getString(R.string.download_not_support_msg)))));
+            SystemClock.sleep(5000);
+        }
+        if (error_index == downloads.size()) fileDownloadTask.delete();
+    }
+
+    public void startTask(String name, String url) {
+        List<DownloadTask> tasks = download(name,url);
+        if (tasks != null){
+            saveDB(tasks);
         }
     }
 
-    public void startDownload(String name, String url, Callback callback) {
+    private List<DownloadTask>  download(String name,String url){
         if (AppDatabase.get().getDownloadTaskDao().find(url).size() > 0){
-            App.post(() -> callback.error(Notify.getError(R.string.error_download, new Exception(ResUtil.getString(R.string.download_exists)))));
+            DownloadEvent.error(String.format("%s\n%s",name,ResUtil.getString(R.string.download_exists)));
         }else{
-            App.execute(() -> download(name,url,callback));
+            Extractor extractor = getExtractor(url);
+            if (extractor != null) {
+                List<DownloadTask> tasks = extractor.startDownload(name,url);
+                if (tasks != null){
+                    DownloadEvent.success(String.format("%s\n%s",name,ResUtil.getString(R.string.download_success_msg)));
+                    return tasks;
+                }else{
+                    DownloadEvent.error(String.format("%s\n%s",name,ResUtil.getString(R.string.download_fail_msg)));
+                }
+            }else{
+                DownloadEvent.error(String.format("%s\n%s",name,ResUtil.getString(R.string.download_not_support_msg)));
+            }
         }
+        return null;
     }
 
-    public void stopDownload(DownloadTask task,boolean isFinish) {
-        extractors.get(task.getTaskType()).stopDownload(task);
-        task.setDownloadSpeed(0);
-        if (isFinish){
+    private void stop(DownloadTask task,boolean isFinish){
+        if (task.getTaskType() != Constant.CUSTOM_DOWNLOAD_TYPE){
+            extractors.get(task.getTaskType()).stopDownload(task);
+        }
+        if (isFinish || task.getTaskStatus() == Constant.DOWNLOAD_SUCCESS){
             task.setTaskId(0);
+            task.setDownloadSpeed(0);
             task.setTaskStatus(Constant.DOWNLOAD_SUCCESS);
         }
         else task.setTaskStatus(Constant.DOWNLOAD_STOP);
         task.update();
+    }
+
+    public void stopTask(DownloadTask task,boolean isFinish) {
+        //如果是文件夹需要全部停止
+        if (task.getFile()){
+            List <DownloadTask> tasks = AppDatabase.get().getDownloadTaskDao().find(task.getId());
+            for (DownloadTask downloadTask:tasks){
+                stop(downloadTask,isFinish);
+            }
+        }
+        stop(task,isFinish);
+    }
+
+
+    private void resume(DownloadTask task,int parentId){
+        if (task.getTaskType() != Constant.CUSTOM_DOWNLOAD_TYPE){
+            List<DownloadTask> tasks = extractors.get(task.getTaskType()).resumeDownload(task);
+            if (parentId != -1){
+                for (DownloadTask downloadTask:tasks){
+                    saveDB(parentId,downloadTask);
+                }
+            }else{
+                saveDB(tasks);
+            }
+        }
+    }
+
+    public void resumeTask(DownloadTask task) {
+        if (task.getFile() && task.getTaskType() == Constant.CUSTOM_DOWNLOAD_TYPE){
+            List <DownloadTask> tasks = AppDatabase.get().getDownloadTaskDao().find(task.getId());
+            for (DownloadTask downloadTask:tasks){
+                resume(downloadTask,task.getId());
+            }
+        }
+        resume(task,-1);
     }
 
     public void getDownloadingTask(DownloadTask task) {
@@ -90,14 +154,37 @@ public class DownloadSource {
     }
 
 
-    public void delete(DownloadTask task){
-        extractors.get(task.getTaskType()).delete(task);
-        stopDownload(task,false);
+    private void delete(DownloadTask task){
+        if (task.getTaskType() != Constant.CUSTOM_DOWNLOAD_TYPE){
+            stopTask(task,false);
+            extractors.get(task.getTaskType()).delete(task);
+        }
+        if (task.getParentId() != 0){
+            List<DownloadTask> downloadTasks = AppDatabase.get().getDownloadTaskDao().findById(task.getParentId());
+            if (downloadTasks.size() > 0){
+                DownloadTask parentTask = downloadTasks.get(0);
+                long fileSize = parentTask.getFileSize() - task.getFileSize();
+                if (fileSize == 0) parentTask.delete();
+                else{
+                    parentTask.setFileSize(fileSize);
+                    parentTask.update();
+                }
+            }
+        }
         task.delete();
     }
 
-    private int saveDB(List<DownloadTask> downloadTasks) {
-        //多文件下载
+    public void deleteTask(DownloadTask task){
+        if (task.getFile()){
+            List <DownloadTask> tasks = AppDatabase.get().getDownloadTaskDao().find(task.getId());
+            for (DownloadTask downloadTask:tasks){
+                delete(downloadTask);
+            }
+        }
+        delete(task);
+    }
+
+    private void saveDB(List<DownloadTask> downloadTasks) {
         if (downloadTasks != null) {
             if (downloadTasks.size() > 1) {
                 saveMultipleDB(downloadTasks);
@@ -106,10 +193,22 @@ public class DownloadSource {
                 task.save();
             }
         }
-        return 0;
     }
 
-    //多文件存储
+    private void setParentId(int parentId,DownloadTask downloadTasks){
+        downloadTasks.setParentId(parentId);
+        downloadTasks.save();
+    }
+
+    private void saveDB(int parentId,List<DownloadTask> downloadTasks) {
+        DownloadTask task = downloadTasks.get(0);
+        setParentId(parentId,task);
+    }
+
+    private void saveDB(int parentId,DownloadTask downloadTask) {
+       setParentId(parentId,downloadTask);
+    }
+
     private void saveMultipleDB(List<DownloadTask> downloadTasks) {
         DownloadTask taskFile = downloadTasks.get(0);
         taskFile.setFile(true);
@@ -134,6 +233,8 @@ public class DownloadSource {
     }
 
     public interface Extractor {
+
+        void downloadInit();
 
         boolean match(String scheme, String host);
 

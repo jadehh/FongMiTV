@@ -24,6 +24,8 @@
 
     <!-- Download -->
     <string name="download">下载</string>
+    <string name="create_download">创建任务</string>
+    <string name="download_detail">下载详情</string>
     <string name="downloading">下载中</string>
     <string name="download_url_hint">请输入或粘贴下载链接(支持：磁力链、thunder://、ftp://、http:// ed2k://)</string>
     <string name="start_download">开始下载</string>

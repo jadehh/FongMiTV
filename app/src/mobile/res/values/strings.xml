@@ -23,6 +23,8 @@
 
     <!-- Download -->
     <string name="download">Download</string>
+    <string name="create_download">Create Task</string>
+    <string name="download_detail">Download Detail</string>
     <string name="downloading">Downloading</string>
     <string name="download_url_hint">Please Input or Paste Download Url(Support:thunder://、ftp://、http:// ed2k://)</string>
     <string name="start_download">Start Download</string>

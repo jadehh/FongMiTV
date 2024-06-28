@@ -43,7 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:overScrollMode="never"
-                tools:listitem="@layout/adapter_download_finish" />
+                tools:listitem="@layout/adapter_download" />
         </LinearLayout>
 
 </LinearLayout>

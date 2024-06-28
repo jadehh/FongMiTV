@@ -51,9 +51,9 @@ public class Thunder implements Source.Extractor, DownloadSource.Extractor {
                     sleep();
                 }
             List<TorrentFileInfo> medias = XLTaskHelper.get().getTorrentInfo(taskId.getSaveFile()).getMedias();
-            downloadTasks.add(getDownloadTask(name,taskId));
+            downloadTasks.add(getDownloadTask(url,name,taskId));
             for (TorrentFileInfo media : medias) {
-                downloadTasks.add(downloadTorrentTask(Uri.parse(media.getPlayUrl())));
+                downloadTasks.add(downloadTorrentTask(url,Uri.parse(media.getPlayUrl())));
             }
             XLTaskHelper.get().stopTask(taskId);
         } else {
@@ -70,9 +70,13 @@ public class Thunder implements Source.Extractor, DownloadSource.Extractor {
     private DownloadTask downloadThunderTask(String name,String url) {
         File folder = Path.thunder(Util.md5(url));
         taskId = XLTaskHelper.get().addThunderTask(url, folder);
-        return getDownloadTask(name,taskId);
+        return getDownloadTask(url,name,taskId);
     }
 
+
+    @Override
+    public void downloadInit() {
+    }
 
     @Override
     public boolean match(String scheme, String host) {
@@ -114,7 +118,7 @@ public class Thunder implements Source.Extractor, DownloadSource.Extractor {
         return XLTaskHelper.get().getLocalUrl(taskId.getSaveFile());
     }
 
-    private DownloadTask downloadTorrentTask(Uri uri) {
+    private DownloadTask downloadTorrentTask(String url,Uri uri) {
         File torrent = new File(uri.getPath());
         String name = uri.getQueryParameter("name");
         int index = Integer.parseInt(uri.getQueryParameter("index"));
@@ -129,7 +133,7 @@ public class Thunder implements Source.Extractor, DownloadSource.Extractor {
             taskId.mRealUrl = uri.getPath();
             taskId.mFileName = name;
         }
-        return getDownloadTask("",taskId);
+        return getDownloadTask(url,"",taskId);
     }
 
     @Override
@@ -145,7 +149,6 @@ public class Thunder implements Source.Extractor, DownloadSource.Extractor {
             List<DownloadTask> tasks= AppDatabase.get().getDownloadTaskDao().find(task.getId());
             for (DownloadTask downloadTask:tasks){
                 new File(downloadTask.getLocalPath()).delete();
-                AppDatabase.get().getDownloadTaskDao().delete(task.getId());
             }
         }else{
             new File(task.getLocalPath()).delete();
@@ -174,14 +177,21 @@ public class Thunder implements Source.Extractor, DownloadSource.Extractor {
 
     @Override
     public void stopDownload(DownloadTask task) {
-        XLTaskHelper.get().stopDownloadTask(task.getTaskId());
+        if (task.getFile()){
+            List<DownloadTask> tasks= AppDatabase.get().getDownloadTaskDao().find(task.getId());
+            for (DownloadTask downloadTask:tasks){
+                XLTaskHelper.get().stopDownloadTask(downloadTask.getTaskId());
+            }
+        }else{
+            XLTaskHelper.get().stopDownloadTask(task.getTaskId());
+        }
     }
 
 
-    private DownloadTask getDownloadTask(String name,GetTaskId taskId) {
+    private DownloadTask getDownloadTask(String url,String name,GetTaskId taskId) {
         DownloadTask task = new DownloadTask();
         XLTaskInfo taskInfo = XLTaskHelper.get().getDwonloadTaskInfo(taskId.mTaskId);
-        task.setTaskType(Constant.THUNDER_TYPE);
+        task.setTaskType(Constant.THUNDER_DOWNLOAD_TYPE);
         task.setTaskStatus(taskInfo.mTaskStatus);
         task.setFileSize(taskInfo.mFileSize);
         task.setDownloadSize(taskInfo.mDownloadSize);

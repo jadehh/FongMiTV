@@ -1,16 +1,14 @@
 package com.fongmi.android.tv.player.extractor;
 
 import android.net.Uri;
-import android.os.SystemClock;
-import android.telecom.Call;
 
-import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.Constant;
 import com.fongmi.android.tv.bean.DownloadTask;
+import com.fongmi.android.tv.db.AppDatabase;
 import com.fongmi.android.tv.download.DownloadSource;
-import com.fongmi.android.tv.impl.Callback;
 import com.fongmi.android.tv.player.Source;
 import com.github.catvod.utils.Path;
+import com.orhanobut.logger.Logger;
 import com.p2p.P2PClass;
 
 import java.net.URLDecoder;
@@ -26,6 +24,8 @@ public class JianPian implements Source.Extractor, DownloadSource.Extractor {
     private String path;
     private Map<String, Boolean> pathPaused;
 
+    private static final String TAG = JianPian.class.getSimpleName();
+
     @Override
     public boolean match(String scheme, String host) {
         return "tvbox-xg".equals(scheme) || "jianpian".equals(scheme) || "ftp".equals(scheme);
@@ -39,12 +39,13 @@ public class JianPian implements Source.Extractor, DownloadSource.Extractor {
     @Override
     public List<DownloadTask> startDownload(String name,String url) {try {
             long taskId = p2p.P2Pdownload(getPathBytes(url));
-            SystemClock.sleep(500);
             List <DownloadTask> taskList = new ArrayList<>();
             DownloadTask downloadTask = new DownloadTask();
+            List <DownloadTask> downloadTasks = AppDatabase.get().getDownloadTaskDao().find(url);
+            if (downloadTasks.size() > 0 ) downloadTask = downloadTasks.get(0);
             if (name.length() > 0) downloadTask.setFileName(name);
             else downloadTask.setFileName(getFileName(url));
-            downloadTask.setTaskType(Constant.JIANPIAN_TYPE);
+            downloadTask.setTaskType(Constant.JIANPIAN_DOWNLOAD_TYPE);
             downloadTask.setTaskStatus(Constant.DOWNLOAD_LOADING);
             downloadTask.setLocalPath(this.getLocalPath(url));
             downloadTask.setUrl(url);
@@ -72,9 +73,11 @@ public class JianPian implements Source.Extractor, DownloadSource.Extractor {
         if (pathPaused == null) pathPaused = new HashMap<>();
     }
 
-
+    @Override
     public void downloadInit(){
+        Logger.t(TAG).d("初始化荐片下载器");
         if (p2p == null) p2p = new P2PClass();
+        Logger.t(TAG).d("荐片下载器初始化完成");
     }
 
     @Override
@@ -155,7 +158,11 @@ public class JianPian implements Source.Extractor, DownloadSource.Extractor {
         long fileSize = p2p.P2Pgetfilesize((int)task.getTaskId());
         if (fileSize == 0 && downloadSize == 0 && downloadSpeed == 0){
             task.setDownloadSpeed(0);
-            task.setTaskStatus(Constant.DOWNLOAD_STOP);
+            if (task.getFileSize() != 0){
+                task.setTaskStatus(Constant.DOWNLOAD_STOP);
+            }else{
+                task.setTaskStatus(Constant.DOWNLOAD_WAIT);
+            }
         }else{
             task.setDownloadSpeed(downloadSpeed);
             task.setDownloadSize(downloadSize);

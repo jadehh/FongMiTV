@@ -17,6 +17,9 @@ public abstract class DownloadTaskDao extends BaseDao<DownloadTask> {
     @Query("SELECT * FROM DownloadTask WHERE parentId = :parentId ")
     public abstract List<DownloadTask> find(int parentId);
 
+    @Query("SELECT * FROM DownloadTask WHERE id = :id ")
+    public abstract List<DownloadTask> findById(int id);
+
     @Query("SELECT * FROM DownloadTask WHERE taskStatus != :taskStatus  ORDER BY createTime ")
     public abstract List<DownloadTask> findLoadingTask(int taskStatus);
 

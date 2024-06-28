@@ -15,8 +15,9 @@ import com.fongmi.android.tv.bean.DownloadTask;
 import com.fongmi.android.tv.bean.Msg;
 import com.fongmi.android.tv.databinding.FragmentDownloadingBinding;
 import com.fongmi.android.tv.download.DownloadSource;
+import com.fongmi.android.tv.download.DownloadService;
 import com.fongmi.android.tv.event.MessageEvent;
-import com.fongmi.android.tv.ui.adapter.DownloadingAdapter;
+import com.fongmi.android.tv.ui.adapter.DownloadAdapter;
 import com.fongmi.android.tv.ui.base.BaseFragment;
 
 import org.greenrobot.eventbus.EventBus;
@@ -26,14 +27,14 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DownloadingFragment extends BaseFragment implements DownloadingAdapter.OnClickListener{
-
-    FragmentDownloadingBinding mBinding;
-
+public class DownloadingFragment extends BaseFragment implements DownloadAdapter.OnClickListener{
+    private FragmentDownloadingBinding mBinding;
+    private final DownloadingFragment.OnClickListener mListener;
     private final List<DownloadTask> list = new ArrayList<>();
-
-    private DownloadingAdapter mAdapter;
-
+    private DownloadAdapter mAdapter;
+    public DownloadingFragment(OnClickListener mListener) {
+        this.mListener = mListener;
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,25 +42,21 @@ public class DownloadingFragment extends BaseFragment implements DownloadingAdap
             EventBus.getDefault().register(this);
         }
     }
-
     @Override
     protected ViewBinding getBinding(@NonNull LayoutInflater inflater, @Nullable ViewGroup container) {
         return mBinding = FragmentDownloadingBinding.inflate(inflater, container, false);
     }
-
     @Override
     protected void initView() {
         setRecyclerView();
     }
-
     private void setRecyclerView() {
         mBinding.recycler.setHasFixedSize(true);
         mBinding.recycler.setItemAnimator(null);
         mBinding.recycler.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        mBinding.recycler.setAdapter(mAdapter = new DownloadingAdapter(this,list));
+        mBinding.recycler.setAdapter(mAdapter = new DownloadAdapter(this,list));
     }
-
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(MessageEvent event) {
         Msg msg = event.getMessage();
         if (msg.getType() == Constant.DOWNLOAD_UPDATE_MESSAGE_TYPE){
@@ -69,21 +66,24 @@ public class DownloadingFragment extends BaseFragment implements DownloadingAdap
 
     @Override
     public void startTask(DownloadTask task) {
-        DownloadSource.get().resumeDownload(task);
+        DownloadSource.get().resumeTask(task);
+        DownloadService.getInstance().refreshDownloading();
     }
     @Override
     public void stopTask(DownloadTask task) {
-        DownloadSource.get().stopDownload(task,false);
+        DownloadSource.get().stopTask(task,false);
+        DownloadService.getInstance().refreshDownloading();
     }
 
     @Override
     public void openFile(DownloadTask task) {
-
+        mListener.openFile(task);
     }
 
     @Override
-    public void deleTask(DownloadTask task) {
-        DownloadSource.get().delete(task);
+    public void deleteTask(DownloadTask task) {
+        DownloadSource.get().deleteTask(task);
+        DownloadService.getInstance().refreshDownloading();
     }
 
     @Override
@@ -91,10 +91,11 @@ public class DownloadingFragment extends BaseFragment implements DownloadingAdap
         list.clear();
         list.addAll(tasks);
         mAdapter.notifyDataSetChanged();
+
     }
 
-    @Override
-    public void alert(String msg, int msgType) {
 
+    public interface OnClickListener {
+        void openFile(DownloadTask task);
     }
 }

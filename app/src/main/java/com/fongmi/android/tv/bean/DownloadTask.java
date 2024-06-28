@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey;
 
 import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.db.AppDatabase;
+import com.fongmi.android.tv.utils.Download;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
@@ -218,15 +219,33 @@ public class DownloadTask {
 
     public void update() {
         if (this.id == null) {
-            this.id = AppDatabase.get().getDownloadTaskDao().find(this.url).get(0).getId();
+            List <DownloadTask> downloadTasks = AppDatabase.get().getDownloadTaskDao().find(this.url);
+            if (downloadTasks.size() > 0)   {
+                this.id =downloadTasks.get(0).getId();
+            }
+            else {
+                this.insert();
+                return;
+            }
         }
         this.updateTime = new Date().getTime();
         AppDatabase.get().getDownloadTaskDao().update(this);
     }
 
+    public void  reload(){
+        List <DownloadTask> downloadTasks = AppDatabase.get().getDownloadTaskDao().find(this.url);
+        this.id = downloadTasks.get(0).getId();
+    }
+
 
 
     public void delete(){
+        if (this.getFile()){
+            List<DownloadTask> tasks= AppDatabase.get().getDownloadTaskDao().find(this.getId());
+            for (DownloadTask task:tasks){
+                AppDatabase.get().getDownloadTaskDao().delete(task.getId());
+            }
+        }
         AppDatabase.get().getDownloadTaskDao().delete(this.getId());
     }
 

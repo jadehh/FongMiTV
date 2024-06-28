@@ -15,9 +15,9 @@ import com.fongmi.android.tv.bean.DownloadTask;
 import com.fongmi.android.tv.bean.Msg;
 import com.fongmi.android.tv.databinding.FragmentDownloadFinishBinding;
 import com.fongmi.android.tv.download.DownloadSource;
+import com.fongmi.android.tv.download.DownloadService;
 import com.fongmi.android.tv.event.MessageEvent;
-import com.fongmi.android.tv.ui.activity.MainActivity;
-import com.fongmi.android.tv.ui.adapter.DownloadFinishAdapter;
+import com.fongmi.android.tv.ui.adapter.DownloadAdapter;
 import com.fongmi.android.tv.ui.base.BaseFragment;
 
 import org.greenrobot.eventbus.EventBus;
@@ -27,14 +27,13 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DownloadFinishFragment extends BaseFragment implements DownloadFinishAdapter.OnClickListener{
+public class DownloadFinishFragment extends BaseFragment implements DownloadAdapter.OnClickListener{
 
     private FragmentDownloadFinishBinding mBinding;
 
     private final DownloadFinishFragment.OnClickListener mListener;
 
-
-    private DownloadFinishAdapter mAdapter;
+    private DownloadAdapter mAdapter;
 
     private final List<DownloadTask> list = new ArrayList<>();
 
@@ -55,7 +54,7 @@ public class DownloadFinishFragment extends BaseFragment implements DownloadFini
         return mBinding = FragmentDownloadFinishBinding.inflate(inflater, container, false);
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(MessageEvent event) {
         Msg msg = event.getMessage();
         if (msg.getType() == Constant.DOWNLOAD_Success_MESSAGE_TYPE){
@@ -71,13 +70,18 @@ public class DownloadFinishFragment extends BaseFragment implements DownloadFini
         mBinding.recycler.setHasFixedSize(true);
         mBinding.recycler.setItemAnimator(null);
         mBinding.recycler.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        mBinding.recycler.setAdapter(mAdapter = new DownloadFinishAdapter(this,list));
+        mBinding.recycler.setAdapter(mAdapter = new DownloadAdapter(this,list));
     }
 
-    private MainActivity getRoot() {
-        return (MainActivity) getActivity();
+    @Override
+    public void startTask(DownloadTask task) {
+
     }
 
+    @Override
+    public void stopTask(DownloadTask task) {
+
+    }
 
     @Override
     public void openFile(DownloadTask task) {
@@ -85,18 +89,20 @@ public class DownloadFinishFragment extends BaseFragment implements DownloadFini
     }
 
     @Override
-    public void deleTask(DownloadTask task) {
-        DownloadSource.get().delete(task);
+    public void deleteTask(DownloadTask task) {
+        DownloadSource.get().deleteTask(task);
+        DownloadService.getInstance().refreshDownloadFinish();
     }
 
     @Override
     public void refreshData(List<DownloadTask> tasks) {
-        if (list.size() != tasks.size()){
+        if (list != tasks){
             list.clear();
             list.addAll(tasks);
             mAdapter.notifyDataSetChanged();
         }
     }
+
 
     public interface OnClickListener {
         void openFile(DownloadTask task);
