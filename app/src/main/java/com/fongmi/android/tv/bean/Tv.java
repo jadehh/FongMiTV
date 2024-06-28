@@ -13,10 +13,10 @@ import java.util.List;
 @Root(name = "tv", strict = false)
 public class Tv {
 
-    @ElementList(entry = "channel", inline = true)
+    @ElementList(entry = "channel", required = false, inline = true)
     private List<Channel> channel;
 
-    @ElementList(entry = "programme", inline = true)
+    @ElementList(entry = "programme", required = false, inline = true)
     private List<Programme> programme;
 
     public List<Channel> getChannel() {
@@ -30,10 +30,10 @@ public class Tv {
     @Root(name = "channel")
     public static class Channel {
 
-        @Attribute(name = "id")
+        @Attribute(name = "id", required = false)
         private String id;
 
-        @Element(name = "display-name")
+        @Element(name = "display-name", required = false)
         private String displayName;
 
         public String getId() {
@@ -48,23 +48,17 @@ public class Tv {
     @Root(name = "programme")
     public static class Programme {
 
-        @Attribute(name = "start")
+        @Attribute(name = "start", required = false)
         private String start;
 
-        @Attribute(name = "stop")
+        @Attribute(name = "stop", required = false)
         private String stop;
 
-        @Attribute(name = "channel")
+        @Attribute(name = "channel", required = false)
         private String channel;
 
-        @Element(name = "title")
+        @Element(name = "title", required = false)
         private String title;
-
-        @Element(name = "date", required = false)
-        private String date;
-
-        @Element(name = "desc", required = false)
-        private String desc;
 
         public String getStart() {
             return TextUtils.isEmpty(start) ? "" : start;
@@ -80,14 +74,6 @@ public class Tv {
 
         public String getTitle() {
             return TextUtils.isEmpty(title) ? "" : title;
-        }
-
-        public String getDate() {
-            return TextUtils.isEmpty(date) ? "" : date;
-        }
-
-        public String getDesc() {
-            return TextUtils.isEmpty(desc) ? "" : desc;
         }
     }
 }

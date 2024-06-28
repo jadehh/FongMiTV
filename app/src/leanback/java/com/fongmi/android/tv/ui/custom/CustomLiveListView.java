@@ -3,6 +3,7 @@ package com.fongmi.android.tv.ui.custom;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -53,6 +54,12 @@ public class CustomLiveListView extends VerticalGridView {
         if (KeyUtil.isDownKey(event)) return onKeyDown();
         if (KeyUtil.isUpKey(event)) return onKeyUp();
         return super.dispatchKeyEvent(event);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(@NonNull MotionEvent event) {
+        if (getVisibility() == View.VISIBLE && listener != null) listener.setUITimer();
+        return super.dispatchTouchEvent(event);
     }
 
     public interface Callback {

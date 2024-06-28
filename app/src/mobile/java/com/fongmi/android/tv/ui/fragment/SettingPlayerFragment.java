@@ -16,7 +16,6 @@ import com.fongmi.android.tv.databinding.FragmentSettingPlayerBinding;
 import com.fongmi.android.tv.impl.BufferCallback;
 import com.fongmi.android.tv.impl.SubtitleCallback;
 import com.fongmi.android.tv.impl.UaCallback;
-import com.fongmi.android.tv.player.ExoUtil;
 import com.fongmi.android.tv.player.Players;
 import com.fongmi.android.tv.ui.base.BaseFragment;
 import com.fongmi.android.tv.ui.dialog.BufferDialog;
@@ -117,7 +116,6 @@ public class SettingPlayerFragment extends BaseFragment implements UaCallback, B
         int index = Setting.getHttp();
         Setting.putHttp(index = index == http.length - 1 ? 0 : ++index);
         mBinding.httpText.setText(http[index]);
-        ExoUtil.reset();
     }
 
     private void setFlag(View view) {
@@ -206,6 +204,6 @@ public class SettingPlayerFragment extends BaseFragment implements UaCallback, B
 
     @Override
     public void onHiddenChanged(boolean hidden) {
-        if (!hidden) setVisible();
+        if (!hidden) initView();
     }
 }

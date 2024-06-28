@@ -13,7 +13,6 @@ import android.view.View;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
-import androidx.media3.common.VideoSize;
 import androidx.media3.ui.R;
 
 import com.fongmi.android.tv.App;
@@ -72,24 +71,24 @@ public class PiP {
         }
     }
 
-    public void enter(Activity activity, VideoSize size, int scale) {
+    public void enter(Activity activity, int width, int height, int scale) {
         try {
             if (noPiP() || activity.isInPictureInPictureMode() || !Setting.isBackgroundPiP()) return;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) builder.setAutoEnterEnabled(true);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) builder.setSeamlessResizeEnabled(true);
             if (scale == 1) builder.setAspectRatio(new Rational(16, 9));
             else if (scale == 2) builder.setAspectRatio(new Rational(4, 3));
-            else builder.setAspectRatio(getRational(size));
+            else builder.setAspectRatio(getRational(width, height));
             activity.enterPictureInPictureMode(builder.build());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private Rational getRational(VideoSize size) {
+    private Rational getRational(int width, int height) {
         Rational limitWide = new Rational(239, 100);
         Rational limitTall = new Rational(100, 239);
-        Rational rational = new Rational(size.width, size.height);
+        Rational rational = new Rational(width, height);
         if (rational.isInfinite()) return new Rational(16, 9);
         if (rational.floatValue() > limitWide.floatValue()) return limitWide;
         if (rational.floatValue() < limitTall.floatValue()) return limitTall;

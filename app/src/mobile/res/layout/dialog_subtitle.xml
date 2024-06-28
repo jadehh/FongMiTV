@@ -15,7 +15,6 @@
         android:stepSize="1"
         android:valueFrom="14"
         android:valueTo="48"
-        app:tickVisible="false"
         app:trackColorInactive="@color/blue_50" />
 
 </LinearLayout>

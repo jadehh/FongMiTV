@@ -101,4 +101,11 @@ public class IjkTrackInfo implements ITrackInfo {
     public void setTrackType(int trackType) {
         mTrackType = trackType;
     }
+
+    @Override
+    public float getFps() {
+        if (mStreamMeta == null) return 0;
+        if (mStreamMeta.mFpsNum == 0 || mStreamMeta.mFpsDen == 0) return 0;
+        return mStreamMeta.mFpsNum / mStreamMeta.mFpsDen;
+    }
 }

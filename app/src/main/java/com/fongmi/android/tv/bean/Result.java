@@ -82,6 +82,8 @@ public class Result implements Parcelable {
     private Integer code;
     @SerializedName("jx")
     private Integer jx;
+    @SerializedName("drm")
+    private Drm drm;
 
     public static Result objectFrom(String str) {
         try {
@@ -98,7 +100,7 @@ public class Result implements Parcelable {
 
     public static Result fromXml(String str) {
         try {
-            return new Persister().read(Result.class, str).trans();
+            return new Persister().read(Result.class, str, false).trans();
         } catch (Exception e) {
             return empty();
         }
@@ -281,6 +283,10 @@ public class Result implements Parcelable {
 
     public Integer getJx() {
         return jx == null ? 0 : jx;
+    }
+
+    public Drm getDrm() {
+        return drm;
     }
 
     public boolean hasMsg() {

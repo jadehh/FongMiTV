@@ -1,5 +1,7 @@
 package com.fongmi.android.tv.bean;
 
+import android.util.Base64;
+
 import androidx.annotation.NonNull;
 
 import com.fongmi.android.tv.App;
@@ -31,10 +33,11 @@ public class ClearKey {
     }
 
     private void addKeys(String line) {
+        int flags = Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP;
         for (String s : line.split(",")) {
             String[] a = s.split(":");
-            String kid = Util.base64(Util.hex2byte(a[0].trim())).replace("=", "");
-            String k = Util.base64(Util.hex2byte(a[1].trim())).replace("=", "");
+            String kid = Util.base64(Util.hex2byte(a[0].trim()), flags).replace("=", "");
+            String k = Util.base64(Util.hex2byte(a[1].trim()), flags).replace("=", "");
             keys.add(new Keys(kid, k));
         }
     }

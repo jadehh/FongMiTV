@@ -1,4 +1,4 @@
-package com.fongmi.android.tv.cast;
+package com.fongmi.android.tv.event;
 
 import org.greenrobot.eventbus.EventBus;
 

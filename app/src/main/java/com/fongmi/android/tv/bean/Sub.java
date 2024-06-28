@@ -3,10 +3,11 @@ package com.fongmi.android.tv.bean;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
 import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
 
-import com.fongmi.android.tv.player.ExoUtil;
+import com.fongmi.android.tv.player.exo.ExoUtil;
 import com.github.catvod.utils.Path;
 import com.github.catvod.utils.Trans;
 import com.google.gson.annotations.SerializedName;
@@ -78,7 +79,15 @@ public class Sub {
         this.name = Trans.s2t(name);
     }
 
-    public MediaItem.SubtitleConfiguration getExo() {
+    public MediaItem.SubtitleConfiguration getConfig() {
         return new MediaItem.SubtitleConfiguration.Builder(Uri.parse(getUrl())).setLabel(getName()).setMimeType(getFormat()).setSelectionFlags(getFlag()).setLanguage(getLang()).build();
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Sub)) return false;
+        Sub it = (Sub) obj;
+        return getUrl().equals(it.getUrl());
     }
 }

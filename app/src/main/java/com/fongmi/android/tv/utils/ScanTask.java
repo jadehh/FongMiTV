@@ -1,4 +1,4 @@
-package com.fongmi.android.tv.cast;
+package com.fongmi.android.tv.utils;
 
 import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.bean.Device;

@@ -31,7 +31,6 @@
         android:valueTo="48"
         app:labelBehavior="gone"
         app:thumbColor="@color/blue_500"
-        app:tickVisible="false"
         app:trackColorActive="@color/blue_500"
         app:trackColorInactive="@color/blue_50" />
 

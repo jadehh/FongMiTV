@@ -27,16 +27,13 @@ import java.util.Set;
 
 public class EpgParser {
 
-    public static void start(Live live) {
-        try {
-            if (!live.getEpg().endsWith(".xml") && !live.getEpg().endsWith(".gz")) return;
-            File file = Path.epg(Uri.parse(live.getEpg()).getLastPathSegment());
-            if (shouldDownload(file)) Download.create(live.getEpg(), file).start();
-            if (file.getName().endsWith(".gz")) readGzip(live, file);
-            else readXml(live, file);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public static boolean start(Live live) throws Exception {
+        if (!live.getEpg().endsWith(".xml") && !live.getEpg().endsWith(".gz")) return false;
+        File file = Path.epg(Uri.parse(live.getEpg()).getLastPathSegment());
+        if (shouldDownload(file)) Download.create(live.getEpg(), file).start();
+        if (file.getName().endsWith(".gz")) readGzip(live, file);
+        else readXml(live, file);
+        return true;
     }
 
     private static boolean shouldDownload(File file) {
@@ -67,7 +64,7 @@ public class EpgParser {
         SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         SimpleDateFormat formatFull = new SimpleDateFormat("yyyyMMddHHmmss Z", Locale.getDefault());
         String today = formatDate.format(new Date());
-        Tv tv = new Persister().read(Tv.class, Path.read(file));
+        Tv tv = new Persister().read(Tv.class, Path.read(file), false);
         for (Group group : live.getGroups()) for (Channel channel : group.getChannel()) exist.add(channel.getTvgName());
         for (Tv.Channel channel : tv.getChannel()) mapping.put(channel.getId(), channel.getDisplayName());
         for (Tv.Programme programme : tv.getProgramme()) {

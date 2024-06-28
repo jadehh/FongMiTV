@@ -40,6 +40,7 @@
     <string name="play_netspeed">Net Speed</string>
     <string name="play_duration">Duration</string>
     <string name="play_mini_progress">Mini Progress</string>
+    <string name="play_video_title">Title</string>
     <string name="play_danmu">Danmu</string>
     <string name="play_display">Display</string>
     <string name="play_speed">Speed</string>
@@ -154,7 +155,7 @@
     <string name="error_play_next">It\'s the last episode!</string>
     <string name="error_play_prev">It\'s the first episode!</string>
     <string name="error_play_parse">Unable to parse url</string>
-    <string name="error_play_url">Unable to load url</string>
+    <string name="error_play_url">Unable to load url\nError code: <xliff:g name="name">%s</xliff:g></string>
     <string name="error_play_flag">No flag data</string>
     <string name="error_play_timeout">Timed out</string>
     <string name="error_detail">No play data</string>

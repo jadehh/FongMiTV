@@ -1,6 +1,7 @@
 package com.fongmi.android.tv.utils;
 
 import android.net.Uri;
+import android.text.TextUtils;
 
 import com.fongmi.android.tv.server.Server;
 import com.google.common.net.HttpHeaders;
@@ -55,5 +56,12 @@ public class UrlUtil {
         if (HttpHeaders.REFERER.equalsIgnoreCase(key)) return HttpHeaders.REFERER;
         if (HttpHeaders.COOKIE.equalsIgnoreCase(key)) return HttpHeaders.COOKIE;
         return key;
+    }
+
+    public static String fixDownloadUrl(String url) {
+        if (TextUtils.isEmpty(url)) return "";
+        Uri uri = UrlUtil.uri(url);
+        String download = uri.getQueryParameter("url");
+        return TextUtils.isEmpty(download) ? uri.toString() : download;
     }
 }

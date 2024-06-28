@@ -34,6 +34,7 @@ import com.github.catvod.net.OkHttp;
 import com.google.common.net.HttpHeaders;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.List;
 
 import okhttp3.Call;
@@ -115,7 +116,7 @@ public class SearchActivity extends BaseActivity implements WordAdapter.OnClickL
     private void getSuggest(String text) {
         mBinding.hint.setText(R.string.search_suggest);
         mWordAdapter.clear();
-        OkHttp.newCall("https://tv.aiseet.atianqi.com/i-tvbin/qtv_video/search/get_search_smart_box?format=json&page_num=0&page_size=10&key=" + text).enqueue(new Callback() {
+        OkHttp.newCall("https://tv.aiseet.atianqi.com/i-tvbin/qtv_video/search/get_search_smart_box?format=json&page_num=0&page_size=10&key=" + URLEncoder.encode(text)).enqueue(new Callback() {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (mBinding.keyword.getText().toString().trim().isEmpty()) return;
@@ -123,7 +124,7 @@ public class SearchActivity extends BaseActivity implements WordAdapter.OnClickL
                 App.post(() -> mWordAdapter.appendAll(items));
             }
         });
-        OkHttp.newCall("https://suggest.video.iqiyi.com/?if=mobile&key=" + text).enqueue(new Callback() {
+        OkHttp.newCall("https://suggest.video.iqiyi.com/?if=mobile&key=" + URLEncoder.encode(text)).enqueue(new Callback() {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (mBinding.keyword.getText().toString().trim().isEmpty()) return;
