@@ -4,12 +4,11 @@ import android.os.SystemClock;
 
 import com.fongmi.android.tv.Constant;
 import com.fongmi.android.tv.R;
-import com.fongmi.android.tv.bean.Download;
+import com.fongmi.android.tv.bean.DownloadUN;
 import com.fongmi.android.tv.bean.DownloadTask;
 import com.fongmi.android.tv.db.AppDatabase;
 import com.fongmi.android.tv.event.DownloadEvent;
 import com.fongmi.android.tv.impl.Callback;
-import com.fongmi.android.tv.player.Source;
 import com.fongmi.android.tv.player.extractor.JianPian;
 import com.fongmi.android.tv.player.extractor.Thunder;
 import com.fongmi.android.tv.utils.ResUtil;
@@ -49,12 +48,12 @@ public class DownloadSource {
         return null;
     }
 
-    public void startTask(String name, List<Download> downloads) {
+    public void startTask(String name, List<DownloadUN> downloadUNS) {
         DownloadTask fileDownloadTask = new DownloadTask();
         fileDownloadTask.setFileName(name);
         String fileUrl = "";
-        for (Download download : downloads){
-            fileUrl = fileUrl + download.getDownloadUrl() + download.getDownloadName();
+        for (DownloadUN downloadUN : downloadUNS){
+            fileUrl = fileUrl + downloadUN.getDownloadUrl() + downloadUN.getDownloadName();
         }
         fileDownloadTask.setUrl(Util.md5(fileUrl));
         fileDownloadTask.setFile(true);
@@ -62,8 +61,8 @@ public class DownloadSource {
         fileDownloadTask.update();
         fileDownloadTask.reload();
         int error_index = 0;
-        for (Download download :downloads){
-            List<DownloadTask> tasks = download(download.getDownloadName(), download.getDownloadUrl());
+        for (DownloadUN downloadUN : downloadUNS){
+            List<DownloadTask> tasks = download(downloadUN.getDownloadName(), downloadUN.getDownloadUrl());
             if (tasks != null){
                 saveDB(fileDownloadTask.getId(),tasks);
             }else{
@@ -71,7 +70,7 @@ public class DownloadSource {
             }
             SystemClock.sleep(5000);
         }
-        if (error_index == downloads.size()) fileDownloadTask.delete();
+        if (error_index == downloadUNS.size()) fileDownloadTask.delete();
     }
 
     public void startTask(String name, String url) {

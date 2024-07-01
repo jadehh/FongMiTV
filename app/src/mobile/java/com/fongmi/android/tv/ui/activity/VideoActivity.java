@@ -745,6 +745,7 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         mBinding.actor.setMaxLines(mBinding.actor.getMaxLines() == 1 ? Integer.MAX_VALUE : 1);
     }
 
+
     private void onContent() {
         mBinding.content.setMaxLines(mBinding.content.getMaxLines() == 2 ? Integer.MAX_VALUE : 2);
     }

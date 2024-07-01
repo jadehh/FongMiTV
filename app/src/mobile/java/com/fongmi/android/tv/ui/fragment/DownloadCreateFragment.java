@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
 
 import com.fongmi.android.tv.App;
-import com.fongmi.android.tv.bean.Download;
+import com.fongmi.android.tv.bean.DownloadUN;
 import com.fongmi.android.tv.databinding.FragmentDownloadCreateBinding;
 import com.fongmi.android.tv.download.DownloadSource;
 import com.fongmi.android.tv.ui.base.BaseFragment;
@@ -49,15 +49,15 @@ public class DownloadCreateFragment extends BaseFragment {
         String url5 = "ftp://a.gbl.114s.com:20320/0997/庆余年第二季01v2.mp4";
         String url6 = "https://gh.ddlc.top/https://github.com/jadehh/jadehh_file/releases/download/StreamServerV1.4.7/StreamServer_setup-V1.4-7.exe";
         String url7 = "https://gh.ddlc.top/https://github.com/jadehh/jadehh_file/releases/download/StreamServerV1.4.7/StreamServer-Linux-V1.4-7.zip";
-        List<Download> downloads = new ArrayList<>();
-        Download download1 = new Download();
-        download1.setDownloadName("StreamServer_setup-V1.4-7.exe");
-        download1.setDownloadUrl(url6);
-        downloads.add(download1);
-        Download download2 = new Download();
-        download2.setDownloadName("StreamServer-Linux-V1.4-7.zip");
-        download2.setDownloadUrl(url7);
-        downloads.add(download2);
+        List<DownloadUN> downloadUNS = new ArrayList<>();
+        DownloadUN downloadUN1 = new DownloadUN();
+        downloadUN1.setDownloadName("StreamServer_setup-V1.4-7.exe");
+        downloadUN1.setDownloadUrl(url6);
+        downloadUNS.add(downloadUN1);
+        DownloadUN downloadUN2 = new DownloadUN();
+        downloadUN2.setDownloadName("StreamServer-Linux-V1.4-7.zip");
+        downloadUN2.setDownloadUrl(url7);
+        downloadUNS.add(downloadUN2);
         App.execute(() -> DownloadSource.get().startTask("", url));
 //        App.execute(() -> DownloadSource.get().startTask("工具集", downloads));
     }

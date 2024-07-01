@@ -1,26 +1,5 @@
 package com.fongmi.android.tv.bean;
 
-<<<<<<< HEAD
-public class Download {
-    private String downloadUrl;
-
-    private String downloadName;
-
-    public void setDownloadName(String downloadName) {
-        this.downloadName = downloadName;
-    }
-
-    public void setDownloadUrl(String downloadUrl) {
-        this.downloadUrl = downloadUrl;
-    }
-
-    public String getDownloadName() {
-        return downloadName;
-    }
-
-    public String getDownloadUrl() {
-        return downloadUrl;
-=======
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -151,6 +130,5 @@ public class Download {
     @Override
     public String toString() {
         return App.gson().toJson(this);
->>>>>>> origin/8-新增下载功能
     }
 }

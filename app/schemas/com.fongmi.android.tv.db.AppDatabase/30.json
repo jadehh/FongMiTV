@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 30,
-    "identityHash": "f877ea08445883fb336fa01763b23b90",
+    "identityHash": "0b022548139474a6dfe4fd7360624372",
     "entities": [
       {
         "tableName": "Keep",
@@ -455,6 +455,56 @@
         "foreignKeys": []
       },
       {
+        "tableName": "Download",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `vodPic` TEXT, `vodName` TEXT, `url` TEXT, `header` TEXT, `createTime` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vodPic",
+            "columnName": "vodPic",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "vodName",
+            "columnName": "vodName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "header",
+            "columnName": "header",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createTime",
+            "columnName": "createTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "DownloadTask",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `parentId` INTEGER NOT NULL, `taskId` INTEGER NOT NULL, `taskStatus` INTEGER NOT NULL, `fileSize` INTEGER NOT NULL, `taskType` INTEGER NOT NULL, `downloadSize` INTEGER NOT NULL, `downloadSpeed` INTEGER NOT NULL, `url` TEXT, `hash` TEXT, `file` INTEGER, `fileName` TEXT, `localPath` TEXT, `thumbnailPath` TEXT, `createTime` INTEGER NOT NULL, `updateTime` INTEGER NOT NULL)",
         "fields": [
@@ -579,7 +629,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f877ea08445883fb336fa01763b23b90')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0b022548139474a6dfe4fd7360624372')"
     ]
   }
 }
