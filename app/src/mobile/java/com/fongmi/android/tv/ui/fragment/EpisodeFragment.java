@@ -77,8 +77,7 @@ public class EpisodeFragment extends BaseFragment implements EpisodeAdapter.OnCl
 
     @Override
     public void onItemClick(Episode item) {
-        boolean download = getDownload();
-        if (download) mViewModel.setDownload(item);
+        if (getDownload()) mViewModel.setDownload(item);
         else mViewModel.setEpisode(item);
     }
 }

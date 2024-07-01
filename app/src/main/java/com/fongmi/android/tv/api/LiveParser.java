@@ -240,7 +240,7 @@ public class LiveParser {
             try {
                 if (line.startsWith("format=")) format = line.split("format=")[1].trim();
                 if (line.contains("manifest_type=")) format = line.split("manifest_type=")[1].trim();
-                if ("mpd".equals(format)) format = MimeTypes.APPLICATION_MPD;
+                if ("mpd".equals(format) || "dash".equals(format)) format = MimeTypes.APPLICATION_MPD;
                 if ("hls".equals(format)) format = MimeTypes.APPLICATION_M3U8;
             } catch (Exception e) {
                 format = null;

@@ -44,7 +44,7 @@ public class Drm {
 
     private String getUri() {
         if (getKey().startsWith("http")) return getKey();
-        return Server.get().getAddress("license/") + Util.base64(getKey());
+        return Server.get().getAddress("license/") + Util.base64(getKey(), Util.URL_SAFE);
     }
 
     public MediaItem.DrmConfiguration get() {

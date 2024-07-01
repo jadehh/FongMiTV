@@ -1,7 +1,6 @@
 package com.fongmi.android.tv.bean;
 
 import android.text.TextUtils;
-import android.util.Base64;
 
 import androidx.annotation.NonNull;
 
@@ -128,7 +127,7 @@ public class Parse {
     public String extUrl() {
         int index = getUrl().indexOf("?");
         if (getExt().isEmpty() || index == -1) return getUrl();
-        return getUrl().substring(0, index + 1) + "cat_ext=" + Util.base64(getExt().toString(), Base64.DEFAULT | Base64.URL_SAFE | Base64.NO_WRAP) + "&" + getUrl().substring(index + 1);
+        return getUrl().substring(0, index + 1) + "cat_ext=" + Util.base64(getExt().toString(), Util.URL_SAFE) + "&" + getUrl().substring(index + 1);
     }
 
     public HashMap<String, String> mixMap() {

@@ -1,5 +1,7 @@
 package com.github.catvod.utils;
 
+import android.text.TextUtils;
+
 import androidx.collection.ArrayMap;
 
 import com.google.gson.JsonElement;
@@ -67,6 +69,10 @@ public class Json {
         } catch (Exception e) {
             return new JsonObject();
         }
+    }
+
+    public static Map<String, String> toMap(String json) {
+        return TextUtils.isEmpty(json) ? null : toMap(parse(json));
     }
 
     public static Map<String, String> toMap(JsonElement element) {

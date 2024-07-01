@@ -10,7 +10,6 @@ import com.fongmi.android.tv.player.extractor.TVBus;
 import com.fongmi.android.tv.player.extractor.Thunder;
 import com.fongmi.android.tv.player.extractor.Video;
 import com.fongmi.android.tv.player.extractor.Youtube;
-import com.fongmi.android.tv.player.extractor.ZLive;
 import com.fongmi.android.tv.utils.UrlUtil;
 
 import java.util.ArrayList;
@@ -38,7 +37,6 @@ public class Source {
         extractors.add(new TVBus());
         extractors.add(new Video());
         extractors.add(new Youtube());
-        extractors.add(new ZLive());
     }
 
     private Extractor getExtractor(String url) {

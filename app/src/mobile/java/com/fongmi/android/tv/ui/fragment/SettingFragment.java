@@ -383,7 +383,10 @@ public class SettingFragment extends BaseFragment implements BackupCallback, Con
             public void success() {
                 if (allGranted) {
                     Notify.progress(getActivity());
-                    App.post(() -> initConfig(), 3000);
+                    App.post(() -> {
+                        AppDatabase.reset();
+                        initConfig();
+                    }, 3000);
                 }
             }
         }));

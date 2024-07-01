@@ -245,7 +245,7 @@ public class Vod implements Parcelable {
     }
 
     public String getVodName(String name) {
-        if (getVodName().isEmpty()) setVodName(name);
+        if (!TextUtils.isEmpty(name)) setVodName(name);
         return getVodName();
     }
 

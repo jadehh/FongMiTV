@@ -736,7 +736,6 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
 
     private void setQualityActivated(Result result) {
         try {
-            result.setUrl(Source.get().fetch(result));
             mPlayers.start(result, isUseParse(), getSite().isChangeable() ? getSite().getTimeout() : -1);
             mBinding.danmaku.hide();
         } catch (Exception e) {

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 
@@ -67,48 +68,54 @@ public class IDMUtil {
     }
 
     private static boolean downloadFilesInternal(@NonNull Activity activity, @Nullable Map<String, String> urlAndFileNames, @Nullable String url, @Nullable String referer, @Nullable String fileName, @Nullable String userAgent, @Nullable String cookies, @Nullable Map<String, String> headers, boolean secureUri, boolean askUserToInstall1DMIfNotInstalled){
-        int requiredVersionCode = secureUri ? SECURE_URI_1DM_SUPPORT_MIN_VERSION_CODE : !isEmpty(urlAndFileNames) || !isEmpty(headers) ? HEADERS_AND_MULTIPLE_LINKS_1DM_SUPPORT_MIN_VERSION_CODE : 0;
-        String packageName = "";
         try {
-            packageName = get1DMInstalledPackageName(requiredVersionCode, askUserToInstall1DMIfNotInstalled);
+            int requiredVersionCode = secureUri ? SECURE_URI_1DM_SUPPORT_MIN_VERSION_CODE : !isEmpty(urlAndFileNames) || !isEmpty(headers) ? HEADERS_AND_MULTIPLE_LINKS_1DM_SUPPORT_MIN_VERSION_CODE : 0;
+            String packageName = "";
+            try {
+                packageName = get1DMInstalledPackageName(requiredVersionCode, askUserToInstall1DMIfNotInstalled);
+            } catch (Exception e) {
+                return false;
+            }
+            if (TextUtils.isEmpty(packageName)) return false;
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setComponent(new ComponentName(packageName, DOWNLOADER_ACTIVITY_NAME_1DM));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) intent.addCategory(Intent.CATEGORY_BROWSABLE);
+            intent.putExtra(EXTRA_SECURE_URI, secureUri);
+            if (isEmpty(urlAndFileNames)) {
+                intent.setData(Uri.parse(url));
+                if (!TextUtils.isEmpty(referer)) intent.putExtra(EXTRA_REFERER, referer);
+                if (!TextUtils.isEmpty(userAgent)) intent.putExtra(EXTRA_USERAGENT, userAgent);
+                if (!TextUtils.isEmpty(cookies)) intent.putExtra(EXTRA_COOKIES, cookies);
+                if (!TextUtils.isEmpty(fileName)) intent.putExtra(EXTRA_FILENAME, fileName);
+            } else {
+                ArrayList<String> urls = new ArrayList<>(urlAndFileNames.size());
+                ArrayList<String> names = new ArrayList<>(urlAndFileNames.size());
+                for (Map.Entry<String, String> entry : urlAndFileNames.entrySet()) {
+                    if (TextUtils.isEmpty(entry.getKey())) continue;
+                    urls.add(entry.getKey());
+                    names.add(entry.getValue());
+                }
+                if (urls.size() > 0) {
+                    intent.putExtra(EXTRA_URL_LIST, urls);
+                    intent.putExtra(EXTRA_URL_FILENAME_LIST, names);
+                    intent.setData(Uri.parse(urls.get(0)));
+                }
+            }
+            if (!isEmpty(headers)) {
+                Bundle extra = new Bundle();
+                for (Map.Entry<String, String> entry : headers.entrySet()) extra.putString(entry.getKey(), entry.getValue());
+                intent.putExtra(EXTRA_HEADERS, extra);
+            }
+            activity.startActivity(intent);
+            return true;
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
-        if (TextUtils.isEmpty(packageName)) return false;
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setComponent(new ComponentName(packageName, DOWNLOADER_ACTIVITY_NAME_1DM));
-        intent.putExtra(EXTRA_SECURE_URI, secureUri);
-        if (isEmpty(urlAndFileNames)) {
-            intent.setData(Uri.parse(url));
-            if (!TextUtils.isEmpty(referer)) intent.putExtra(EXTRA_REFERER, referer);
-            if (!TextUtils.isEmpty(userAgent)) intent.putExtra(EXTRA_USERAGENT, userAgent);
-            if (!TextUtils.isEmpty(cookies)) intent.putExtra(EXTRA_COOKIES, cookies);
-            if (!TextUtils.isEmpty(fileName)) intent.putExtra(EXTRA_FILENAME, fileName);
-        } else {
-            ArrayList<String> urls = new ArrayList<>(urlAndFileNames.size());
-            ArrayList<String> names = new ArrayList<>(urlAndFileNames.size());
-            for (Map.Entry<String, String> entry : urlAndFileNames.entrySet()) {
-                if (TextUtils.isEmpty(entry.getKey())) continue;
-                urls.add(entry.getKey());
-                names.add(entry.getValue());
-            }
-            if (urls.size() > 0) {
-                intent.putExtra(EXTRA_URL_LIST, urls);
-                intent.putExtra(EXTRA_URL_FILENAME_LIST, names);
-                intent.setData(Uri.parse(urls.get(0)));
-            }
-        }
-        if (!isEmpty(headers)) {
-            Bundle extra = new Bundle();
-            for (Map.Entry<String, String> entry : headers.entrySet()) extra.putString(entry.getKey(), entry.getValue());
-            intent.putExtra(EXTRA_HEADERS, extra);
-        }
-        activity.startActivity(intent);
-        return true;
     }
 
     public static void install1DM(String packageName, boolean update) {
-        
+
     }
 
     private static <S, T> boolean isEmpty(Map<S, T> map) {

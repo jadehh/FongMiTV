@@ -63,7 +63,7 @@ import com.fongmi.android.tv.event.PlayerEvent;
 import com.fongmi.android.tv.event.RefreshEvent;
 import com.fongmi.android.tv.impl.SubtitleCallback;
 import com.fongmi.android.tv.model.SiteViewModel;
-import com.fongmi.android.tv.player.Download;
+import com.fongmi.android.tv.utils.Downloader;
 import com.fongmi.android.tv.player.exo.ExoUtil;
 import com.fongmi.android.tv.player.Players;
 import com.fongmi.android.tv.player.Source;
@@ -422,6 +422,14 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         mBinding.video.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> mPiP.update(getActivity(), view));
     }
 
+    private void setVideoView(boolean isInPictureInPictureMode) {
+        if (isInPictureInPictureMode) {
+            mBinding.video.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+        } else {
+            mBinding.video.setLayoutParams(mFrameParams);
+        }
+    }
+
     private void setSubtitleView() {
         setSubtitle(Setting.getSubtitle());
         getExo().getSubtitleView().setStyle(ExoUtil.getCaptionStyle());
@@ -479,7 +487,8 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
             hideSheet();
         });
         mViewModel.ep.observe(this, episode -> {
-            Download.get().title(mBinding.name.getText() + "-" + episode.getName());
+            Notify.progress(this);
+            Downloader.get().title(mBinding.name.getText() + "-" + episode.getName());
             mViewModel.download(getKey(), getFlag().getFlag(), episode.getUrl());
         });
     }
@@ -537,6 +546,7 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         mBinding.progressLayout.showContent();
         mBinding.video.setTag(item.getVodPic(getPic()));
         mBinding.name.setText(item.getVodName(getName()));
+        Downloader.get().image(item.getVodPic());
         setText(mBinding.remark, 0, item.getVodRemarks());
         setText(mBinding.site, R.string.detail_site, getSite().getName());
         setText(mBinding.content, 0, Html.fromHtml(item.getVodContent()).toString());
@@ -624,7 +634,7 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
     }
 
     private void setDownload(Result result) {
-        Download.get().result(result).start(this);
+        Downloader.get().result(result).start(this);
     }
 
     private void checkDanmu(String danmu) {
@@ -656,7 +666,6 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
     @Override
     public void onItemClick(Result result) {
         try {
-            result.setUrl(Source.get().fetch(result));
             mPlayers.start(result, isUseParse(), getSite().isChangeable() ? getSite().getTimeout() : -1);
             mBinding.danmaku.hide();
         } catch (Exception e) {
@@ -1715,17 +1724,16 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
     @Override
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode);
+        if (!isFullscreen()) setVideoView(isInPictureInPictureMode);
         if (isInPictureInPictureMode) {
             PlaybackService.start(mPlayers);
             mBinding.danmaku.hide();
-            enterFullscreen();
             setSubtitle(10);
             hideControl();
             hideSheet();
         } else {
             showDanmu();
             setForeground(true);
-            exitFullscreen();
             PlaybackService.stop();
             setSubtitle(Setting.getSubtitle());
             if (isStop()) finish();

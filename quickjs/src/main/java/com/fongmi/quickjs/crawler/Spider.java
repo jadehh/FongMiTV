@@ -13,6 +13,7 @@ import com.fongmi.quickjs.utils.JSUtil;
 import com.fongmi.quickjs.utils.Module;
 import com.github.catvod.utils.Asset;
 import com.github.catvod.utils.Json;
+import com.github.catvod.utils.Util;
 import com.whl.quickjs.wrapper.JSArray;
 import com.whl.quickjs.wrapper.JSMethod;
 import com.whl.quickjs.wrapper.JSObject;
@@ -228,10 +229,13 @@ public class Spider extends com.github.catvod.crawler.Spider {
     private Object[] proxy1(Map<String, String> params) throws Exception {
         JSObject object = JSUtil.toObj(ctx, params);
         JSONArray array = new JSONArray(((JSArray) jsObject.getJSFunction("proxy").call(object)).stringify());
-        Object[] result = new Object[3];
-        result[0] = array.opt(0);
-        result[1] = array.opt(1);
-        result[2] = getStream(array.opt(2));
+        Map<String, String> headers = array.length() > 3 ? Json.toMap(array.optString(3)) : null;
+        boolean base64 = array.length() > 4 && array.optInt(4) == 1;
+        Object[] result = new Object[4];
+        result[0] = array.optInt(0);
+        result[1] = array.optString(1);
+        result[2] = getStream(array.opt(2), base64);
+        result[3] = headers;
         return result;
     }
 
@@ -249,15 +253,16 @@ public class Spider extends com.github.catvod.crawler.Spider {
         return result;
     }
 
-    private ByteArrayInputStream getStream(Object o) {
+    private ByteArrayInputStream getStream(Object o, boolean base64) {
         if (o instanceof JSONArray) {
             JSONArray a = (JSONArray) o;
             byte[] bytes = new byte[a.length()];
             for (int i = 0; i < a.length(); i++) bytes[i] = (byte) a.optInt(i);
             return new ByteArrayInputStream(bytes);
         } else {
-            return new ByteArrayInputStream(o.toString().getBytes());
+            String content = o.toString();
+            if (base64 && content.contains("base64,")) content = content.split("base64,")[1];
+            return new ByteArrayInputStream(base64 ? Util.decode(content) : content.getBytes());
         }
     }
 }
-

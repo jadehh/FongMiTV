@@ -1,9 +1,9 @@
 package com.fongmi.quickjs.bean;
 
 import android.text.TextUtils;
-import android.util.Base64;
 
 import com.github.catvod.utils.Json;
+import com.github.catvod.utils.Util;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.annotations.SerializedName;
@@ -57,7 +57,7 @@ public class Res {
     }
 
     public ByteArrayInputStream getStream() {
-        if (getBuffer() == 2) return new ByteArrayInputStream(Base64.decode(getContent(), Base64.DEFAULT));
+        if (getBuffer() == 2) return new ByteArrayInputStream(Util.decode(getContent()));
         return new ByteArrayInputStream(getContent().getBytes());
     }
 }

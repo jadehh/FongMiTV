@@ -27,10 +27,7 @@ import com.fongmi.android.tv.Setting;
 import com.fongmi.android.tv.bean.Drm;
 import com.fongmi.android.tv.bean.Sub;
 import com.fongmi.android.tv.player.Players;
-import com.fongmi.android.tv.server.Server;
-import com.fongmi.android.tv.utils.Sniffer;
 
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -97,8 +94,6 @@ public class ExoUtil {
     }
 
     public static MediaItem getMediaItem(Map<String, String> headers, Uri uri, String mimeType, Drm drm, List<Sub> subs, int decode) {
-        boolean m3u8Ad = uri.toString().contains(".m3u8") && (Setting.isRemoveAd() || Sniffer.getRegex(uri).size() > 0);
-        if (m3u8Ad) uri = Uri.parse(Server.get().getAddress(true).concat("/m3u8?url=").concat(URLEncoder.encode(uri.toString())));
         MediaItem.Builder builder = new MediaItem.Builder().setUri(uri);
         builder.setRequestMetadata(getRequestMetadata(headers, uri));
         builder.setSubtitleConfigurations(getSubtitleConfigs(subs));
