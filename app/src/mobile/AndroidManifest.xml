@@ -119,6 +119,11 @@
             android:theme="@style/AppTheme.Detail" />
 
         <activity
+            android:name=".ui.activity.DownloadDetailActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout"
+            android:screenOrientation="fullUser" />
+
+        <activity
             android:name=".ui.activity.MangaActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout"
             android:screenOrientation="fullUser" />

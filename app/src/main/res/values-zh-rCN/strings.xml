@@ -161,11 +161,18 @@
     <string name="error_play_timeout">连接超时</string>
     <string name="error_detail">暂无播放数据</string>
     <string name="error_empty">找不到数据</string>
+    <string name="error_download">下载失败</string>
 
     <!-- Update -->
     <string name="update_version">发现新版本 <xliff:g name="name">%s</xliff:g></string>
     <string name="update_check">正在检测更新…</string>
     <string name="update_confirm">更新</string>
+
+    <!-- Download -->
+    <string name="download_success_msg">获取下载地址成功</string>
+    <string name="download_fail_msg">下载失败</string>
+    <string name="download_exists">下载列表已存在</string>
+    <string name="download_not_support_msg">不支持下载</string>
 
     <!-- X5 WebView -->
     <string name="x5webview_title">X5 WebView</string>

@@ -121,6 +121,7 @@ public class ResUtil {
         return App.get().getResources().getStringArray(resId);
     }
 
+
     public static TypedArray getTypedArray(@ArrayRes int resId) {
         return App.get().getResources().obtainTypedArray(resId);
     }

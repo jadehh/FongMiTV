@@ -26,7 +26,7 @@ public class EpisodeGridDialog extends BaseDialog {
     private DialogEpisodeGridBinding binding;
     private List<Episode> episodes;
     private final List<String> titles;
-    private boolean download;
+    private int download;
     private boolean reverse;
     private int spanCount;
     private int itemCount;
@@ -38,7 +38,7 @@ public class EpisodeGridDialog extends BaseDialog {
     public EpisodeGridDialog() {
         this.titles = new ArrayList<>();
         this.spanCount = 5;
-        this.download = false;
+        this.download = 0;
     }
 
     public EpisodeGridDialog reverse(boolean reverse) {
@@ -46,7 +46,7 @@ public class EpisodeGridDialog extends BaseDialog {
         return this;
     }
 
-    public EpisodeGridDialog download(boolean download) {
+    public EpisodeGridDialog download(int download) {
         this.download = download;
         return this;
     }
@@ -68,7 +68,7 @@ public class EpisodeGridDialog extends BaseDialog {
 
     @Override
     protected void initView() {
-        binding.episode.setText(download ? R.string.detail_download : R.string.detail_episode);
+        binding.episode.setText(download==0 ? R.string.detail_episode :download == 1 ? R.string.detail_outer_download:R.string.detail_inner_download);
         setSpanCount();
         setTitles();
         setPager();

@@ -1,0 +1,24 @@
+apply plugin: 'com.android.library'
+
+android {
+  namespace 'com.arialyy.aria.m3u8'
+  compileSdk 34
+
+  defaultConfig {
+    minSdk 21
+    targetSdk 28
+  }
+
+}
+
+
+dependencies {
+  implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+  implementation project(path: ':HttpComponent')
+  implementation project(path: ':PublicComponent')
+}
+
+ext{
+  PUBLISH_ARTIFACT_ID = 'm3u8'
+}

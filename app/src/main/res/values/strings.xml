@@ -162,11 +162,18 @@
     <string name="error_play_timeout">Timed out</string>
     <string name="error_detail">No play data</string>
     <string name="error_empty">Not found</string>
+    <string name="error_download">Download failed</string>
 
     <!-- Update -->
     <string name="update_version">New version <xliff:g name="name">%s</xliff:g></string>
     <string name="update_check">Checking for updates…</string>
     <string name="update_confirm">Update</string>
+
+    <!-- Download -->
+    <string name="download_success_msg">Get Download Url Success</string>
+    <string name="download_fail_msg">Download failed</string>
+    <string name="download_exists">Download exists</string>
+    <string name="download_not_support_msg">Not support download</string>
 
     <!-- X5 WebView -->
     <string name="x5webview_title">X5 WebView</string>

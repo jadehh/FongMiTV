@@ -23,6 +23,23 @@ public class P2PClass {
         doxstart(bArr);
     }
 
+    public long P2Pdownload(byte[] bArr) {
+        return (long) doxstart(bArr);
+    }
+
+    public long P2Pgetdownsize(int var1) {
+        return getdownsize(var1);
+    }
+
+    public long P2Pgetfilesize(int var1) {
+        return getfilesize(var1);
+    }
+
+    public long P2Pgetspeed(int var1) {
+        return getspeed(var1);
+    }
+
+
     public void P2Pdoxadd(byte[] bArr) {
         doxadd(bArr);
     }
@@ -46,4 +63,12 @@ public class P2PClass {
     private native int doxpause(byte[] bArr);
 
     private native int doxdel(byte[] bArr);
+
+    private native long getdownsize(int var1);
+
+    private native long getfilesize(int var1);
+
+    private  native long getspeed(int i);
+
+
 }

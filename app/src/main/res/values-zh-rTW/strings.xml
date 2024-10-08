@@ -162,11 +162,18 @@
     <string name="error_play_timeout">連線逾時</string>
     <string name="error_detail">暫無播放資料</string>
     <string name="error_empty">找不到資料</string>
+    <string name="error_download">下載失敗</string>
 
     <!-- Update -->
     <string name="update_version">發現新版本 <xliff:g name="name">%s</xliff:g></string>
     <string name="update_check">正在檢查更新…</string>
     <string name="update_confirm">更新</string>
+
+    <!-- Download -->
+    <string name="download_success_msg">獲取下載地址成功</string>
+    <string name="download_fail_msg">下載失敗</string>
+    <string name="download_exists">下載列表已存在</string>
+    <string name="download_not_support_msg">不支持下載</string>
 
     <!-- X5 WebView -->
     <string name="x5webview_title">X5 WebView</string>

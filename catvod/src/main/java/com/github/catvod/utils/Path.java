@@ -97,6 +97,10 @@ public class Path {
         return mkdir(new File(thunderCache() + File.separator + "jpa"));
     }
 
+    public static File m3u8() {
+        return mkdir(new File(cache() + File.separator + "m3u8"));
+    }
+
     public static File thunder() {
         return mkdir(new File(thunderCache() + File.separator + "thunder"));
     }

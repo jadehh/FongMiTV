@@ -12,6 +12,7 @@ import com.fongmi.android.tv.Constant;
 import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.api.config.VodConfig;
 import com.fongmi.android.tv.bean.Danmu;
+import com.fongmi.android.tv.bean.Download;
 import com.fongmi.android.tv.bean.Episode;
 import com.fongmi.android.tv.bean.Flag;
 import com.fongmi.android.tv.bean.Result;
@@ -19,7 +20,10 @@ import com.fongmi.android.tv.bean.Site;
 import com.fongmi.android.tv.bean.Url;
 import com.fongmi.android.tv.bean.Vod;
 import com.fongmi.android.tv.exception.ExtractException;
+import com.fongmi.android.tv.player.DownloadSource;
 import com.fongmi.android.tv.player.Source;
+import com.fongmi.android.tv.player.extractor.Thunder;
+import com.fongmi.android.tv.service.DownloadService;
 import com.fongmi.android.tv.utils.ResUtil;
 import com.fongmi.android.tv.utils.Sniffer;
 import com.github.catvod.crawler.Spider;
@@ -31,6 +35,7 @@ import com.github.catvod.utils.Util;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -42,32 +47,51 @@ import okhttp3.Response;
 
 public class SiteViewModel extends ViewModel {
 
-    public MutableLiveData<Episode> ep;
+    public MutableLiveData<Episode> outerDownloadEp;
+    public MutableLiveData<Episode> innerDownloadEp;
     public MutableLiveData<Episode> episode;
+    public MutableLiveData<String> download;
+    public MutableLiveData<String> downloadEp;
     public MutableLiveData<Result> result;
     public MutableLiveData<Result> player;
     public MutableLiveData<Result> search;
     public MutableLiveData<Result> action;
     public MutableLiveData<Danmu> danmaku;
-    public MutableLiveData<Result> download;
+    public MutableLiveData<Result> outerDownload;
+    public MutableLiveData<String> innerDownload;
+
     private ExecutorService executor;
 
     public SiteViewModel() {
-        this.ep = new MutableLiveData<>();
+        this.outerDownloadEp = new MutableLiveData<>();
+        this.innerDownloadEp = new MutableLiveData<>();
+        this.downloadEp = new MutableLiveData<>();
+        this.download = new MutableLiveData<>();
         this.episode = new MutableLiveData<>();
         this.result = new MutableLiveData<>();
         this.player = new MutableLiveData<>();
         this.search = new MutableLiveData<>();
+        this.outerDownload = new MutableLiveData<>();
+        this.innerDownload = new MutableLiveData<>();
         this.action = new MutableLiveData<>();
         this.download = new MutableLiveData<>();
+
     }
 
     public void setEpisode(Episode value) {
         episode.setValue(value);
     }
 
-    public void setDownload(Episode value) {
-        ep.setValue(value);
+    public void setDownload(String url){
+        downloadEp.setValue(url);
+    }
+
+    public void setOuterDownload(Episode value) {
+        outerDownloadEp.setValue(value);
+    }
+
+    public void setInnerDownload(Episode value) {
+        innerDownloadEp.setValue(value);
     }
 
     public void homeContent() {
@@ -107,8 +131,10 @@ public class SiteViewModel extends ViewModel {
                 return Result.fromJson(categoryContent);
             } else {
                 ArrayMap<String, String> params = new ArrayMap<>();
-                if (site.getType() == 1 && !extend.isEmpty()) params.put("f", App.gson().toJson(extend));
-                if (site.getType() == 4) params.put("ext", Util.base64(App.gson().toJson(extend), Util.URL_SAFE));
+                if (site.getType() == 1 && !extend.isEmpty())
+                    params.put("f", App.gson().toJson(extend));
+                if (site.getType() == 4)
+                    params.put("ext", Util.base64(App.gson().toJson(extend), Util.URL_SAFE));
                 params.put("ac", site.getType() == 0 ? "videolist" : "detail");
                 params.put("t", tid);
                 params.put("pg", page);
@@ -123,11 +149,15 @@ public class SiteViewModel extends ViewModel {
         execute(result, () -> {
             Site site = VodConfig.get().getSite(key);
             if (site.getType() == 3) {
+                Spider spider = VodConfig.get().getSpider(site);
+                String detailContent = spider.detailContent(Collections.singletonList(id));
                 Spider spider = site.recent().spider();
                 String detailContent = spider.detailContent(Arrays.asList(id));
                 SpiderDebug.log(detailContent);
                 Result result = Result.fromJson(detailContent);
                 if (!result.getList().isEmpty()) result.getList().get(0).setVodFlags();
+                if (!result.getList().isEmpty())
+                    checkThunder(result.getList().get(0).getVodFlags());
                 if (!result.getList().isEmpty()) Source.get().parse(result.getList().get(0).getVodFlags());
                 return result;
             } else if (site.isEmpty() && "push_agent".equals(key)) {
@@ -146,6 +176,8 @@ public class SiteViewModel extends ViewModel {
                 SpiderDebug.log(detailContent);
                 Result result = Result.fromType(site.getType(), detailContent);
                 if (!result.getList().isEmpty()) result.getList().get(0).setVodFlags();
+                if (!result.getList().isEmpty())
+                    checkThunder(result.getList().get(0).getVodFlags());
                 if (!result.getList().isEmpty()) Source.get().parse(result.getList().get(0).getVodFlags());
                 return result;
             }
@@ -201,12 +233,36 @@ public class SiteViewModel extends ViewModel {
         });
     }
 
+    private void innerDownload(MutableLiveData<String> data,String name, String pic,String url, String headers) {
+        downloadExecute(data, () -> {
+            Source.get().stop();
+            String msg =  DownloadSource.get().startTask(new Download(name, pic,url, headers));
+            return msg;
+        });
+    }
+
+    private void download(MutableLiveData<String> data,String url){
+        downloadExecute(data, () -> {
+            Source.get().stop();
+            return DownloadSource.get().startTask(new Download("", "", url, ""));
+        });
+    }
+
+
     public void playerContent(String key, String flag, String id) {
         executePlayer(player, key, flag, id);
     }
 
-    public void download(String key, String flag, String id) {
-        executePlayer(download, key, flag, id);
+    public void outerDownload(String key, String flag, String id) {
+        executePlayer(outerDownload, key, flag, id);
+    }
+
+    public void innerDownload(String name, String pic,String url, String headers) {
+        innerDownload(innerDownload, name,pic, url, headers);
+    }
+
+    public void download(String url){
+        download(download,url);
     }
 
     public void action(String key, String action) {
@@ -245,6 +301,7 @@ public class SiteViewModel extends ViewModel {
                 ArrayMap<String, String> params = new ArrayMap<>();
                 params.put("wd", Trans.t2s(keyword));
                 params.put("pg", page);
+                params.put("pg", page);
                 String searchContent = call(site, params, true);
                 SpiderDebug.log(site.getName() + "," + searchContent);
                 Result result = fetchPic(site, Result.fromType(site.getType(), searchContent));
@@ -275,10 +332,13 @@ public class SiteViewModel extends ViewModel {
     }
 
     private Result fetchPic(Site site, Result result) throws Exception {
-        if (site.getType() > 2 || result.getList().isEmpty() || result.getList().get(0).getVodPic().length() > 0) return result;
+        if (site.getType() > 2 || result.getList().isEmpty() || result.getList().get(0).getVodPic().length() > 0)
+            return result;
         ArrayList<String> ids = new ArrayList<>();
-        if (site.getCategories().isEmpty()) for (Vod item : result.getList()) ids.add(item.getVodId());
-        else for (Vod item : result.getList()) if (site.getCategories().contains(item.getTypeName())) ids.add(item.getVodId());
+        if (site.getCategories().isEmpty())
+            for (Vod item : result.getList()) ids.add(item.getVodId());
+        else for (Vod item : result.getList())
+            if (site.getCategories().contains(item.getTypeName())) ids.add(item.getVodId());
         if (ids.isEmpty()) return result.clear();
         ArrayMap<String, String> params = new ArrayMap<>();
         params.put("ac", site.getType() == 0 ? "videolist" : "detail");
@@ -286,6 +346,29 @@ public class SiteViewModel extends ViewModel {
         String response = OkHttp.newCall(site.getApi(), site.getHeaders(), params).execute().body().string();
         result.setList(Result.fromType(site.getType(), response).getList());
         return result;
+    }
+
+    private void checkThunder(List<Flag> flags) throws Exception {
+        for (Flag flag : flags) {
+            ExecutorService executor = Executors.newFixedThreadPool(Constant.THREAD_POOL * 2);
+            for (Future<List<Episode>> future : executor.invokeAll(getThunder(flag), 30, TimeUnit.SECONDS))
+                flag.getEpisodes().addAll(future.get());
+            executor.shutdownNow();
+        }
+    }
+
+    private List<Thunder.Parser> getThunder(Flag flag) {
+        List<Thunder.Parser> items = new ArrayList<>();
+        Iterator<Episode> iterator = flag.getEpisodes().iterator();
+        while (iterator.hasNext()) addThunder(iterator, items);
+        return items;
+    }
+
+    private void addThunder(Iterator<Episode> iterator, List<Thunder.Parser> items) {
+        String url = iterator.next().getUrl();
+        if (!Sniffer.isThunder(url)) return;
+        items.add(Thunder.Parser.get(url));
+        iterator.remove();
     }
 
     private void post(Site site, Result result) {
@@ -303,8 +386,23 @@ public class SiteViewModel extends ViewModel {
                 result.postValue(executor.submit(callable).get(Constant.TIMEOUT_VOD, TimeUnit.MILLISECONDS));
             } catch (Throwable e) {
                 if (e instanceof InterruptedException || Thread.interrupted()) return;
-                if (e.getCause() instanceof ExtractException) result.postValue(Result.error(e.getCause().getMessage()));
+                if (e.getCause() instanceof ExtractException)
+                    result.postValue(Result.error(e.getCause().getMessage()));
                 else result.postValue(Result.empty());
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void downloadExecute(MutableLiveData<String> result, Callable<String> callable) {
+        if (executor != null) executor.shutdownNow();
+        executor = Executors.newFixedThreadPool(2);
+        executor.execute(() -> {
+            try {
+                if (Thread.interrupted()) return;
+                result.postValue(executor.submit(callable).get(Constant.TIMEOUT_VOD, TimeUnit.MILLISECONDS));
+            } catch (Throwable e) {
+                if (e instanceof InterruptedException || Thread.interrupted()) return;
                 e.printStackTrace();
             }
         });

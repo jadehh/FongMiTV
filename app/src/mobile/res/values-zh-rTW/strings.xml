@@ -8,14 +8,36 @@
     <string name="nav_vod">點播</string>
     <string name="nav_live">直播</string>
     <string name="nav_setting">設定</string>
+    <string name="nav_downloading">下載</string>
 
     <!-- Vod -->
     <string name="vod_home">推薦</string>
 
+    <!-- Download -->
+    <string name="download">下載</string>
+    <string name="create_download">創建任務</string>
+    <string name="download_detail">下載詳情</string>
+    <string name="downloading">下載中</string>
+    <string name="download_url_hint">請輸入或粘貼下載鏈接(支持：磁力鏈、magnet://、thunder://、ftp://、http://、ed2k://、m3u8)</string>
+    <string name="start_download">開始下載</string>
+    <string name="download_finish">下載完成</string>
+    <string name="download_size">%1$s / %2$s</string>
+    <string name="download_speed">%1$s / s </string>
+    <string name="download_status">已暫停</string>
+    <string name="download_stop">已停止</string>
+    <string name="download_connect">連接中</string>
+    <string name="download_fail">失敗</string>
+    <string name="download_waiting">等待中</string>
+    <string name="download_downloading">下載中</string>
+    <string name="download_remaining_time">剩餘時間</string>
+    <string name="download_delete_file">刪除文件</string>
+    <string name="download_open">打開</string>
+
     <!-- Detail -->
     <string name="detail_flag">線路</string>
     <string name="detail_more">更多</string>
-    <string name="detail_download">下載</string>
+    <string name="detail_outer_download">内部下載</string>
+    <string name="detail_inner_download">外部下載</string>
     <string name="detail_episode">選集</string>
     <string name="detail_quality">畫質</string>
     <string name="detail_content">簡介</string>
