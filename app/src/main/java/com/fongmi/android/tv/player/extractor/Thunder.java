@@ -11,11 +11,11 @@ import com.fongmi.android.tv.exception.ExtractException;
 import com.fongmi.android.tv.player.DownloadSource;
 import com.fongmi.android.tv.player.Source;
 import com.fongmi.android.tv.utils.Download;
+import com.fongmi.android.tv.utils.Sniffer;
 import com.fongmi.android.tv.utils.UrlUtil;
 import com.github.catvod.utils.Path;
 import com.github.catvod.utils.Util;
 import com.orhanobut.logger.Logger;
-import com.p2p.P2PClass;
 import com.xunlei.downloadlib.XLTaskHelper;
 import com.xunlei.downloadlib.parameter.GetTaskId;
 import com.xunlei.downloadlib.parameter.TorrentFileInfo;
@@ -66,6 +66,7 @@ public class Thunder implements Source.Extractor, DownloadSource.Extractor {
                 int time = 0;
                 while (XLTaskHelper.get().getTaskInfo(taskId).getTaskStatus() != 2 && time < 5000) {
                     sleep(time);
+                    time = time + 1000;
                 }
                 List<TorrentFileInfo> medias = XLTaskHelper.get().getTorrentInfo(taskId.getSaveFile()).getMedias();
                 downloadTasks.add(getDownloadTask(name,taskId,thumbPath));

@@ -69,23 +69,23 @@ public final class SubtitleDialog extends BaseDialog {
     }
 
     private void onUp(View view) {
-        subtitleView.addBottomPadding(0.005f);
-        Setting.putSubtitleBottomPadding(subtitleView.getBottomPadding());
+//        subtitleView.addBottomPadding(0.005f);
+        Setting.putSubtitleBottomPadding(0.005f);
     }
 
     private void onDown(View view) {
-        subtitleView.subBottomPadding(0.005f);
-        Setting.putSubtitleBottomPadding(subtitleView.getBottomPadding());
+//        subtitleView.subBottomPadding(0.005f);
+        Setting.putSubtitleBottomPadding(0.005f);
     }
 
     private void onLarge(View view) {
-        subtitleView.addTextSize(0.002f);
-        Setting.putSubtitleTextSize(subtitleView.getTextSize());
+//        subtitleView.addTextSize(0.002f);
+        Setting.putSubtitleTextSize(0.002f);
     }
 
     private void onSmall(View view) {
-        subtitleView.subTextSize(0.002f);
-        Setting.putSubtitleTextSize(subtitleView.getTextSize());
+//        subtitleView.subTextSize(0.002f);
+        Setting.putSubtitleTextSize(0.002f);
     }
 
     private void onReset(View view) {
