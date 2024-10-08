@@ -60,7 +60,7 @@ public class CustomKeyDownLive extends GestureDetector.SimpleOnGestureListener {
     }
 
     private boolean isEdge(MotionEvent e) {
-        return ResUtil.isEdge(e, ResUtil.dp2px(16));
+        return ResUtil.isEdge(e, ResUtil.dp2px(32));
     }
 
     @Override

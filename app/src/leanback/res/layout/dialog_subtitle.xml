@@ -1,73 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:orientation="horizontal"
+    android:padding="8dp">
 
-    <FrameLayout
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/large"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/shape_subtitle">
+        android:background="@drawable/selector_image"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:padding="8dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/ic_subtitle_large" />
 
-        <androidx.media3.ui.SubtitleView
-            android:id="@+id/preview"
-            android:layout_width="match_parent"
-            android:layout_height="76dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp" />
-
-    </FrameLayout>
-
-    <com.google.android.material.slider.Slider
-        android:id="@+id/slider"
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/small"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:nextFocusDown="@id/positive"
-        android:stepSize="1"
-        android:valueFrom="14"
-        android:valueTo="48"
-        app:labelBehavior="gone"
-        app:thumbColor="@color/blue_500"
-        app:trackColorActive="@color/blue_500"
-        app:trackColorInactive="@color/blue_50" />
+        android:background="@drawable/selector_image"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:padding="8dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/ic_subtitle_small" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/up"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal">
+        android:background="@drawable/selector_image"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:padding="8dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/ic_subtitle_up" />
 
-        <TextView
-            android:id="@+id/positive"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_weight="1"
-            android:background="@drawable/selector_text"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:gravity="center"
-            android:singleLine="true"
-            android:text="@string/dialog_positive"
-            android:textColor="@color/white"
-            android:textSize="14sp" />
+    <ImageView
+        android:id="@+id/down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/selector_image"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:padding="8dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/ic_subtitle_down" />
 
-        <TextView
-            android:id="@+id/negative"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/selector_text"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:gravity="center"
-            android:singleLine="true"
-            android:text="@string/dialog_negative"
-            android:textColor="@color/white"
-            android:textSize="14sp" />
+    <ImageView
+        android:id="@+id/reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/selector_image"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:padding="8dp"
+        android:src="@drawable/ic_subtitle_reset" />
 
-    </LinearLayout>
 </LinearLayout>

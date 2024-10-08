@@ -329,15 +329,15 @@ public class Channel {
     }
 
     public void live(Live live) {
-        if (live.getUa().length() > 0 && getUa().isEmpty()) setUa(live.getUa());
+        if (!live.getUa().isEmpty() && getUa().isEmpty()) setUa(live.getUa());
         if (live.getHeader() != null && getHeader() == null) setHeader(live.getHeader());
-        if (live.getClick().length() > 0 && getClick().isEmpty()) setClick(live.getClick());
-        if (live.getOrigin().length() > 0 && getOrigin().isEmpty()) setOrigin(live.getOrigin());
+        if (!live.getClick().isEmpty() && getClick().isEmpty()) setClick(live.getClick());
+        if (!live.getOrigin().isEmpty() && getOrigin().isEmpty()) setOrigin(live.getOrigin());
         if (!live.getCatchup().isEmpty() && getCatchup().isEmpty()) setCatchup(live.getCatchup());
-        if (live.getReferer().length() > 0 && getReferer().isEmpty()) setReferer(live.getReferer());
+        if (!live.getReferer().isEmpty() && getReferer().isEmpty()) setReferer(live.getReferer());
         if (live.getPlayerType() != -1 && getPlayerType() == -1) setPlayerType(live.getPlayerType());
-        if (!getEpg().startsWith("http") && live.getEpg().contains("{")) setEpg(live.getEpg().replace("{name}", getTvgName()).replace("{epg}", getEpg()));
-        if (!getLogo().startsWith("http") && live.getLogo().contains("{")) setLogo(live.getLogo().replace("{name}", getTvgName()).replace("{logo}", getLogo()));
+        if (live.getEpg().contains("{") && !getEpg().startsWith("http")) setEpg(live.getEpg().replace("{name}", getTvgName()).replace("{epg}", getEpg()));
+        if (live.getLogo().contains("{") && !getLogo().startsWith("http")) setLogo(live.getLogo().replace("{name}", getTvgName()).replace("{logo}", getLogo()));
     }
 
     public void setLine(String line) {

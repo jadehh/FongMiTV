@@ -1,5 +1,7 @@
 package com.fongmi.android.tv.model;
 
+import android.net.Uri;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -8,7 +10,6 @@ import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.api.EpgParser;
 import com.fongmi.android.tv.api.LiveParser;
 import com.fongmi.android.tv.api.config.LiveConfig;
-import com.fongmi.android.tv.api.config.VodConfig;
 import com.fongmi.android.tv.bean.Channel;
 import com.fongmi.android.tv.bean.Epg;
 import com.fongmi.android.tv.bean.EpgData;
@@ -22,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -58,8 +60,8 @@ public class LiveViewModel extends ViewModel {
 
     public void getLive(Live item) {
         execute(LIVE, () -> {
-            VodConfig.get().setRecent(item.getJar());
-            LiveParser.start(item);
+            LiveParser.start(item.recent());
+            setTimeZone(item.getEpg());
             verify(item);
             return item;
         });
@@ -89,11 +91,19 @@ public class LiveViewModel extends ViewModel {
 
     public void getUrl(Channel item, EpgData data) {
         execute(URL, () -> {
-            item.setMsg(null);
-            Source.get().stop();
             item.setUrl(item.getCatchup().format(item.getCurrent(), data));
             return item;
         });
+    }
+
+    private void setTimeZone(String url) {
+        try {
+            if (!url.contains("serverTimeZone=")) return;
+            TimeZone timeZone = TimeZone.getTimeZone(Uri.parse(url).getQueryParameter("serverTimeZone"));
+            formatDate.setTimeZone(timeZone);
+            formatTime.setTimeZone(timeZone);
+        } catch (Exception ignored) {
+        }
     }
 
     private void verify(Live item) {

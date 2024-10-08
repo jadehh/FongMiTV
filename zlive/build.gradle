@@ -3,7 +3,9 @@ plugins {
 }
 
 android {
-    compileSdk 34
+    namespace 'com.east.android.zlive'
+
+    compileSdk 35
 
     defaultConfig {
         minSdk 21
@@ -13,5 +15,5 @@ android {
 }
 
 dependencies {
-    implementation 'net.java.dev.jna:jna:5.12.1'
+    api 'net.java.dev.jna:jna:5.2.0'
 }

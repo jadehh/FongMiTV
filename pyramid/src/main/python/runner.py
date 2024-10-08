@@ -23,14 +23,14 @@ class Runner():
     def detailContent(self, ids):
         return self.spider.detailContent(ids)
 
-    def searchContent(self, key, quick):
-        return self.spider.searchContent(key, quick)
-
-    def searchContentPage(self, key, quick, pg):
-        return self.spider.searchContentPage(key, quick, pg)
+    def searchContent(self, key, quick, pg="1"):
+        return self.spider.searchContent(key, quick, pg)
 
     def playerContent(self, flag, id, vipFlags):
         return self.spider.playerContent(flag, id, vipFlags)
+
+    def liveContent(self):
+        return self.spider.liveContent()
 
     def localProxy(self, param):
         return self.spider.localProxy(param)
@@ -40,3 +40,9 @@ class Runner():
 
     def manualVideoCheck(self):
         return self.spider.manualVideoCheck()
+
+    def action(self, action):
+        return self.spider.action(action)
+
+    def destroy(self):
+        self.spider.destroy()

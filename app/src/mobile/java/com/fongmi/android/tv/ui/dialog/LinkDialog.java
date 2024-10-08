@@ -1,6 +1,7 @@
 package com.fongmi.android.tv.ui.dialog;
 
 import android.content.DialogInterface;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,6 +47,7 @@ public class LinkDialog {
 
     private void initView() {
         CharSequence text = Util.getClipText();
+        binding.text.setFilters(new InputFilter[]{new InputFilter.LengthFilter(Integer.MAX_VALUE)});
         if (!TextUtils.isEmpty(text)) binding.text.setText(Sniffer.getUrl(text.toString()));
     }
 

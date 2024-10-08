@@ -6,7 +6,7 @@ public class Constant {
     //控件隱藏時間
     public static final int INTERVAL_HIDE = 5 * 1000;
     //網路偵測間隔
-    public static final int INTERVAL_TRAFFIC = 500;
+    public static final int INTERVAL_TRAFFIC = 1000;
     //點播爬蟲時間
     public static final int TIMEOUT_VOD = 30 * 1000;
     //直播爬蟲時間
@@ -28,8 +28,9 @@ public class Constant {
     //传送超時時間
     public static final int TIMEOUT_TRANSMIT = 60 * 1000;
     //搜尋線程數量
-    public static final int THREAD_POOL = 5;
-
+    public static final int THREAD_POOL = 10;
+    
+  
     public static final int DOWNLOAD_OUTER_TYPE = 1;
 
     public static final int DOWNLOAD_INNER_TYPE = 2;

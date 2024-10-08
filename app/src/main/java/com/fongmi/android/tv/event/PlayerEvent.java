@@ -1,7 +1,5 @@
 package com.fongmi.android.tv.event;
 
-import androidx.media3.common.Player;
-
 import org.greenrobot.eventbus.EventBus;
 
 public class PlayerEvent {
@@ -10,10 +8,6 @@ public class PlayerEvent {
 
     public static void prepare() {
         EventBus.getDefault().post(new PlayerEvent(0));
-    }
-
-    public static void ready() {
-        EventBus.getDefault().post(new PlayerEvent(Player.STATE_READY));
     }
 
     public static void state(int state) {

@@ -14,14 +14,12 @@ import com.github.catvod.utils.Json;
 import com.github.catvod.utils.UriUtil;
 import com.github.catvod.utils.Util;
 import com.whl.quickjs.wrapper.JSArray;
-import com.whl.quickjs.wrapper.JSMethod;
 import com.whl.quickjs.wrapper.JSObject;
 import com.whl.quickjs.wrapper.QuickJSContext;
 
 import org.json.JSONArray;
 
 import java.io.ByteArrayInputStream;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -31,24 +29,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import dalvik.system.DexClassLoader;
 import java9.util.concurrent.CompletableFuture;
 
 public class Spider extends com.github.catvod.crawler.Spider {
 
     private final ExecutorService executor;
-    private final DexClassLoader dex;
     private QuickJSContext ctx;
     private JSObject jsObject;
     private final String key;
     private final String api;
     private boolean cat;
 
-    public Spider(String key, String api, DexClassLoader dex) throws Exception {
+    public Spider(String key, String api) throws Exception {
         this.executor = Executors.newSingleThreadExecutor();
         this.key = key;
         this.api = api;
-        this.dex = dex;
         initializeJS();
     }
 
@@ -109,6 +104,11 @@ public class Spider extends com.github.catvod.crawler.Spider {
     }
 
     @Override
+    public String liveContent() throws Exception {
+        return (String) call("live");
+    }
+
+    @Override
     public boolean manualVideoCheck() throws Exception {
         return (Boolean) call("sniffer");
     }
@@ -125,17 +125,27 @@ public class Spider extends com.github.catvod.crawler.Spider {
     }
 
     @Override
+    public String action(String action) throws Exception {
+        return (String) call("action", action);
+    }
+
+    @Override
     public void destroy() {
+        try {
+            call("destroy");
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         submit(() -> {
             executor.shutdownNow();
+            jsObject.release();
             ctx.destroy();
         });
     }
 
     private void initializeJS() throws Exception {
         submit(() -> {
-            if (ctx == null) createCtx();
-            if (dex != null) createDex();
+            createCtx();
             createObj();
             return null;
         }).get();
@@ -161,58 +171,14 @@ public class Spider extends com.github.catvod.crawler.Spider {
         });
     }
 
-    private void createDex() {
-        try {
-            JSObject obj = ctx.createNewJSObject();
-            Class<?> clz = dex.loadClass("com.github.catvod.js.Method");
-            Class<?>[] classes = clz.getDeclaredClasses();
-            ctx.getGlobalObject().setProperty("jsapi", obj);
-            if (classes.length == 0) invokeSingle(clz, obj);
-            if (classes.length >= 1) invokeMultiple(clz, obj);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void invokeSingle(Class<?> clz, JSObject jsObj) throws Throwable {
-        invoke(clz, jsObj, clz.getDeclaredConstructor(QuickJSContext.class).newInstance(ctx));
-    }
-
-    private void invokeMultiple(Class<?> clz, JSObject jsObj) throws Throwable {
-        for (Class<?> subClz : clz.getDeclaredClasses()) {
-            Object javaObj = subClz.getDeclaredConstructor(clz).newInstance(clz.getDeclaredConstructor(QuickJSContext.class).newInstance(ctx));
-            JSObject subObj = ctx.createNewJSObject();
-            invoke(subClz, subObj, javaObj);
-            jsObj.setProperty(subClz.getSimpleName(), subObj);
-        }
-    }
-
-    private void invoke(Class<?> clz, JSObject jsObj, Object javaObj) {
-        for (Method method : clz.getMethods()) {
-            if (!method.isAnnotationPresent(JSMethod.class)) continue;
-            invoke(jsObj, method, javaObj);
-        }
-    }
-
-    private void invoke(JSObject jsObj, Method method, Object javaObj) {
-        jsObj.setProperty(method.getName(), args -> {
-            try {
-                return method.invoke(javaObj, args);
-            } catch (Throwable e) {
-                return null;
-            }
-        });
-    }
-
     private void createObj() {
-        String jsEval = "__jsEvalReturn";
         String spider = "__JS_SPIDER__";
         String global = "globalThis." + spider;
         String content = Module.get().fetch(api);
-        if (content.startsWith("//bb")) ctx.execute(Module.get().bb(content));
-        else ctx.evaluateModule(content.replace(spider, global), api);
+        boolean bb = content.startsWith("//bb");
+        cat = bb || content.contains("__jsEvalReturn");
+        if (!bb) ctx.evaluateModule(content.replace(spider, global), api);
         ctx.evaluateModule(String.format(Asset.read("js/lib/spider.js"), api));
-        if (content.startsWith("//bb") || content.contains(jsEval)) cat = true;
         jsObject = (JSObject) ctx.getProperty(ctx.getGlobalObject(), spider);
     }
 

@@ -33,6 +33,7 @@
 -keep class okhttp3.** { *; }
 
 # CatVod
+-keep class com.github.catvod.Proxy { *; }
 -keep class com.github.catvod.crawler.** { *; }
 -keep class * extends com.github.catvod.crawler.Spider
 
@@ -56,7 +57,6 @@
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 -keep class org.xmlpull.** { *; }
 -keepclassmembers class org.xmlpull.** { *; }
--keep class androidx.media3.** { *; }
 
 # IJK
 -keep class tv.danmaku.ijk.media.player.** { *; }

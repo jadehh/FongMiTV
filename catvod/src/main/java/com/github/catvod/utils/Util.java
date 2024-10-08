@@ -8,8 +8,6 @@ import android.util.Base64;
 
 import com.github.catvod.Init;
 
-import org.mozilla.universalchardet.UniversalDetector;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.math.BigInteger;
@@ -17,14 +15,16 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
 
+import okhttp3.OkHttp;
+
 public class Util {
 
-    public static final String CHROME = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36";
+    public static final String OKHTTP = "okhttp/" + OkHttp.VERSION;
+    public static final String CHROME = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
     public static final int URL_SAFE = Base64.DEFAULT | Base64.URL_SAFE | Base64.NO_WRAP;
 
     public static String base64(String s) {
@@ -63,17 +63,6 @@ public class Util {
 
     public static boolean equals(String name, String md5) {
         return md5(Path.jar(name)).equalsIgnoreCase(md5);
-    }
-
-    public static byte[] utf8(byte[] bytes) {
-        try {
-            UniversalDetector detector = new UniversalDetector(null);
-            detector.handleData(bytes, 0, bytes.length);
-            detector.dataEnd();
-            return new String(bytes, detector.getDetectedCharset()).getBytes(StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            return bytes;
-        }
     }
 
     public static String md5(String src) {

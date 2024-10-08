@@ -1,5 +1,6 @@
 package com.fongmi.android.tv.ui.adapter;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,18 +13,21 @@ import com.fongmi.android.tv.api.config.VodConfig;
 import com.fongmi.android.tv.bean.Site;
 import com.fongmi.android.tv.databinding.AdapterSiteBinding;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.ViewHolder> {
 
     private final OnClickListener mListener;
-    private final List<Site> mItems;
+    private List<Site> mItems;
+    private final List<Site> allItems;
     private boolean search;
     private boolean change;
 
     public SiteAdapter(OnClickListener listener) {
         this.mListener = listener;
         this.mItems = VodConfig.get().getSites();
+        this.allItems = this.mItems;
     }
 
     public SiteAdapter search(boolean search) {
@@ -34,6 +38,20 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.ViewHolder> {
     public SiteAdapter change(boolean change) {
         this.change = change;
         return this;
+    }
+
+    public void keyword(String keyword) {
+        if (TextUtils.isEmpty(keyword)) {
+            this.mItems = allItems;
+            notifyDataSetChanged();
+            return;
+        }
+        List<Site> newItems = new ArrayList<>();
+        for(Site site : allItems) {
+            if (site.getName().toLowerCase().contains(keyword.toLowerCase())) newItems.add(site);
+        }
+        this.mItems = newItems;
+        notifyDataSetChanged();
     }
 
     public interface OnClickListener {

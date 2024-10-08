@@ -5,7 +5,7 @@ plugins {
 android {
     namespace 'com.github.kiulian.downloader'
 
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         minSdk 21
@@ -14,6 +14,6 @@ android {
 }
 
 dependencies {
-    implementation 'com.alibaba:fastjson:2.0.21.android'
+    implementation 'com.google.code.gson:gson:' + gsonVersion
     implementation 'com.squareup.okhttp3:okhttp:' + okhttpVersion
 }

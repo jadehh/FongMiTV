@@ -37,7 +37,6 @@ public final class TrackDialog extends BaseDialog implements TrackAdapter.OnClic
     private final TrackNameProvider provider;
     private final TrackAdapter adapter;
     private DialogTrackBinding binding;
-    private FragmentActivity activity;
     private Listener listener;
     private ChooserListener cListener;
     private Players player;
@@ -77,7 +76,6 @@ public final class TrackDialog extends BaseDialog implements TrackAdapter.OnClic
         for (Fragment f : activity.getSupportFragmentManager().getFragments()) if (f instanceof BottomSheetDialogFragment) return;
         show(activity.getSupportFragmentManager(), null);
         this.listener = (Listener) activity;
-        this.activity = activity;
     }
 
     @Override
@@ -93,18 +91,18 @@ public final class TrackDialog extends BaseDialog implements TrackAdapter.OnClic
         binding.recycler.post(() -> binding.recycler.scrollToPosition(adapter.getSelected()));
         binding.recycler.setVisibility(adapter.getItemCount() == 0 ? View.GONE : View.VISIBLE);
         binding.choose.setVisibility(type == C.TRACK_TYPE_TEXT && player.isExo() && vod ? View.VISIBLE : View.GONE);
-        binding.size.setVisibility(type == C.TRACK_TYPE_TEXT ? View.VISIBLE : View.GONE);
+        binding.subtitle.setVisibility(type == C.TRACK_TYPE_TEXT ? View.VISIBLE : View.GONE);
         binding.title.setText(ResUtil.getStringArray(R.array.select_track)[type - 1]);
     }
 
     @Override
     protected void initEvent() {
-        binding.size.setOnClickListener(this::showSubtitle);
         binding.choose.setOnClickListener(this::showChooser);
+        binding.subtitle.setOnClickListener(this::onSubtitle);
     }
 
-    private void showSubtitle(View view) {
-        SubtitleDialog.create(activity).listen(true).show();
+    private void onSubtitle(View view) {
+        listener.onSubtitleClick();
         dismiss();
     }
 
@@ -171,6 +169,8 @@ public final class TrackDialog extends BaseDialog implements TrackAdapter.OnClic
     public interface Listener {
 
         void onTrackClick(Track item);
+
+        void onSubtitleClick();
     }
 
     public interface ChooserListener {

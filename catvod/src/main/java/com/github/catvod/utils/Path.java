@@ -94,7 +94,7 @@ public class Path {
     }
 
     public static File jpa() {
-        return mkdir(new File(cache() + File.separator + "jpa"));
+        return mkdir(new File(thunderCache() + File.separator + "jpa"));
     }
 
     public static File m3u8() {
@@ -131,6 +131,10 @@ public class Path {
 
     public static File js(String name) {
         return new File(js(), name);
+    }
+
+    public static File py(String name) {
+        return new File(py(), name);
     }
 
     public static File jar(String name) {
@@ -199,10 +203,6 @@ public class Path {
             ignored.printStackTrace();
             return file;
         }
-    }
-
-    public static File utf8(File file) {
-        return write(cache(file.getName()), Util.utf8(readToByte(file)));
     }
 
     public static void move(File in, File out) {

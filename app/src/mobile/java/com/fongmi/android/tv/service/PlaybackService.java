@@ -39,11 +39,11 @@ import java.util.Objects;
 public class PlaybackService extends Service {
 
     private final Map<String, Bitmap> cache = new HashMap<>();
-    private static Players players;
+    private static Players player;
 
-    public static void start(Players players) {
+    public static void start(Players player) {
         ContextCompat.startForegroundService(App.get(), new Intent(App.get(), PlaybackService.class));
-        PlaybackService.players = players;
+        PlaybackService.player = player;
     }
 
     public static void stop() {
@@ -51,11 +51,11 @@ public class PlaybackService extends Service {
     }
 
     private boolean isNull() {
-        return Objects.isNull(players) || Objects.isNull(players.getSession());
+        return Objects.isNull(player) || Objects.isNull(player.getSession());
     }
 
     private boolean nonNull() {
-        return Objects.nonNull(players) && Objects.nonNull(players.getSession());
+        return Objects.nonNull(player) && Objects.nonNull(player.getSession());
     }
 
     private NotificationManagerCompat getManager() {
@@ -67,12 +67,12 @@ public class PlaybackService extends Service {
     }
 
     private NotificationCompat.Action getPlayPauseAction() {
-        if (nonNull() && players.isPlaying()) return buildNotificationAction(R.drawable.ic_notify_pause, androidx.media3.ui.R.string.exo_controls_pause_description, ActionEvent.PAUSE);
+        if (nonNull() && player.isPlaying()) return buildNotificationAction(R.drawable.ic_notify_pause, androidx.media3.ui.R.string.exo_controls_pause_description, ActionEvent.PAUSE);
         return buildNotificationAction(R.drawable.ic_notify_play, androidx.media3.ui.R.string.exo_controls_play_description, ActionEvent.PLAY);
     }
 
     private MediaMetadataCompat getMetadata() {
-        return isNull() ? null : players.getSession().getController().getMetadata();
+        return isNull() ? null : player.getSession().getController().getMetadata();
     }
 
     private String getTitle() {
@@ -120,8 +120,8 @@ public class PlaybackService extends Service {
         builder.setSmallIcon(R.drawable.ic_logo);
         builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
         builder.setDeleteIntent(ActionReceiver.getPendingIntent(this, ActionEvent.STOP));
-        if (nonNull()) builder.setContentIntent(players.getSession().getController().getSessionActivity());
-        if (nonNull()) builder.setStyle(new MediaStyle().setMediaSession(players.getSession().getSessionToken()));
+        if (nonNull()) builder.setContentIntent(player.getSession().getController().getSessionActivity());
+        if (nonNull()) builder.setStyle(new MediaStyle().setMediaSession(player.getSession().getSessionToken()));
         addAction(builder);
         setArtwork(builder);
         return builder.build();
@@ -138,7 +138,6 @@ public class PlaybackService extends Service {
 
             @Override
             public void onLoadCleared(@Nullable Drawable placeholder) {
-
             }
         };
     }
@@ -156,7 +155,7 @@ public class PlaybackService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (nonNull()) MediaButtonReceiver.handleIntent(players.getSession(), intent);
+        if (nonNull()) MediaButtonReceiver.handleIntent(player.getSession(), intent);
         startForeground(Notify.ID, buildNotification());
         return START_NOT_STICKY;
     }

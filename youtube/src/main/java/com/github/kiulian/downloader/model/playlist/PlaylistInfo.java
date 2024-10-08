@@ -1,6 +1,5 @@
 package com.github.kiulian.downloader.model.playlist;
 
-
 import com.github.kiulian.downloader.model.Filter;
 
 import java.util.List;
@@ -25,8 +24,7 @@ public class PlaylistInfo {
 
     public PlaylistVideoDetails findVideoById(String videoId) {
         for (PlaylistVideoDetails video : videos) {
-            if (video.videoId().equals(videoId))
-                return video;
+            if (video.videoId().equals(videoId)) return video;
         }
         return null;
     }

@@ -89,7 +89,7 @@ public class UaDialog implements DialogInterface.OnDismissListener {
             binding.text.setText(Util.CHROME);
         } else if (append && "o".equalsIgnoreCase(s)) {
             append = false;
-            binding.text.setText(okhttp3.internal.Util.userAgent);
+            binding.text.setText(Util.OKHTTP);
         } else if (s.length() > 1) {
             append = false;
         } else if (s.length() == 0) {

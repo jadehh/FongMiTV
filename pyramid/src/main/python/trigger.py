@@ -20,16 +20,16 @@ class Trigger():
         return sp_obj.detailContent(ids)
 
     @staticmethod
-    def searchContent(sp_obj, key, quick):
-        return sp_obj.searchContent(key, quick)
-
-    @staticmethod
-    def searchContentPage(sp_obj, key, quick, pg):
-        return sp_obj.searchContentPage(key, quick, pg)
+    def searchContent(sp_obj, key, quick, pg="1"):
+        return sp_obj.searchContent(key, quick, pg)
 
     @staticmethod
     def playerContent(sp_obj, flag, id, vipFlags):
         return sp_obj.playerContent(flag, id, vipFlags)
+
+    @staticmethod
+    def liveContent(sp_obj):
+        return sp_obj.liveContent()
 
     @staticmethod
     def isVideoFormat(sp_obj, url):
@@ -38,3 +38,11 @@ class Trigger():
     @staticmethod
     def manualVideoCheck(sp_obj):
         return sp_obj.manualVideoCheck()
+
+    @staticmethod
+    def action(sp_obj, action):
+        return sp_obj.action(action)
+
+    @staticmethod
+    def destroy(sp_obj):
+        sp_obj.destroy()

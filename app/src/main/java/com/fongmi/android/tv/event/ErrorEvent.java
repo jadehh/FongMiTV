@@ -65,6 +65,14 @@ public class ErrorEvent {
         return code;
     }
 
+    public boolean isDecode() {
+        return code / 1000 == 4;
+    }
+
+    public boolean isExo() {
+        return code / 1000 == 2 || code / 1000 == 3 || code / 1000 == 4;
+    }
+
     public String getMsg() {
         if (type == Type.URL) return ResUtil.getString(R.string.error_play_url, code);
         if (type == Type.FLAG) return ResUtil.getString(R.string.error_play_flag);

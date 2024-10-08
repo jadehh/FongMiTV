@@ -106,7 +106,7 @@ public class Track {
     }
 
     public boolean isIjk(int player) {
-        return getPlayer() == player && player != Players.EXO;
+        return getPlayer() == player && (player == Players.IJK || player == Players.SYS);
     }
 
     public Track toggle() {

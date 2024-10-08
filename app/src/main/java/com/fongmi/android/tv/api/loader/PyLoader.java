@@ -3,8 +3,6 @@ package com.fongmi.android.tv.api.loader;
 import android.content.Context;
 
 import com.fongmi.android.tv.App;
-import com.fongmi.android.tv.api.config.VodConfig;
-import com.fongmi.android.tv.bean.Site;
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderNull;
 
@@ -24,7 +22,7 @@ public class PyLoader {
     }
 
     public void clear() {
-        for (Spider spider : spiders.values()) spider.destroy();
+        for (Spider spider : spiders.values()) App.execute(spider::destroy);
         spiders.clear();
     }
 
@@ -42,8 +40,8 @@ public class PyLoader {
     public Spider getSpider(String key, String api, String ext) {
         try {
             if (spiders.containsKey(key)) return spiders.get(key);
-            Method method = loader.getClass().getMethod("spider", Context.class, String.class, String.class);
-            Spider spider = (Spider) method.invoke(loader, App.get(), key, api);
+            Method method = loader.getClass().getMethod("spider", Context.class, String.class);
+            Spider spider = (Spider) method.invoke(loader, App.get(), api);
             spider.init(App.get(), ext);
             spiders.put(key, spider);
             return spider;
@@ -53,15 +51,10 @@ public class PyLoader {
         }
     }
 
-    private Spider find(Map<String, String> params) {
-        if (!params.containsKey("siteKey")) return spiders.get(recent);
-        Site site = VodConfig.get().getSite(params.get("siteKey"));
-        return site.isEmpty() ? new SpiderNull() : VodConfig.get().getSpider(site);
-    }
-
     public Object[] proxyInvoke(Map<String, String> params) {
         try {
-            return find(params).proxyLocal(params);
+            if (!params.containsKey("siteKey")) return spiders.get(recent).proxyLocal(params);
+            return BaseLoader.get().getSpider(params).proxyLocal(params);
         } catch (Throwable e) {
             e.printStackTrace();
             return null;

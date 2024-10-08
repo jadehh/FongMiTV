@@ -47,6 +47,7 @@ public class EpisodeListDialog implements EpisodeAdapter.OnClickListener {
         binding = DialogEpisodeListBinding.inflate(LayoutInflater.from(activity));
         dialog = new SideSheetDialog(activity);
         dialog.setContentView(binding.getRoot());
+        dialog.getBehavior().setDraggable(false);
         dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         dialog.show();
     }

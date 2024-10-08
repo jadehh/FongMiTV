@@ -48,6 +48,10 @@ public abstract class Spider {
         return "";
     }
 
+    public String liveContent() throws Exception {
+        return "";
+    }
+
     public boolean manualVideoCheck() throws Exception {
         return false;
     }
@@ -57,6 +61,10 @@ public abstract class Spider {
     }
 
     public Object[] proxyLocal(Map<String, String> params) throws Exception {
+        return null;
+    }
+
+    public String action(String action) throws Exception {
         return null;
     }
 

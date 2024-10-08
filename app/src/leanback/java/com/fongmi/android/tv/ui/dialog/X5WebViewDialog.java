@@ -84,8 +84,7 @@ public class X5WebViewDialog  implements Download.Callback {
     @Override
     public void success(File file) {
         dismiss();
-        Tbs.install();
-        callback.onX5Success();
+        Tbs.install(callback);
     }
 
 }

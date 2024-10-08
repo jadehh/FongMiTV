@@ -43,8 +43,7 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginEnd="36dp"
-        android:orientation="vertical">
+        android:layout_marginEnd="36dp">
 
         <com.fongmi.android.tv.ui.custom.CustomMic
             android:id="@+id/mic"

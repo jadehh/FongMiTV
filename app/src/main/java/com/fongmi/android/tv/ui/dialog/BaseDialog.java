@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
 
+import com.fongmi.android.tv.R;
+import com.fongmi.android.tv.utils.ResUtil;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -39,6 +41,15 @@ public abstract class BaseDialog extends BottomSheetDialogFragment {
     protected void initEvent() {
     }
 
+    protected boolean transparent() {
+        return false;
+    }
+
+    protected void setDimAmount(float amount) {
+        getDialog().getWindow().setDimAmount(amount);
+        getDialog().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -48,8 +59,9 @@ public abstract class BaseDialog extends BottomSheetDialogFragment {
         return dialog;
     }
 
-    protected void setBehavior(BottomSheetDialog dialog) {
+    private void setBehavior(BottomSheetDialog dialog) {
         FrameLayout bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        if (transparent()) bottomSheet.setBackgroundColor(ResUtil.getColor(R.color.transparent));
         BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheet);
         behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         behavior.setSkipCollapsed(true);

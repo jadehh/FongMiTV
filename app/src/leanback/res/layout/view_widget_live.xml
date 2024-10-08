@@ -50,8 +50,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:orientation="vertical"
-        android:visibility="visible">
+        android:orientation="vertical">
 
         <include layout="@layout/view_progress" />
 
@@ -256,8 +255,6 @@
             android:id="@+id/epg_data"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:clipChildren="false"
-            android:clipToPadding="false"
             tools:itemCount="5"
             tools:listitem="@layout/adapter_epg_data" />
 

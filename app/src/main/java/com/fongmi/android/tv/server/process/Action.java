@@ -44,34 +44,16 @@ public class Action implements Process {
     @Override
     public NanoHTTPD.Response doResponse(NanoHTTPD.IHTTPSession session, String path, Map<String, String> files) {
         Map<String, String> params = session.getParms();
-        switch (Objects.requireNonNullElse(params.get("do"), "")) {
-            case "search":
-                onSearch(params);
-                return Nano.success();
-            case "push":
-                onPush(params);
-                return Nano.success();
-            case "setting":
-                onSetting(params);
-                return Nano.success();
-            case "file":
-                onFile(params);
-                return Nano.success();
-            case "refresh":
-                onRefresh(params);
-                return Nano.success();
-            case "cast":
-                onCast(params);
-                return Nano.success();
-            case "sync":
-                onSync(params);
-                return Nano.success();
-            case "transmit":
-                onTransmit(params, files);
-                return Nano.success();
-            default:
-                return Nano.error(null);
-        }
+        String param = params.get("do");
+        if ("file".equals(param)) onFile(params);
+        else if ("push".equals(param)) onPush(params);
+        else if ("cast".equals(param)) onCast(params);
+        else if ("sync".equals(param)) onSync(params);
+        else if ("search".equals(param)) onSearch(params);
+        else if ("setting".equals(param)) onSetting(params);
+        else if ("refresh".equals(param)) onRefresh(params);
+        else if ("transmit".equals(param)) onTransmit(params, files);
+        return Nano.success();
     }
 
     private void onSearch(Map<String, String> params) {
@@ -106,74 +88,51 @@ public class Action implements Process {
         String type = params.get("type");
         String path = params.get("path");
         if (TextUtils.isEmpty(type)) return;
-        switch (type) {
-            case "detail":
-                RefreshEvent.detail();
-                break;
-            case "player":
-                RefreshEvent.player();
-                break;
-            case "danmaku":
-                RefreshEvent.danmaku(path);
-                break;
-            case "subtitle":
-                RefreshEvent.subtitle(path);
-                break;
-        }
+        if ("live".equals(type)) RefreshEvent.live();
+        else if ("detail".equals(type)) RefreshEvent.detail();
+        else if ("player".equals(type)) RefreshEvent.player();
+        else if ("danmaku".equals(type)) RefreshEvent.danmaku(path);
+        else if ("subtitle".equals(type)) RefreshEvent.subtitle(path);
     }
 
     private void onCast(Map<String, String> params) {
-        Config config = Config.find(params.get("url"), 0);
+        Config config = Config.objectFrom(params.get("config"));
         Device device = Device.objectFrom(params.get("device"));
         History history = History.objectFrom(params.get("history"));
-        CastEvent.post(config, device, history);
+        CastEvent.post(Config.find(config), device, history);
     }
 
     private void onSync(Map<String, String> params) {
-        boolean sync = Objects.equals(params.get("mode"), "0");
         boolean keep = Objects.equals(params.get("type"), "keep");
+        boolean force = Objects.equals(params.get("force"), "true");
         boolean history = Objects.equals(params.get("type"), "history");
-        Device device = Device.objectFrom(params.get("device"));
-        if (params.get("device") != null && sync) {
+        String mode = Objects.requireNonNullElse(params.get("mode"), "0");
+        if (params.get("device") != null && (mode.equals("0") || mode.equals("2"))) {
+            Device device = Device.objectFrom(params.get("device"));
             if (history) sendHistory(device, params);
             else if (keep) sendKeep(device);
         }
-        if (history) {
-            syncHistory(params);
-        } else if (keep) {
-            syncKeep(params);
+        if (mode.equals("0") || mode.equals("1")) {
+            if (history) syncHistory(params, force);
+            else if (keep) syncKeep(params, force);
         }
     }
 
     private void onTransmit(Map<String, String> params, Map<String, String> files) {
         String type = params.get("type");
-        switch (type) {
-            case "apk":
-                apk(params, files);
-                break;
-            case "vod_config":
-                vodConfig(params);
-                break;
-            case "wall_config":
-                wallConfig(params, files);
-                break;
-            case "push_restore":
-                pushRestore(params, files);
-                break;
-            case "pull_restore":
-                pullRestore(params, files);
-                break;
-            default:
-                break;
-        }
+        if ("apk".equals(type)) apk(params, files);
+        else if ("vod_config".equals(type)) vodConfig(params);
+        else if ("wall_config".equals(type)) wallConfig(params, files);
+        else if ("push_restore".equals(type)) pushRestore(params, files);
+        else if ("pull_restore".equals(type)) pullRestore(params, files);
     }
 
     private void sendHistory(Device device, Map<String, String> params) {
         try {
-            String url = Objects.requireNonNullElse(params.get("url"), VodConfig.getUrl());
+            Config config = Config.find(Config.objectFrom(params.get("config")));
             FormBody.Builder body = new FormBody.Builder();
-            body.add("url", url);
-            body.add("targets", App.gson().toJson(History.get(Config.find(url, 0).getId())));
+            body.add("config", config.toString());
+            body.add("targets", App.gson().toJson(History.get(config.getId())));
             OkHttp.newCall(OkHttp.client(Constant.TIMEOUT_SYNC), device.getIp().concat("/action?do=sync&mode=0&type=history"), body.build()).execute();
         } catch (Exception e) {
             App.post(() -> Notify.show(e.getMessage()));
@@ -191,14 +150,11 @@ public class Action implements Process {
         }
     }
 
-    public void syncHistory(Map<String, String> params) {
-        String url = params.get("url");
-        if (TextUtils.isEmpty(url)) return;
-        Config config = Config.find(url, 0);
-        boolean replace = Objects.equals(params.get("mode"), "1");
+    public void syncHistory(Map<String, String> params, boolean force) {
+        Config config = Config.find(Config.objectFrom(params.get("config")));
         List<History> targets = History.arrayFrom(params.get("targets"));
         if (VodConfig.get().getConfig().equals(config)) {
-            if (replace) History.delete(config.getId());
+            if (force) History.delete(config.getId());
             History.sync(targets);
         } else {
             VodConfig.load(config, getCallback(targets));
@@ -221,14 +177,13 @@ public class Action implements Process {
         };
     }
 
-    private void syncKeep(Map<String, String> params) {
-        List<Config> configs = Config.arrayFrom(params.get("configs"));
+    private void syncKeep(Map<String, String> params, boolean force) {
         List<Keep> targets = Keep.arrayFrom(params.get("targets"));
-        boolean replace = Objects.equals(params.get("mode"), "1");
+        List<Config> configs = Config.arrayFrom(params.get("configs"));
         if (TextUtils.isEmpty(VodConfig.getUrl()) && configs.size() > 0) {
-            VodConfig.load(Config.find(configs.get(0), 0), getCallback(configs, targets));
+            VodConfig.load(Config.find(configs.get(0)), getCallback(configs, targets));
         } else {
-            if (replace) Keep.deleteAll();
+            if (force) Keep.deleteAll();
             Keep.sync(configs, targets);
         }
     }
@@ -307,7 +262,10 @@ public class Action implements Process {
                 @Override
                 public void success() {
                     App.post(() -> Notify.progress(App.activity()));
-                    App.post(() -> initConfig(), 3000);
+                    App.post(() -> {
+                        AppDatabase.reset();
+                        initConfig();
+                    }, 3000);
                 }
             });
             temp.delete();
@@ -335,6 +293,11 @@ public class Action implements Process {
 
     private Callback getCallback() {
         return new Callback() {
+            @Override
+            public void success(String result) {
+                Notify.show(result);
+            }
+
             @Override
             public void success() {
                 Notify.dismiss();

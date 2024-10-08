@@ -6,7 +6,7 @@ plugins {
 android {
     namespace 'com.undcover.freedom.pyramid'
 
-    compileSdk 34
+    compileSdk 35
     flavorDimensions = ["abi"]
 
     defaultConfig {
@@ -16,7 +16,10 @@ android {
             version "3.8"
             pip {
                 install "lxml"
+                install "ujson"
+                install "pyquery"
                 install "requests"
+                install "jsonpath"
                 install 'pycryptodome'
                 install 'beautifulsoup4'
             }

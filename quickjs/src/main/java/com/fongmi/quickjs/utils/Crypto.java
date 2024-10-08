@@ -38,7 +38,7 @@ public class Crypto {
             SecretKeySpec keySpec = new SecretKeySpec(keyBuf, "AES");
             if (iv == null) cipher.init(encrypt ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE, keySpec);
             else cipher.init(encrypt ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE, keySpec, new IvParameterSpec(ivBuf));
-            byte[] inBuf = inBase64 ? Base64.decode(input, Base64.DEFAULT | Base64.URL_SAFE) : input.getBytes("UTF-8");
+            byte[] inBuf = inBase64 ? Base64.decode(input.replaceAll("_", "/").replaceAll("-", "+"), Base64.DEFAULT) : input.getBytes("UTF-8");
             return outBase64 ? Base64.encodeToString(cipher.doFinal(inBuf), Base64.NO_WRAP) : new String(cipher.doFinal(inBuf), "UTF-8");
         } catch (Exception e) {
             e.printStackTrace();
@@ -51,7 +51,7 @@ public class Crypto {
             Key rsaKey = generateKey(pub, key);
             int len = getModulusLength(rsaKey);
             byte[] outBytes = new byte[0];
-            byte[] inBytes = inBase64 ? Base64.decode(input, Base64.DEFAULT | Base64.URL_SAFE) : input.getBytes("UTF-8");
+            byte[] inBytes = inBase64 ? Base64.decode(input.replaceAll("_", "/").replaceAll("-", "+"), Base64.DEFAULT) : input.getBytes("UTF-8");
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(encrypt ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE, rsaKey);
             int blockLen = encrypt ? len / 8 - 11 : len / 8;

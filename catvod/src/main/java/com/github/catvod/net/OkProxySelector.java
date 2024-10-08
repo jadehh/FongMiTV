@@ -12,16 +12,25 @@ import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.SocketAddress;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class OkProxySelector extends ProxySelector {
 
-    private List<String> hosts;
+    private final List<String> hosts;
     private Proxy proxy;
 
-    public void setHosts(List<String> hosts) {
-        this.hosts = hosts;
+    public OkProxySelector() {
+        this.hosts = new ArrayList<>();
+    }
+
+    public void addAll(List<String> hosts) {
+        this.hosts.addAll(hosts);
+    }
+
+    public void clear() {
+        this.hosts.clear();
     }
 
     public void setProxy(String proxy) {
@@ -30,7 +39,7 @@ public class OkProxySelector extends ProxySelector {
 
     @Override
     public List<Proxy> select(URI uri) {
-        if (proxy == null || hosts == null || hosts.isEmpty() || uri.getHost() == null || "127.0.0.1".equals(uri.getHost())) return Collections.singletonList(Proxy.NO_PROXY);
+        if (proxy == null || hosts.isEmpty() || uri.getHost() == null || "127.0.0.1".equals(uri.getHost())) return Collections.singletonList(Proxy.NO_PROXY);
         for (String host : hosts) if (Util.containOrMatch(uri.getHost(), host)) return Collections.singletonList(proxy);
         return Collections.singletonList(Proxy.NO_PROXY);
     }

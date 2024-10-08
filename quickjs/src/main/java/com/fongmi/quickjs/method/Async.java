@@ -24,6 +24,7 @@ public class Async {
         Object result = function.call(args);
         if (result instanceof JSObject) then(result);
         else future.complete(result);
+        function.release();
         return future;
     }
 
@@ -36,6 +37,7 @@ public class Async {
         JSObject promise = (JSObject) result;
         JSFunction then = promise.getJSFunction("then");
         if (then != null) then.call(callback);
+        if (then != null) then.release();
     }
 
     private final JSCallFunction callback = new JSCallFunction() {

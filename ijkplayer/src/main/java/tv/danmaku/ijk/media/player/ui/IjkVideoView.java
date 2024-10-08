@@ -427,8 +427,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         }
     }
 
-    public Bitmap getDefaultArtwork() {
-        return ((BitmapDrawable) mDefaultArtwork).getBitmap();
+    public Drawable getDefaultArtwork() {
+        return mDefaultArtwork;
     }
 
     private void updateForCurrentTrackSelections() {
