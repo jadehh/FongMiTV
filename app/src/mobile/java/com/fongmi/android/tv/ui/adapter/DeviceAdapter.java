@@ -34,6 +34,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
         if (items == null) return;
         mItems.removeAll(items);
         mItems.addAll(items);
+        Device.Sorter.sort(mItems);
         notifyDataSetChanged();
     }
 

@@ -49,6 +49,7 @@ public class FlagAdapter extends RecyclerView.Adapter<FlagAdapter.ViewHolder> {
     }
 
     public void setActivated(Flag flag) {
+        if (!mItems.contains(flag)) flag.setFlag(mItems.get(0).getFlag());
         for (Flag item : mItems) item.setActivated(flag);
         notifyItemRangeChanged(0, getItemCount());
     }

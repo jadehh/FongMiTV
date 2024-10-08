@@ -156,7 +156,7 @@ public class Keep {
         for (Keep target : targets) {
             for (Config config : configs) {
                 if (target.getCid() == config.getId()) {
-                    target.save(Config.find(config, 0).getId());
+                    target.save(Config.find(config).getId());
                 }
             }
         }

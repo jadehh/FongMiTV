@@ -89,8 +89,12 @@ public class Path {
         return mkdir(new File(cache() + File.separator + "exo"));
     }
 
+    public static File epg() {
+        return mkdir(new File(cache() + File.separator + "epg"));
+    }
+
     public static File jpa() {
-        return mkdir(new File(cache() + File.separator + "jpa"));
+        return mkdir(new File(thunderCache() + File.separator + "jpa"));
     }
 
     public static File thunder() {
@@ -117,8 +121,16 @@ public class Path {
         return new File(files(), name);
     }
 
+    public static File epg(String name) {
+        return new File(epg(), name);
+    }
+
     public static File js(String name) {
         return new File(js(), name);
+    }
+
+    public static File py(String name) {
+        return new File(py(), name);
     }
 
     public static File jar(String name) {
@@ -187,10 +199,6 @@ public class Path {
             ignored.printStackTrace();
             return file;
         }
-    }
-
-    public static File utf8(File file) {
-        return write(cache(file.getName()), Util.utf8(readToByte(file)));
     }
 
     public static void move(File in, File out) {

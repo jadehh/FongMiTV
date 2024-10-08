@@ -1,6 +1,5 @@
 package com.fongmi.android.tv.ui.dialog;
 
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,18 +18,18 @@ import com.android.cast.dlna.dmc.control.ServiceActionCallback;
 import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.Constant;
 import com.fongmi.android.tv.R;
-import com.fongmi.android.tv.api.config.VodConfig;
+import com.fongmi.android.tv.bean.CastVideo;
+import com.fongmi.android.tv.bean.Config;
 import com.fongmi.android.tv.bean.Device;
 import com.fongmi.android.tv.bean.History;
-import com.fongmi.android.tv.cast.CastDevice;
-import com.fongmi.android.tv.cast.CastVideo;
-import com.fongmi.android.tv.cast.ScanEvent;
-import com.fongmi.android.tv.cast.ScanTask;
 import com.fongmi.android.tv.databinding.DialogDeviceBinding;
+import com.fongmi.android.tv.event.ScanEvent;
 import com.fongmi.android.tv.server.Server;
 import com.fongmi.android.tv.ui.activity.ScanActivity;
 import com.fongmi.android.tv.ui.adapter.DeviceAdapter;
+import com.fongmi.android.tv.utils.DLNADevice;
 import com.fongmi.android.tv.utils.Notify;
+import com.fongmi.android.tv.utils.ScanTask;
 import com.github.catvod.net.OkHttp;
 import com.github.catvod.utils.Path;
 import com.github.catvod.utils.Util;
@@ -68,18 +67,17 @@ public class CastDialog extends BaseDialog implements DeviceAdapter.OnClickListe
     }
 
     public CastDialog() {
-        client = OkHttp.client(Constant.TIMEOUT_SYNC);
         body = new FormBody.Builder();
         body.add("device", Device.get().toString());
-        if (VodConfig.getUrl() != null) body.add("url", VodConfig.getUrl());
+        body.add("config", Config.vod().toString());
+        client = OkHttp.client(Constant.TIMEOUT_SYNC);
     }
 
     public CastDialog history(History history) {
         String id = history.getVodId();
         String fd = history.getVodId();
         if (fd.startsWith("/")) fd = Server.get().getAddress() + "/file" + fd.replace(Path.rootPath(), "");
-        if (fd.startsWith("file")) fd = Server.get().getAddress() + "/" + fd.replace(Path.rootPath(), "");
-        if (fd.startsWith("http://127.0.0.1:7777")) fd = Uri.parse(fd).getQueryParameter("url");
+        if (fd.startsWith("file")) fd = Server.get().getAddress() + "/" + fd.replace(Path.rootPath(), "").replace("://", "");
         if (fd.contains("127.0.0.1")) fd = fd.replace("127.0.0.1", Util.getIp());
         body.add("history", history.toString().replace(id, fd));
         return this;
@@ -128,7 +126,7 @@ public class CastDialog extends BaseDialog implements DeviceAdapter.OnClickListe
 
     private void getDevice() {
         if (fm) adapter.addAll(Device.getAll());
-        adapter.addAll(CastDevice.get().getAll());
+        adapter.addAll(DLNADevice.get().getAll());
     }
 
     private void initDLNA() {
@@ -136,14 +134,14 @@ public class CastDialog extends BaseDialog implements DeviceAdapter.OnClickListe
         DLNACastManager.INSTANCE.registerDeviceListener(this);
     }
 
+    private void onScan() {
+        ScanActivity.start(getActivity());
+    }
+
     private void onRefresh() {
         if (fm) ScanTask.create(this).start(adapter.getIps());
         DLNACastManager.INSTANCE.search(null);
         adapter.clear();
-    }
-
-    private void onScan() {
-        ScanActivity.start(getActivity());
     }
 
     private void onCasted() {
@@ -163,12 +161,12 @@ public class CastDialog extends BaseDialog implements DeviceAdapter.OnClickListe
 
     @Override
     public void onDeviceAdded(@NonNull org.fourthline.cling.model.meta.Device<?, ?, ?> device) {
-        adapter.addAll(CastDevice.get().add(device));
+        adapter.addAll(DLNADevice.get().add(device));
     }
 
     @Override
     public void onDeviceRemoved(@NonNull org.fourthline.cling.model.meta.Device<?, ?, ?> device) {
-        adapter.remove(CastDevice.get().remove(device));
+        adapter.remove(DLNADevice.get().remove(device));
     }
 
     @Override
@@ -205,14 +203,14 @@ public class CastDialog extends BaseDialog implements DeviceAdapter.OnClickListe
 
     @Override
     public void onItemClick(Device item) {
-        if (item.isDLNA()) control = DLNACastManager.INSTANCE.connectDevice(CastDevice.get().find(item), this);
+        if (item.isDLNA()) control = DLNACastManager.INSTANCE.connectDevice(DLNADevice.get().find(item), this);
         else OkHttp.newCall(client, item.getIp().concat("/action?do=cast"), body.build()).enqueue(this);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        CastDevice.get().disconnect();
+        DLNADevice.get().disconnect();
         EventBus.getDefault().unregister(this);
         DLNACastManager.INSTANCE.unregisterListener(this);
         DLNACastManager.INSTANCE.unbindCastService(App.get());

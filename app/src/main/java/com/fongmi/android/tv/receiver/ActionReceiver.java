@@ -10,7 +10,7 @@ import com.fongmi.android.tv.event.ActionEvent;
 public class ActionReceiver extends BroadcastReceiver {
 
     public static PendingIntent getPendingIntent(Context context, String action) {
-        return PendingIntent.getBroadcast(context, 100, new Intent(action).setPackage(context.getPackageName()), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        return PendingIntent.getBroadcast(context, 0, new Intent(action).setPackage(context.getPackageName()), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     @Override

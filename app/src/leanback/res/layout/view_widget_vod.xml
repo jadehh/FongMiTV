@@ -51,8 +51,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:orientation="vertical"
-        android:visibility="visible">
+        android:orientation="vertical">
 
         <include layout="@layout/view_progress" />
 
@@ -91,6 +90,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:gravity="center"
             android:textColor="@color/white"
             android:textSize="16sp"
             tools:text="@string/error_play_url" />

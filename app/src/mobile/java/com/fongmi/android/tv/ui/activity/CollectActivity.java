@@ -48,10 +48,9 @@ import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayoutManager;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Response;
@@ -128,10 +127,10 @@ public class CollectActivity extends BaseActivity implements CustomScroller.Call
         mBinding.recycler.setHasFixedSize(true);
         mBinding.recycler.addOnScrollListener(mScroller);
         mBinding.recycler.setAdapter(mSearchAdapter = new SearchAdapter(this));
-        mBinding.wordRecycler.setHasFixedSize(true);
+        mBinding.wordRecycler.setHasFixedSize(false);
         mBinding.wordRecycler.setAdapter(mWordAdapter = new WordAdapter(this));
         mBinding.wordRecycler.setLayoutManager(new FlexboxLayoutManager(this, FlexDirection.ROW));
-        mBinding.recordRecycler.setHasFixedSize(true);
+        mBinding.recordRecycler.setHasFixedSize(false);
         mBinding.recordRecycler.setAdapter(mRecordAdapter = new RecordAdapter(this));
         mBinding.recordRecycler.setLayoutManager(new FlexboxLayoutManager(this, FlexDirection.ROW));
     }
@@ -191,7 +190,7 @@ public class CollectActivity extends BaseActivity implements CustomScroller.Call
         mBinding.view.setVisibility(View.VISIBLE);
         mBinding.result.setVisibility(View.VISIBLE);
         if (mExecutor != null) mExecutor.shutdownNow();
-        mExecutor = new PauseExecutor(Constant.THREAD_POOL * 2, 0, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        mExecutor = new PauseExecutor(Constant.THREAD_POOL * 2);
         String keyword = mBinding.keyword.getText().toString().trim();
         for (Site site : mSites) mExecutor.execute(() -> search(site, keyword));
         App.post(() -> mRecordAdapter.add(keyword), 250);
@@ -212,7 +211,7 @@ public class CollectActivity extends BaseActivity implements CustomScroller.Call
     private void getSuggest(String text) {
         mBinding.word.setText(R.string.search_suggest);
         mWordAdapter.clear();
-        OkHttp.newCall("https://tv.aiseet.atianqi.com/i-tvbin/qtv_video/search/get_search_smart_box?format=json&page_num=0&page_size=20&key=" + text).enqueue(new Callback() {
+        OkHttp.newCall("https://tv.aiseet.atianqi.com/i-tvbin/qtv_video/search/get_search_smart_box?format=json&page_num=0&page_size=20&key=" + URLEncoder.encode(text)).enqueue(new Callback() {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (mBinding.keyword.getText().toString().trim().isEmpty()) return;
@@ -220,7 +219,7 @@ public class CollectActivity extends BaseActivity implements CustomScroller.Call
                 App.post(() -> mWordAdapter.appendAll(items));
             }
         });
-        OkHttp.newCall("https://suggest.video.iqiyi.com/?if=mobile&key=" + text).enqueue(new Callback() {
+        OkHttp.newCall("https://suggest.video.iqiyi.com/?if=mobile&key=" + URLEncoder.encode(text)).enqueue(new Callback() {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (mBinding.keyword.getText().toString().trim().isEmpty()) return;

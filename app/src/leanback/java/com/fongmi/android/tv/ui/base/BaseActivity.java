@@ -9,17 +9,11 @@ import android.view.View;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
-import com.bumptech.glide.signature.ObjectKey;
-import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.Setting;
 import com.fongmi.android.tv.event.RefreshEvent;
@@ -106,29 +100,11 @@ public abstract class BaseActivity extends AppCompatActivity {
         try {
             if (!customWall()) return;
             File file = FileUtil.getWall(Setting.getWall());
-            if (file.exists() && file.length() > 0) loadWall(file);
+            if (file.exists() && file.length() > 0) getWindow().setBackgroundDrawable(Drawable.createFromPath(file.getAbsolutePath()));
             else getWindow().setBackgroundDrawableResource(ResUtil.getDrawable(file.getName()));
         } catch (Exception e) {
             getWindow().setBackgroundDrawableResource(R.drawable.wallpaper_1);
         }
-    }
-
-    private void loadWall(File file) {
-        Glide.with(App.get()).load(file).centerCrop().override(ResUtil.getScreenWidth(), ResUtil.getScreenHeight()).signature(new ObjectKey(com.github.catvod.utils.Util.md5(file))).into(new CustomTarget<Drawable>() {
-            @Override
-            public void onResourceReady(@NonNull Drawable drawable, @Nullable Transition<? super Drawable> transition) {
-                getWindow().setBackgroundDrawable(drawable);
-            }
-
-            @Override
-            public void onLoadFailed(@Nullable Drawable error) {
-                getWindow().setBackgroundDrawableResource(R.drawable.wallpaper_1);
-            }
-
-            @Override
-            public void onLoadCleared(@Nullable Drawable drawable) {
-            }
-        });
     }
 
     private Resources hackResources(Resources resources) {

@@ -7,7 +7,6 @@ import com.fongmi.android.tv.bean.Episode;
 import com.fongmi.android.tv.exception.ExtractException;
 import com.fongmi.android.tv.player.Source;
 import com.fongmi.android.tv.utils.Download;
-import com.fongmi.android.tv.utils.Sniffer;
 import com.fongmi.android.tv.utils.UrlUtil;
 import com.github.catvod.utils.Path;
 import com.github.catvod.utils.Util;
@@ -22,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
 public class Thunder implements Source.Extractor {
 
@@ -70,8 +70,13 @@ public class Thunder implements Source.Extractor {
 
     public static class Parser implements Callable<List<Episode>> {
 
+        private static final Pattern THUNDER = Pattern.compile("(magnet|thunder|ed2k):.*");
         private final String url;
         private int time;
+
+        public static boolean match(String url) {
+            return THUNDER.matcher(url).find() || isTorrent(url);
+        }
 
         public static Parser get(String url) {
             return new Parser(url);
@@ -86,9 +91,13 @@ public class Thunder implements Source.Extractor {
             time += 10;
         }
 
+        private static boolean isTorrent(String url) {
+            return !url.startsWith("magnet") && url.split(";")[0].endsWith(".torrent");
+        }
+
         @Override
         public List<Episode> call() {
-            boolean torrent = Sniffer.isTorrent(url);
+            boolean torrent = isTorrent(url);
             List<Episode> episodes = new ArrayList<>();
             GetTaskId taskId = XLTaskHelper.get().parse(url, Path.thunder(Util.md5(url)));
             if (!torrent && !taskId.getRealUrl().startsWith("magnet")) return Arrays.asList(Episode.create(taskId.getFileName(), taskId.getRealUrl()));

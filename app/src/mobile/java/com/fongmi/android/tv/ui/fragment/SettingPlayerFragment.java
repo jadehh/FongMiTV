@@ -14,18 +14,15 @@ import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.Setting;
 import com.fongmi.android.tv.databinding.FragmentSettingPlayerBinding;
 import com.fongmi.android.tv.impl.BufferCallback;
-import com.fongmi.android.tv.impl.SubtitleCallback;
 import com.fongmi.android.tv.impl.UaCallback;
-import com.fongmi.android.tv.player.ExoUtil;
 import com.fongmi.android.tv.player.Players;
 import com.fongmi.android.tv.ui.base.BaseFragment;
 import com.fongmi.android.tv.ui.dialog.BufferDialog;
-import com.fongmi.android.tv.ui.dialog.SubtitleDialog;
 import com.fongmi.android.tv.ui.dialog.UaDialog;
 import com.fongmi.android.tv.utils.ResUtil;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class SettingPlayerFragment extends BaseFragment implements UaCallback, BufferCallback, SubtitleCallback {
+public class SettingPlayerFragment extends BaseFragment implements UaCallback, BufferCallback {
 
     private FragmentSettingPlayerBinding mBinding;
     private String[] background;
@@ -36,6 +33,7 @@ public class SettingPlayerFragment extends BaseFragment implements UaCallback, B
     private String[] scale;
     private String[] http;
     private String[] flag;
+    private String[] rtsp;
 
     public static SettingPlayerFragment newInstance() {
         return new SettingPlayerFragment();
@@ -57,8 +55,9 @@ public class SettingPlayerFragment extends BaseFragment implements UaCallback, B
         mBinding.tunnelText.setText(getSwitch(Setting.isTunnel()));
         mBinding.captionText.setText(getSwitch(Setting.isCaption()));
         mBinding.bufferText.setText(String.valueOf(Setting.getBuffer()));
-        mBinding.subtitleText.setText(String.valueOf(Setting.getSubtitle()));
+        mBinding.playWithOthersText.setText(getSwitch(Setting.isPlayWithOthers()));
         mBinding.danmuLoadText.setText(getSwitch(Setting.isDanmuLoad()));
+        mBinding.rtspText.setText((rtsp = ResUtil.getStringArray(R.array.select_rtsp))[Setting.getRtsp()]);
         mBinding.flagText.setText((flag = ResUtil.getStringArray(R.array.select_flag))[Setting.getFlag()]);
         mBinding.httpText.setText((http = ResUtil.getStringArray(R.array.select_exo_http))[Setting.getHttp()]);
         mBinding.scaleText.setText((scale = ResUtil.getStringArray(R.array.select_scale))[Setting.getScale()]);
@@ -72,6 +71,7 @@ public class SettingPlayerFragment extends BaseFragment implements UaCallback, B
     @Override
     protected void initEvent() {
         mBinding.ua.setOnClickListener(this::onUa);
+        mBinding.rtsp.setOnClickListener(this::setRtsp);
         mBinding.http.setOnClickListener(this::setHttp);
         mBinding.flag.setOnClickListener(this::setFlag);
         mBinding.scale.setOnClickListener(this::onScale);
@@ -81,8 +81,8 @@ public class SettingPlayerFragment extends BaseFragment implements UaCallback, B
         mBinding.render.setOnClickListener(this::setRender);
         mBinding.tunnel.setOnClickListener(this::setTunnel);
         mBinding.caption.setOnClickListener(this::setCaption);
-        mBinding.subtitle.setOnClickListener(this::onSubtitle);
         mBinding.caption.setOnLongClickListener(this::onCaption);
+        mBinding.playWithOthers.setOnClickListener(this::setPlayWithOthers);
         mBinding.danmuLoad.setOnClickListener(this::setDanmuLoad);
         mBinding.background.setOnClickListener(this::onBackground);
     }
@@ -92,6 +92,7 @@ public class SettingPlayerFragment extends BaseFragment implements UaCallback, B
         mBinding.http.setVisibility(Players.isExo(Setting.getPlayer()) ? View.VISIBLE : View.GONE);
         mBinding.buffer.setVisibility(Players.isExo(Setting.getPlayer()) ? View.VISIBLE : View.GONE);
         mBinding.tunnel.setVisibility(Players.isExo(Setting.getPlayer()) ? View.VISIBLE : View.GONE);
+        mBinding.playWithOthers.setVisibility(Players.isExo(Setting.getPlayer()) ? View.VISIBLE : View.GONE);
     }
 
     private void onUa(View view) {
@@ -104,11 +105,16 @@ public class SettingPlayerFragment extends BaseFragment implements UaCallback, B
         Setting.putUa(ua);
     }
 
+    private void setRtsp(View view) {
+        int index = Setting.getRtsp();
+        Setting.putRtsp(index = index == rtsp.length - 1 ? 0 : ++index);
+        mBinding.rtspText.setText(rtsp[index]);
+    }
+
     private void setHttp(View view) {
         int index = Setting.getHttp();
         Setting.putHttp(index = index == http.length - 1 ? 0 : ++index);
         mBinding.httpText.setText(http[index]);
-        ExoUtil.reset();
     }
 
     private void setFlag(View view) {
@@ -173,13 +179,9 @@ public class SettingPlayerFragment extends BaseFragment implements UaCallback, B
         return Setting.isCaption();
     }
 
-    private void onSubtitle(View view) {
-        SubtitleDialog.create(this).show();
-    }
-
-    @Override
-    public void setSubtitle(int size) {
-        mBinding.subtitleText.setText(String.valueOf(size));
+    private void setPlayWithOthers(View view) {
+        Setting.putPlayWithOthers(!Setting.isPlayWithOthers());
+        mBinding.playWithOthersText.setText(getSwitch(Setting.isPlayWithOthers()));
     }
 
     private void setDanmuLoad(View view) {
@@ -197,6 +199,6 @@ public class SettingPlayerFragment extends BaseFragment implements UaCallback, B
 
     @Override
     public void onHiddenChanged(boolean hidden) {
-        if (!hidden) setVisible();
+        if (!hidden) initView();
     }
 }

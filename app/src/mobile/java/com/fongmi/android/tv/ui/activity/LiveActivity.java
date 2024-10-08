@@ -8,18 +8,18 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.media.MediaMetadataCompat;
 import android.view.MotionEvent;
 import android.view.View;
 
-import androidx.annotation.Dimension;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.media3.common.C;
+import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.ui.PlayerView;
+import androidx.media3.ui.SubtitleView;
 import androidx.viewbinding.ViewBinding;
 
 import com.bumptech.glide.request.target.CustomTarget;
@@ -36,17 +36,18 @@ import com.fongmi.android.tv.bean.Group;
 import com.fongmi.android.tv.bean.Keep;
 import com.fongmi.android.tv.bean.Live;
 import com.fongmi.android.tv.bean.Track;
-import com.fongmi.android.tv.cast.CastVideo;
+import com.fongmi.android.tv.bean.CastVideo;
 import com.fongmi.android.tv.databinding.ActivityLiveBinding;
 import com.fongmi.android.tv.event.ActionEvent;
 import com.fongmi.android.tv.event.ErrorEvent;
 import com.fongmi.android.tv.event.PlayerEvent;
+import com.fongmi.android.tv.event.RefreshEvent;
 import com.fongmi.android.tv.impl.Callback;
 import com.fongmi.android.tv.impl.LiveCallback;
 import com.fongmi.android.tv.impl.PassCallback;
-import com.fongmi.android.tv.impl.SubtitleCallback;
 import com.fongmi.android.tv.model.LiveViewModel;
-import com.fongmi.android.tv.player.ExoUtil;
+import com.fongmi.android.tv.player.IjkUtil;
+import com.fongmi.android.tv.player.exo.ExoUtil;
 import com.fongmi.android.tv.player.Players;
 import com.fongmi.android.tv.server.Server;
 import com.fongmi.android.tv.service.PlaybackService;
@@ -59,15 +60,18 @@ import com.fongmi.android.tv.ui.dialog.CastDialog;
 import com.fongmi.android.tv.ui.dialog.InfoDialog;
 import com.fongmi.android.tv.ui.dialog.LiveDialog;
 import com.fongmi.android.tv.ui.dialog.PassDialog;
+import com.fongmi.android.tv.ui.dialog.PlayerDialog;
 import com.fongmi.android.tv.ui.dialog.SubtitleDialog;
 import com.fongmi.android.tv.ui.dialog.TrackDialog;
 import com.fongmi.android.tv.utils.Biometric;
 import com.fongmi.android.tv.utils.Clock;
+import com.fongmi.android.tv.utils.IDMUtil;
 import com.fongmi.android.tv.utils.ImgUtil;
 import com.fongmi.android.tv.utils.Notify;
 import com.fongmi.android.tv.utils.PiP;
 import com.fongmi.android.tv.utils.ResUtil;
 import com.fongmi.android.tv.utils.Traffic;
+import com.fongmi.android.tv.utils.UrlUtil;
 import com.fongmi.android.tv.utils.Util;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -80,7 +84,7 @@ import java.util.List;
 
 import tv.danmaku.ijk.media.player.ui.IjkVideoView;
 
-public class LiveActivity extends BaseActivity implements Clock.Callback, CustomKeyDownLive.Listener, TrackDialog.Listener, Biometric.Callback, PassCallback, LiveCallback, GroupAdapter.OnClickListener, ChannelAdapter.OnClickListener, EpgDataAdapter.OnClickListener, SubtitleCallback, CastDialog.Listener, InfoDialog.Listener {
+public class LiveActivity extends BaseActivity implements Clock.Callback, CustomKeyDownLive.Listener, TrackDialog.Listener, PlayerDialog.Listener, Biometric.Callback, PassCallback, LiveCallback, GroupAdapter.OnClickListener, ChannelAdapter.OnClickListener, EpgDataAdapter.OnClickListener, CastDialog.Listener, InfoDialog.Listener {
 
     private ActivityLiveBinding mBinding;
     private ChannelAdapter mChannelAdapter;
@@ -105,6 +109,7 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
     private boolean stop;
     private boolean lock;
     private int toggleCount;
+    private int errorCount;
     private int passCount;
     private PiP mPiP;
 
@@ -117,11 +122,16 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
     }
 
     private PlayerView getExo() {
-        return Setting.getRender() == 0 ? mBinding.surface : mBinding.texture;
+        return mBinding.exo;
     }
 
     private IjkVideoView getIjk() {
         return mBinding.ijk;
+    }
+
+    private Drawable getDefaultArtwork() {
+        if (mPlayers.isExo()) return getExo().getDefaultArtwork();
+        return getIjk().getDefaultArtwork();
     }
 
     private Group getKeep() {
@@ -163,7 +173,7 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         setPadding(mBinding.control.getRoot());
         setPadding(mBinding.widget.epg, true);
         setPadding(mBinding.recycler, true);
-        mPlayers = new Players().init(this);
+        mPlayers = Players.create(this);
         mObserveEpg = this::setEpg;
         mObserveUrl = this::start;
         mHides = new ArrayList<>();
@@ -225,7 +235,6 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         mBinding.control.action.speed.setEnabled(mPlayers.canAdjustSpeed());
         getExo().setVisibility(mPlayers.isExo() ? View.VISIBLE : View.GONE);
         getIjk().setVisibility(mPlayers.isIjk() ? View.VISIBLE : View.GONE);
-        mBinding.video.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> mPiP.update(getActivity(), view));
     }
 
     private void setDecodeView() {
@@ -233,27 +242,21 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
     }
 
     private void setVideoView() {
-        mPlayers.set(getExo(), getIjk());
+        mPlayers.init(getExo(), getIjk());
         setScale(Setting.getLiveScale());
-        setSubtitle(Setting.getSubtitle());
-        getExo().getSubtitleView().setStyle(ExoUtil.getCaptionStyle());
-        getIjk().getSubtitleView().setStyle(ExoUtil.getCaptionStyle());
+        ExoUtil.setSubtitleView(mBinding.exo);
+        IjkUtil.setSubtitleView(mBinding.ijk);
         mBinding.control.action.invert.setActivated(Setting.isInvert());
         mBinding.control.action.across.setActivated(Setting.isAcross());
         mBinding.control.action.change.setActivated(Setting.isChange());
         mBinding.control.action.home.setVisibility(LiveConfig.isOnly() ? View.GONE : View.VISIBLE);
+        mBinding.video.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> mPiP.update(getActivity(), view));
     }
 
     private void setDisplayView() {
         mBinding.display.getRoot().setVisibility(View.VISIBLE);
         mBinding.display.progress.setVisibility(View.GONE);
         showDisplayInfo();
-    }
-
-    @Override
-    public void setSubtitle(int size) {
-        getExo().getSubtitleView().setFixedTextSize(Dimension.SP, size);
-        getIjk().getSubtitleView().setFixedTextSize(Dimension.SP, size);
     }
 
     private void setScale(int scale) {
@@ -265,8 +268,10 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
     private void setViewModel() {
         mViewModel = new ViewModelProvider(this).get(LiveViewModel.class);
         mViewModel.url.observeForever(mObserveUrl);
+        mViewModel.xml.observe(this, this::setEpg);
         mViewModel.epg.observeForever(mObserveEpg);
         mViewModel.live.observe(this, live -> {
+            mViewModel.getXml(live);
             hideProgress();
             setGroup(live);
             setWidth(live);
@@ -306,7 +311,6 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
 
     private void setGroup(Live live) {
         List<Group> items = new ArrayList<>();
-        items.add(Group.create(R.string.keep));
         for (Group group : live.getGroups()) (group.isHidden() ? mHides : items).add(group);
         mGroupAdapter.addAll(items);
         setPosition(LiveConfig.get().find(items));
@@ -325,7 +329,7 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         int padding = ResUtil.dp2px(60);
         if (group.isKeep()) group.setWidth(0);
         if (group.getWidth() == 0) for (Channel item : group.getChannel()) group.setWidth(Math.max(group.getWidth(), (item.getLogo().isEmpty() ? 0 : logo) + ResUtil.getTextWidth(item.getNumber() + item.getName(), 14)));
-        mBinding.channel.getLayoutParams().width = group.getWidth() == 0 ? 0 : Math.min(group.getWidth() + padding, ResUtil.getScreenWidth() / 3);
+        mBinding.channel.getLayoutParams().width = group.getWidth() == 0 ? 0 : Math.min(group.getWidth() + padding, ResUtil.getScreenWidth() / 2);
     }
 
     private void setWidth(Epg epg) {
@@ -333,13 +337,13 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         if (epg.getList().isEmpty()) return;
         int minWidth = ResUtil.getTextWidth(epg.getList().get(0).getTime(), 14);
         if (epg.getWidth() == 0) for (EpgData item : epg.getList()) epg.setWidth(Math.max(epg.getWidth(), ResUtil.getTextWidth(item.getTitle(), 14)));
-        mBinding.widget.epgData.getLayoutParams().width = epg.getWidth() == 0 ? 0 : Math.min(Math.max(epg.getWidth(), minWidth) + padding, ResUtil.getScreenWidth() / 3);
+        mBinding.widget.epgData.getLayoutParams().width = epg.getWidth() == 0 ? 0 : Math.min(Math.max(epg.getWidth(), minWidth) + padding, ResUtil.getScreenWidth() / 2);
     }
 
     private void setPosition(int[] position) {
         if (position[0] == -1) return;
-        if (mGroupAdapter.getItemCount() == 1) return;
-        if (position[0] >= mGroupAdapter.getItemCount()) return;
+        int size = mGroupAdapter.getItemCount();
+        if (size == 1 || position[0] >= size) return;
         mGroup = mGroupAdapter.get(position[0]);
         mGroup.setPosition(position[1]);
         onItemClick(mGroup);
@@ -393,12 +397,6 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         hideControl();
     }
 
-    private boolean onTextLong() {
-        SubtitleDialog.create(this).show();
-        hideControl();
-        return true;
-    }
-
     private void onHome() {
         LiveDialog.create(this).show();
         hideControl();
@@ -446,31 +444,31 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
     }
 
     private void onPlayer() {
-        mPlayers.togglePlayer();
-        Setting.putLivePlayer(mPlayers.getPlayer());
-        setPlayerView();
-        setR1Callback();
-        fetch();
+        PlayerDialog.create().select(mPlayers.getPlayer()).title(mBinding.control.title.getText().toString()).show(this);
+        hideControl();
     }
 
     private void onDecode() {
-        mPlayers.toggleDecode();
-        mPlayers.set(getExo(), getIjk());
+        onDecode(true);
+    }
+
+    private void onDecode(boolean save) {
+        mPlayers.toggleDecode(save);
+        mPlayers.init(getExo(), getIjk());
+        mPlayers.setMediaSource();
         setDecodeView();
         setR1Callback();
-        fetch();
     }
 
     private boolean onChoose() {
         if (mPlayers.isEmpty()) return false;
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.putExtra("headers", mPlayers.getHeaderArray());
-        intent.putExtra("title", mBinding.control.title.getText());
-        intent.setDataAndType(mPlayers.getUri(), "video/*");
-        startActivity(Util.getChooser(intent));
+        mPlayers.choose(this, mBinding.control.title.getText());
         setRedirect(true);
+        return true;
+    }
+
+    private boolean onTextLong() {
+        onSubtitleClick();
         return true;
     }
 
@@ -493,9 +491,8 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         hideEpg();
     }
 
-    @Override
-    public void showEpg(Channel item) {
-        if (mChannel == null || mChannel.getData().getList().isEmpty() || mEpgDataAdapter.getItemCount() == 0 || !mChannel.equals(item)) return;
+    private void showEpg(Channel item) {
+        if (mChannel == null || mChannel.getData().getList().isEmpty() || mEpgDataAdapter.getItemCount() == 0 || !mChannel.equals(item) || !mChannel.getGroup().equals(mGroup)) return;
         mBinding.widget.epgData.scrollToPosition(item.getData().getSelected());
         mBinding.widget.epg.setVisibility(View.VISIBLE);
         hideUI();
@@ -553,6 +550,7 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         mBinding.display.clock.setVisibility(Setting.isDisplayTime() && visible  ? View.VISIBLE : View.GONE);
         mBinding.display.netspeed.setVisibility(Setting.isDisplaySpeed() && visible ? View.VISIBLE : View.GONE);
         mBinding.display.duration.setVisibility(View.GONE);
+        mBinding.display.titleLayout.setVisibility(Setting.isDisplayVideoTitle()&& visible ? View.VISIBLE : View.GONE);
     }
 
     private void onTimeChangeDisplaySpeed() {
@@ -608,14 +606,12 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
             public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
                 getExo().setDefaultArtwork(resource);
                 getIjk().setDefaultArtwork(resource);
-                setMetadata();
             }
 
             @Override
             public void onLoadFailed(@Nullable Drawable error) {
                 getExo().setDefaultArtwork(error);
                 getIjk().setDefaultArtwork(error);
-                setMetadata();
             }
 
             @Override
@@ -638,14 +634,18 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
 
     @Override
     public void onItemClick(Channel item) {
-        mGroup.setPosition(mChannelAdapter.setSelected(item.group(mGroup)));
-        mPlayers.setPlayer(getPlayerType(item.getPlayerType()));
-        setArtwork(item.getLogo());
-        mChannel = item;
-        setPlayerView();
-        showInfo();
-        hideUI();
-        fetch();
+        if (item.getData().getList().size() > 0 && item.isSelected() && mChannel != null && mChannel.equals(item) && mChannel.getGroup().equals(mGroup)) {
+            showEpg(item);
+        } else {
+            mGroup.setPosition(mChannelAdapter.setSelected(item.group(mGroup)));
+            mPlayers.setPlayer(getPlayerType(item.getPlayerType()));
+            setArtwork(item.getLogo());
+            mChannel = item;
+            setPlayerView();
+            showInfo();
+            hideUI();
+            fetch();
+        }
     }
 
     @Override
@@ -665,6 +665,7 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         mEpgDataAdapter.setSelected(item);
         mViewModel.getUrl(mChannel, item);
         mPlayers.clear();
+        mPlayers.stop();
         showProgress();
         hideEpg();
     }
@@ -689,6 +690,7 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         mChannel.loadLogo(mBinding.widget.logo);
         mBinding.widget.name.setText(mChannel.getName());
         mBinding.control.title.setText(mChannel.getName());
+        mBinding.display.title.setText(mChannel.getName());
         mBinding.widget.namePip.setText(mChannel.getName());
         mBinding.widget.line.setText(mChannel.getLineText());
         mBinding.widget.number.setText(mChannel.getNumber());
@@ -710,8 +712,12 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         setMetadata();
     }
 
+    private void setEpg(boolean success) {
+        if (mChannel != null && success) mViewModel.getEpg(mChannel);
+    }
+
     private void setEpg(Epg epg) {
-        if (mChannel != null && mChannel.getName().equals(epg.getKey())) setEpg();
+        if (mChannel != null && mChannel.getTvgName().equals(epg.getKey())) setEpg();
     }
 
     private void fetch() {
@@ -719,6 +725,7 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         LiveConfig.get().setKeep(mChannel);
         mViewModel.getUrl(mChannel);
         mPlayers.clear();
+        mPlayers.stop();
         showProgress();
     }
 
@@ -753,13 +760,22 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
     }
 
     @Override
+    public void onSubtitleClick() {
+        App.post(this::hideControl, 200);
+        SubtitleView subtitleView = mPlayers.isIjk() ? getIjk().getSubtitleView() : getExo().getSubtitleView();
+        App.post(() -> SubtitleDialog.create().view(subtitleView).full(true).show(this), 200);
+    }
+
+    @Override
     public void onTimeChanged() {
         onTimeChangeDisplaySpeed();
     }
 
     @Override
     public void setLive(Live item) {
+        if (item.isActivated()) item.getGroups().clear();
         LiveConfig.get().setHome(item);
+        mPlayers.reset();
         mPlayers.stop();
         resetAdapter();
         hideControl();
@@ -803,6 +819,18 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onRefreshEvent(RefreshEvent event) {
+        switch (event.getType()) {
+            case LIVE:
+                setLive(getHome());
+                break;
+            case PLAYER:
+                fetch();
+                break;
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPlayerEvent(PlayerEvent event) {
         switch (event.getState()) {
             case 0:
@@ -817,12 +845,13 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
             case Player.STATE_READY:
                 setMetadata();
                 resetToggle();
+                resetError();
                 hideProgress();
                 mPlayers.reset();
-                setSpeedVisible();
                 setTrackVisible(true);
                 checkPlayImg(mPlayers.isPlaying());
                 mBinding.control.size.setText(mPlayers.getSizeText());
+                mBinding.display.size.setText(mPlayers.getSizeText());
                 if (isVisible(mBinding.control.getRoot())) showControl();
                 break;
             case Player.STATE_ENDED:
@@ -831,12 +860,9 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         }
     }
 
-    private void setSpeedVisible() {
-        mBinding.control.action.speed.setVisibility(mPlayers.isVod() ? View.VISIBLE : View.GONE);
-    }
-
     private void setTrackVisible(boolean visible) {
         mBinding.control.action.text.setVisibility(visible && mPlayers.haveTrack(C.TRACK_TYPE_TEXT) ? View.VISIBLE : View.GONE);
+        mBinding.control.action.speed.setVisibility(visible && mPlayers.isVod() ? View.VISIBLE : View.GONE);
         mBinding.control.action.audio.setVisibility(visible && mPlayers.haveTrack(C.TRACK_TYPE_AUDIO) ? View.VISIBLE : View.GONE);
         mBinding.control.action.video.setVisibility(visible && mPlayers.haveTrack(C.TRACK_TYPE_VIDEO) ? View.VISIBLE : View.GONE);
     }
@@ -844,19 +870,21 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
     private void setMetadata() {
         String title = mBinding.widget.name.getText().toString();
         String artist = mBinding.widget.play.getText().toString();
-        MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder();
-        builder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, title);
-        builder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist);
-        builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, getIjk().getDefaultArtwork());
-        builder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mPlayers.getDuration());
-        mPlayers.setMetadata(builder.build());
-        ActionEvent.update();
+        mPlayers.setMetadata(title, artist, mChannel.getLogo(), getDefaultArtwork());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onErrorEvent(ErrorEvent event) {
-        if (mPlayers.addRetry() > event.getRetry()) checkError(event);
+        if (addErrorCount() > 20) onErrorEnd(event);
+        else if (mPlayers.addRetry() > event.getRetry()) checkError(event);
+        else if (event.isDecode() && mPlayers.canToggleDecode()) onDecode(false);
+        else if (event.isExo() && mPlayers.isExo()) onExoCheck(event);
         else fetch();
+    }
+
+    private void onExoCheck(ErrorEvent event) {
+        if (event.getCode() == PlaybackException.ERROR_CODE_IO_UNSPECIFIED || event.getCode() >= PlaybackException.ERROR_CODE_PARSING_CONTAINER_MALFORMED && event.getCode() <= PlaybackException.ERROR_CODE_PARSING_MANIFEST_UNSUPPORTED) mPlayers.setFormat(ExoUtil.getMimeType(event.getCode()));
+        mPlayers.setMediaSource();
     }
 
     private void checkError(ErrorEvent event) {
@@ -875,9 +903,19 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         fetch();
     }
 
-    private void onError(ErrorEvent event) {
+    private void onErrorEnd(ErrorEvent event) {
+        onErrorPlayer(event);
+        resetError();
+    }
+
+    private void onErrorPlayer(ErrorEvent event) {
         showError(event.getMsg());
+        mPlayers.reset();
         mPlayers.stop();
+    }
+
+    private void onError(ErrorEvent event) {
+        onErrorPlayer(event);
         startFlow();
     }
 
@@ -1023,6 +1061,14 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         this.toggleCount = 0;
     }
 
+    public int addErrorCount() {
+        return ++errorCount;
+    }
+
+    public void resetError() {
+        this.errorCount = 0;
+    }
+
     private void stopService() {
         PlaybackService.stop();
     }
@@ -1126,16 +1172,24 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
     }
 
     @Override
-    public void onShare(CharSequence title, String url) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(Intent.EXTRA_TEXT, url);
-        intent.putExtra("extra_headers", mPlayers.getHeaderBundle());
-        intent.putExtra("title", title);
-        intent.putExtra("name", title);
-        intent.setType("text/plain");
-        startActivity(Util.getChooser(intent));
+    public void onShare(CharSequence title) {
+        boolean idm = IDMUtil.downloadFile(this, UrlUtil.fixDownloadUrl(mPlayers.getUrl()), title.toString(), mPlayers.getHeaders(), false, false);
+        if (!idm) mPlayers.share(this, title);
         setRedirect(true);
+    }
+
+    @Override
+    public void onPlayerClick(Integer item) {
+        mPlayers.setPlayer(item);
+        Setting.putLivePlayer(mPlayers.getPlayer());
+        setPlayerView();
+        setR1Callback();
+        fetch();
+    }
+
+    @Override
+    public void onPlayerShare(String title) {
+        this.onShare(title);
     }
 
     @Override
@@ -1143,7 +1197,7 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         super.onUserLeaveHint();
         if (isRedirect()) return;
         if (isLock()) App.post(this::onLock, 500);
-        if (mPlayers.haveTrack(C.TRACK_TYPE_VIDEO)) mPiP.enter(this, Setting.getLiveScale() == 2);
+        if (mPlayers.haveTrack(C.TRACK_TYPE_VIDEO)) mPiP.enter(this, mPlayers.getVideoWidth(), mPlayers.getVideoHeight(), Setting.getLiveScale());
     }
 
     @Override
@@ -1151,15 +1205,13 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         super.onPictureInPictureModeChanged(isInPictureInPictureMode);
         if (isInPictureInPictureMode) {
             PlaybackService.start(mPlayers);
-            setSubtitle(10);
             hideControl();
             hideInfo();
             hideUI();
         } else {
             hideInfo();
+            App.post(mR0, 1000);
             setForeground(true);
-            PlaybackService.stop();
-            setSubtitle(Setting.getSubtitle());
             if (isStop()) finish();
         }
     }
@@ -1189,7 +1241,6 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         super.onResume();
         if (isForeground()) return;
         if (isRedirect()) onPlay();
-        App.removeCallbacks(mR0);
         App.post(mR0, 1000);
         setForeground(true);
         setRedirect(false);
@@ -1232,8 +1283,8 @@ public class LiveActivity extends BaseActivity implements Clock.Callback, Custom
         super.onDestroy();
         mClock.release();
         mPlayers.release();
-        PlaybackService.stop();
-        App.removeCallbacks(mR0, mR1, mR2, mR3);
+        App.post(mR0, 1000);
+        App.removeCallbacks(mR1, mR2, mR3);
         mViewModel.url.removeObserver(mObserveUrl);
         mViewModel.epg.removeObserver(mObserveEpg);
     }

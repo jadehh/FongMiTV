@@ -64,7 +64,9 @@ public class EpgDataAdapter extends RecyclerView.Adapter<EpgDataAdapter.ViewHold
         holder.binding.time.setText(item.getTime());
         holder.binding.title.setText(item.getTitle());
         holder.binding.getRoot().setSelected(item.isSelected());
-        holder.binding.getRoot().setOnClickListener(view -> mListener.onItemClick(item));
+        holder.binding.getRoot().setOnClickListener(view -> {
+            if (!item.isFuture()) mListener.onItemClick(item);
+        });
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

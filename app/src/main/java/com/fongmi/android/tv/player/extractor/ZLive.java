@@ -1,25 +1,20 @@
 package com.fongmi.android.tv.player.extractor;
 
+import android.os.SystemClock;
+
 import com.fongmi.android.tv.player.Source;
 import com.github.catvod.net.OkHttp;
 import com.github.catvod.utils.Path;
 
 public class ZLive implements Source.Extractor {
 
-    private final String BASE = "http://127.0.0.1:6677/stream/";
+    private static final int PORT = 6677;
     private boolean init;
 
-    public void init() {
-        //com.east.android.zlive.ZLive.INSTANCE.OnLiveStart(6677);
-        //init = true;
-    }
-
-    private String getLive(String uuid) {
-        return BASE + "live?uuid=" + uuid;
-    }
-
-    private String getOpen(String uuid) {
-        return BASE + "open?uuid=" + uuid;
+    private void init() {
+        com.east.android.zlive.ZLive.INSTANCE.OnLiveStart(PORT);
+        SystemClock.sleep(50);
+        init = true;
     }
 
     @Override
@@ -31,19 +26,16 @@ public class ZLive implements Source.Extractor {
     public String fetch(String url) throws Exception {
         if (!init) init();
         String[] split = url.split("/");
-        String server = split[2];
-        String uuid = split[3];
-        String param = "&group=5850&mac=00:00:00:00:00:00&dir=";
-        String result = getLive(uuid) + "&server=" + server + param + Path.cache();
-        OkHttp.newCall(getOpen(uuid)).execute();
-        return result;
+        OkHttp.newCall(String.format("http://127.0.0.1:%s/stream/open?uuid=%s", PORT, split[3])).execute();
+        return String.format("http://127.0.0.1:%s/stream/live?uuid=%s&server=%s&group=5850&mac=00:00:00:00:00:00&dir=%s", PORT, split[3], split[2], Path.cache());
     }
 
     @Override
     public void stop() {
         try {
-            //if (init) com.east.android.zlive.ZLive.INSTANCE.OnLiveStop();
-            //init = false;
+            if (init) com.east.android.zlive.ZLive.INSTANCE.OnLiveStop();
+            SystemClock.sleep(50);
+            init = false;
         } catch (Throwable e) {
             e.printStackTrace();
         }

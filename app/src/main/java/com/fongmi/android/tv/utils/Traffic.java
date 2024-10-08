@@ -6,12 +6,15 @@ import android.widget.TextView;
 
 import com.fongmi.android.tv.App;
 
+import java.text.DecimalFormat;
+
 public class Traffic {
 
+    private static final DecimalFormat format = new DecimalFormat("#.0");
     private static final String UNIT_KB = " KB/s";
     private static final String UNIT_MB = " MB/s";
-    private static long lastTotalRxBytes = 0;
-    private static long lastTimeStamp = 0;
+    private static long lastTotalRxBytes;
+    private static long lastTimeStamp;
 
     public static void setSpeed(TextView view) {
         if (unsupported()) return;
@@ -24,14 +27,12 @@ public class Traffic {
     }
 
     private static String getSpeed() {
-        long total = TrafficStats.getTotalRxBytes() / 1024;
-        long time = System.currentTimeMillis();
-        long diff = (total - lastTotalRxBytes) * 1000;
-        long speed = diff / Math.max(time - lastTimeStamp, 1);
-        lastTimeStamp = time;
-        lastTotalRxBytes = total;
-        if (speed > 1000) return speed / 1000 + UNIT_MB;
-        else return speed + UNIT_KB;
+        long nowTimeStamp = System.currentTimeMillis();
+        long nowTotalRxBytes = TrafficStats.getTotalRxBytes() / 1024;
+        long speed = (nowTotalRxBytes - lastTotalRxBytes) * 1000 / Math.max(nowTimeStamp - lastTimeStamp, 1);
+        lastTimeStamp = nowTimeStamp;
+        lastTotalRxBytes = nowTotalRxBytes;
+        return speed < 1000 ? speed + UNIT_KB : format.format(speed / 1024f) + UNIT_MB;
     }
 
     public static void reset() {

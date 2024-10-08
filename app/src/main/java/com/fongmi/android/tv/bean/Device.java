@@ -15,6 +15,8 @@ import com.fongmi.android.tv.utils.UrlUtil;
 import com.fongmi.android.tv.utils.Util;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Entity(indices = @Index(value = {"uuid", "name"}, unique = true))
@@ -38,6 +40,14 @@ public class Device {
         device.setName(Util.getDeviceName());
         device.setIp(Server.get().getAddress());
         device.setType(Product.getDeviceType());
+        return device;
+    }
+
+    public static Device get(org.fourthline.cling.model.meta.Device<?, ?, ?> item) {
+        Device device = new Device();
+        device.setUuid(item.getIdentity().getUdn().getIdentifierString());
+        device.setName(item.getDetails().getFriendlyName());
+        device.setType(2);
         return device;
     }
 
@@ -130,5 +140,18 @@ public class Device {
     @Override
     public String toString() {
         return App.gson().toJson(this);
+    }
+
+    public static class Sorter implements Comparator<Device> {
+
+        public static void sort(List<Device> items) {
+            if (items.size() > 1) Collections.sort(items, new Sorter());
+        }
+
+        @Override
+        public int compare(Device o1, Device o2) {
+            int comp = Integer.compare(o1.getType(), o2.getType());
+            return comp != 0 ? comp : o1.getName().compareTo(o2.getName());
+        }
     }
 }

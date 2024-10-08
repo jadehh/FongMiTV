@@ -27,6 +27,10 @@ public class ActionEvent {
         send(NEXT);
     }
 
+    public static void prev() {
+        send(PREV);
+    }
+
     public static void pause() {
         send(PAUSE);
     }

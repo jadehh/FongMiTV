@@ -22,7 +22,7 @@ https://github.com/CatVodTVOfficial/CatVodTVJarLoader
 | ua         | none  | 用戶代理  |                  |
 | origin     | none  | 來源    |                  |
 | referer    | none  | 參照地址  |                  |
-| epg        | none  | 節目地址  |                  |
+| epg        | none  | 節目地址  | &serverTimeZone  |
 | logo       | none  | 台標地址  |                  |
 | pass       | false | 是否免密碼 |                  |
 | boot       | false | 是否自啟動 |                  |
@@ -108,6 +108,12 @@ http://127.0.0.1:9978/action?do=refresh&type=detail
 ```
 http://127.0.0.1:9978/action?do=refresh&type=player
 ```  
+
+刷新直播
+
+```
+http://127.0.0.1:9978/action?do=refresh&type=live
+```
 
 推送字幕
 

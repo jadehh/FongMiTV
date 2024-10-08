@@ -25,8 +25,6 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ViewHold
 
     public interface OnClickListener {
 
-        void showEpg(Channel item);
-
         void onItemClick(Channel item);
 
         boolean onLongClick(Channel item);
@@ -86,7 +84,6 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ViewHold
         holder.binding.name.setText(item.getName());
         holder.binding.number.setText(item.getNumber());
         holder.binding.getRoot().setSelected(item.isSelected());
-        holder.binding.epg.setOnClickListener(view -> mListener.showEpg(item));
         holder.binding.getRoot().setOnClickListener(view -> mListener.onItemClick(item));
         holder.binding.getRoot().setOnLongClickListener(view -> mListener.onLongClick(item));
         holder.binding.epg.setVisibility(item.getData().getList().isEmpty() || !item.isSelected() ? View.GONE : View.VISIBLE);

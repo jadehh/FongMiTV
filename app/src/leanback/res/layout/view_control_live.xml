@@ -42,7 +42,7 @@
             android:textSize="14sp"
             tools:text="硬解" />
 
-        <TextView
+        <com.fongmi.android.tv.ui.custom.CustomUpDownView
             android:id="@+id/speed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -94,7 +94,7 @@
             tools:text="來源 1"
             tools:visibility="visible" />
 
-        <TextView
+        <com.fongmi.android.tv.ui.custom.CustomUpDownView
             android:id="@+id/text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -214,7 +214,7 @@
                 android:textSize="14sp"
                 tools:text="00:00" />
 
-            <TextView
+            <com.fongmi.android.tv.ui.custom.CustomUpDownView
                 android:id="@+id/danmu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

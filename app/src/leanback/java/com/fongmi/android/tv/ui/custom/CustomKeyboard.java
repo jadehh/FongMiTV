@@ -10,6 +10,7 @@ public class CustomKeyboard implements KeyboardAdapter.OnClickListener {
 
     private final ActivitySearchBinding binding;
     private final Callback callback;
+    private KeyboardAdapter adapter;
 
     public static void init(Callback callback, ActivitySearchBinding binding) {
         new CustomKeyboard(callback, binding).initView();
@@ -21,9 +22,10 @@ public class CustomKeyboard implements KeyboardAdapter.OnClickListener {
     }
 
     private void initView() {
-        binding.keyboard.setHasFixedSize(true);
+        binding.keyboard.setItemAnimator(null);
+        binding.keyboard.setHasFixedSize(false);
         binding.keyboard.addItemDecoration(new SpaceItemDecoration(6, 8));
-        binding.keyboard.setAdapter(new KeyboardAdapter(this));
+        binding.keyboard.setAdapter(adapter = new KeyboardAdapter(this));
     }
 
     @Override
@@ -45,6 +47,12 @@ public class CustomKeyboard implements KeyboardAdapter.OnClickListener {
             case R.drawable.ic_setting_home:
                 callback.showDialog();
                 break;
+            case R.drawable.ic_keyboard_remote:
+                callback.onRemote();
+                break;
+            case R.drawable.ic_keyboard_search:
+                callback.onSearch();
+                break;
             case R.drawable.ic_keyboard_left:
                 binding.keyword.setSelection(--cursor < 0 ? 0 : cursor);
                 break;
@@ -57,11 +65,8 @@ public class CustomKeyboard implements KeyboardAdapter.OnClickListener {
                 binding.keyword.setText(sb.toString());
                 binding.keyword.setSelection(cursor - 1);
                 break;
-            case R.drawable.ic_keyboard_remote:
-                callback.onRemote();
-                break;
-            case R.drawable.ic_keyboard_search:
-                callback.onSearch();
+            case R.drawable.ic_keyboard:
+                adapter.toggle();
                 break;
         }
     }

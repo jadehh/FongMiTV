@@ -1,7 +1,7 @@
 <resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
 
     <!-- App -->
-    <string name="app_name">影視</string>
+    <string name="app_name">OK影視</string>
     <string name="app_exit">再按一次返回鍵退出</string>
 
     <!-- Vod -->
@@ -39,7 +39,8 @@
     <string name="play_time">時間</string>
     <string name="play_netspeed">網速</string>
     <string name="play_duration">進度</string>
-    <string name="play_mini_progress">迷你進度</string>
+    <string name="play_mini_progress">迷你</string>
+    <string name="play_video_title">標題</string>
     <string name="play_danmu">彈幕</string>
     <string name="play_display">屏顯</string>
     <string name="play_speed">倍速</string>
@@ -87,6 +88,7 @@
     <string name="setting_home_menu_key">首頁選單鍵</string>
     <string name="setting_home_site_lock">首頁源鎖定</string>
     <string name="setting_incognito">無痕模式</string>
+    <string name="setting_site_search">站源搜索</string>
     <string name="setting_remove_ad">AI去廣告</string>
     <string name="setting_small_window_back_key">小窗返回鍵</string>
     <string name="setting_home_display_name">首頁顯示站源</string>
@@ -111,7 +113,7 @@
     <string name="player_render">渲染方式</string>
     <string name="player_scale">縮放比例</string>
     <string name="player_caption">字幕樣式</string>
-    <string name="player_subtitle">字幕大小</string>
+    <string name="player_play_with_others">同时播放</string>
     <string name="player_danmu_load">彈幕載入</string>
     <string name="player_danmu_speed">彈幕速度</string>
     <string name="player_danmu_size">彈幕大小</string>
@@ -124,6 +126,7 @@
     <string name="player_exo_tunnel">隧道模式</string>
     <string name="player_exo_http">連線方式</string>
     <string name="player_exo_buffer">緩衝時間</string>
+    <string name="player_rtsp">RTSP 通道</string>
     <string name="player_ua">User-Agent</string>
 
     <!-- Search -->
@@ -154,7 +157,7 @@
     <string name="error_play_next">已經是最後一集了！</string>
     <string name="error_play_prev">已經是第一集了！</string>
     <string name="error_play_parse">播放網址解析失敗</string>
-    <string name="error_play_url">播放網址載入失敗</string>
+    <string name="error_play_url">播放網址載入失敗\n錯誤代碼：<xliff:g name="name">%s</xliff:g></string>
     <string name="error_play_flag">暫無線路資料</string>
     <string name="error_play_timeout">連線逾時</string>
     <string name="error_detail">暫無播放資料</string>

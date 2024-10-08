@@ -36,7 +36,7 @@ public class JarLoader {
     }
 
     public void clear() {
-        for (Spider spider : spiders.values()) spider.destroy();
+        for (Spider spider : spiders.values()) App.execute(spider::destroy);
         loaders.clear();
         methods.clear();
         spiders.clear();
@@ -80,7 +80,7 @@ public class JarLoader {
         }
     }
 
-    public void parseJar(String key, String jar) {
+    public synchronized void parseJar(String key, String jar) {
         if (loaders.containsKey(key)) return;
         String[] texts = jar.split(";md5;");
         String md5 = texts.length > 1 ? texts[1].trim() : "";
@@ -100,11 +100,6 @@ public class JarLoader {
         }
     }
 
-    public DexClassLoader getLoader(String key, String jar) {
-        if (!loaders.containsKey(key)) parseJar(key, jar);
-        return loaders.get(key);
-    }
-
     public Spider getSpider(String key, String api, String ext, String jar) {
         try {
             String jaKey = Util.md5(jar);
@@ -122,13 +117,13 @@ public class JarLoader {
     }
 
     public JSONObject jsonExt(String key, LinkedHashMap<String, String> jxs, String url) throws Throwable {
-        Class<?> clz = loaders.get("").loadClass("com.github.catvod.parser.Json" + key);
+        Class<?> clz = loaders.get(recent).loadClass("com.github.catvod.parser.Json" + key);
         Method method = clz.getMethod("parse", LinkedHashMap.class, String.class);
         return (JSONObject) method.invoke(null, jxs, url);
     }
 
     public JSONObject jsonExtMix(String flag, String key, String name, LinkedHashMap<String, HashMap<String, String>> jxs, String url) throws Throwable {
-        Class<?> clz = loaders.get("").loadClass("com.github.catvod.parser.Mix" + key);
+        Class<?> clz = loaders.get(recent).loadClass("com.github.catvod.parser.Mix" + key);
         Method method = clz.getMethod("parse", LinkedHashMap.class, String.class, String.class, String.class);
         return (JSONObject) method.invoke(null, jxs, name, flag, url);
     }

@@ -127,7 +127,7 @@ public class Parse {
     public String extUrl() {
         int index = getUrl().indexOf("?");
         if (getExt().isEmpty() || index == -1) return getUrl();
-        return getUrl().substring(0, index + 1) + "cat_ext=" + Util.base64(getExt().toString()) + "&" + getUrl().substring(index + 1);
+        return getUrl().substring(0, index + 1) + "cat_ext=" + Util.base64(getExt().toString(), Util.URL_SAFE) + "&" + getUrl().substring(index + 1);
     }
 
     public HashMap<String, String> mixMap() {

@@ -1,7 +1,7 @@
 package com.github.kiulian.downloader.model.videos.formats;
 
-import com.alibaba.fastjson.JSONObject;
 import com.github.kiulian.downloader.model.Extension;
+import com.google.gson.JsonObject;
 
 public abstract class Format {
 
@@ -23,30 +23,30 @@ public abstract class Format {
     protected Range initRange;
     protected Range indexRange;
 
-    protected Format(JSONObject json, boolean isAdaptive, String clientVersion) {
+    protected Format(JsonObject json, boolean isAdaptive, String clientVersion) {
         this.isAdaptive = isAdaptive;
         this.clientVersion = clientVersion;
 
         Itag itag;
         try {
-            itag = Itag.valueOf("i" + json.getInteger("itag"));
+            itag = Itag.valueOf("i" + json.get("itag").getAsInt());
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
             itag = Itag.unknown;
-            itag.setId(json.getIntValue("itag"));
+            itag.setId(json.get("itag").getAsInt());
         }
         this.itag = itag;
 
-        url = json.getString("url").replace("\\u0026", "&");
-        mimeType = json.getString("mimeType");
-        bitrate = json.getInteger("bitrate");
-        contentLength = json.getLong("contentLength");
-        lastModified = json.getLong("lastModified");
-        approxDurationMs = json.getLong("approxDurationMs");
-        JSONObject range = json.getJSONObject("initRange");
-        if (range != null) initRange = new Range(range.getLongValue("start"), range.getLongValue("end"));
-        range = json.getJSONObject("indexRange");
-        if (range != null) indexRange = new Range(range.getLongValue("start"), range.getLongValue("end"));
+        url = json.get("url").getAsString().replace("\\u0026", "&");
+        mimeType = json.get("mimeType").getAsString();
+        bitrate = json.get("bitrate").getAsInt();
+        contentLength = json.get("contentLength").getAsLong();
+        lastModified = json.get("lastModified").getAsLong();
+        approxDurationMs = json.get("approxDurationMs").getAsLong();
+
+        JsonObject range = json.getAsJsonObject("initRange");
+        if (range != null) initRange = new Range(range.get("start").getAsLong(), range.get("end").getAsLong());
+        range = json.getAsJsonObject("indexRange");
+        if (range != null) indexRange = new Range(range.get("start").getAsLong(), range.get("end").getAsLong());
 
         if (mimeType == null || mimeType.isEmpty()) {
             extension = Extension.UNKNOWN;

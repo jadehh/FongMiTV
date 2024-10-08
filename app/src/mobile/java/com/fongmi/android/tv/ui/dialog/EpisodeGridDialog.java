@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
+import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.bean.Episode;
 import com.fongmi.android.tv.databinding.DialogEpisodeGridBinding;
 import com.fongmi.android.tv.ui.fragment.EpisodeFragment;
@@ -25,6 +26,7 @@ public class EpisodeGridDialog extends BaseDialog {
     private DialogEpisodeGridBinding binding;
     private List<Episode> episodes;
     private final List<String> titles;
+    private boolean download;
     private boolean reverse;
     private int spanCount;
     private int itemCount;
@@ -36,10 +38,16 @@ public class EpisodeGridDialog extends BaseDialog {
     public EpisodeGridDialog() {
         this.titles = new ArrayList<>();
         this.spanCount = 5;
+        this.download = false;
     }
 
     public EpisodeGridDialog reverse(boolean reverse) {
         this.reverse = reverse;
+        return this;
+    }
+
+    public EpisodeGridDialog download(boolean download) {
+        this.download = download;
         return this;
     }
 
@@ -60,6 +68,7 @@ public class EpisodeGridDialog extends BaseDialog {
 
     @Override
     protected void initView() {
+        binding.episode.setText(download ? R.string.detail_download : R.string.detail_episode);
         setSpanCount();
         setTitles();
         setPager();
@@ -106,7 +115,7 @@ public class EpisodeGridDialog extends BaseDialog {
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            return EpisodeFragment.newInstance(spanCount, episodes.subList(position * itemCount, Math.min(position * itemCount + itemCount, episodes.size())));
+            return EpisodeFragment.newInstance(spanCount, episodes.subList(position * itemCount, Math.min(position * itemCount + itemCount, episodes.size())), download);
         }
 
         @Override

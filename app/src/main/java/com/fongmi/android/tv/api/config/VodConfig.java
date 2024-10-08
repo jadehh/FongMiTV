@@ -5,9 +5,7 @@ import android.text.TextUtils;
 import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.api.Decoder;
-import com.fongmi.android.tv.api.loader.JarLoader;
-import com.fongmi.android.tv.api.loader.JsLoader;
-import com.fongmi.android.tv.api.loader.PyLoader;
+import com.fongmi.android.tv.api.loader.BaseLoader;
 import com.fongmi.android.tv.bean.Config;
 import com.fongmi.android.tv.bean.Depot;
 import com.fongmi.android.tv.bean.Parse;
@@ -17,22 +15,14 @@ import com.fongmi.android.tv.impl.Callback;
 import com.fongmi.android.tv.utils.Notify;
 import com.fongmi.android.tv.utils.UrlUtil;
 import com.github.catvod.bean.Doh;
-import com.github.catvod.crawler.Spider;
-import com.github.catvod.crawler.SpiderNull;
 import com.github.catvod.net.OkHttp;
 import com.github.catvod.utils.Json;
-import com.github.catvod.utils.Util;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class VodConfig {
 
@@ -42,9 +32,6 @@ public class VodConfig {
     private List<Parse> parses;
     private List<String> flags;
     private List<String> ads;
-    private JarLoader jarLoader;
-    private PyLoader pyLoader;
-    private JsLoader jsLoader;
     private boolean loadLive;
     private Config config;
     private Parse parse;
@@ -75,8 +62,12 @@ public class VodConfig {
         return get().getSites().indexOf(get().getHome());
     }
 
+    public static boolean hasUrl() {
+        return getUrl() != null && getUrl().length() > 0;
+    }
+
     public static boolean hasParse() {
-        return get().getParses().size() > 0;
+        return !get().getParses().isEmpty();
     }
 
     public static void load(Config config, Callback callback) {
@@ -94,9 +85,6 @@ public class VodConfig {
         this.sites = new ArrayList<>();
         this.flags = new ArrayList<>();
         this.parses = new ArrayList<>();
-        this.jarLoader = new JarLoader();
-        this.pyLoader = new PyLoader();
-        this.jsLoader = new JsLoader();
         this.loadLive = false;
         return this;
     }
@@ -116,10 +104,8 @@ public class VodConfig {
         this.sites.clear();
         this.flags.clear();
         this.parses.clear();
-        this.jarLoader.clear();
-        this.pyLoader.clear();
-        this.jsLoader.clear();
         this.loadLive = true;
+        BaseLoader.get().clear();
         return this;
     }
 
@@ -176,9 +162,11 @@ public class VodConfig {
             initSite(object);
             initParse(object);
             initOther(object);
+            BaseLoader.get().parseJar(Json.safeString(object, "spider"));
             if (loadLive && object.has("lives")) initLive(object);
-            jarLoader.parseJar("", Json.safeString(object, "spider"));
+            String notice = Json.safeString(object, "notice");
             config.logo(Json.safeString(object, "logo"));
+            App.post(() -> callback.success(notice));
             config.json(object.toString()).update();
             App.post(callback::success);
         } catch (Throwable e) {
@@ -192,11 +180,13 @@ public class VodConfig {
             initSite(object.getAsJsonObject("video"));
             return;
         }
+        String spider = Json.safeString(object, "spider");
         for (JsonElement element : Json.safeListElement(object, "sites")) {
             Site site = Site.objectFrom(element);
             if (sites.contains(site)) continue;
             site.setApi(parseApi(site.getApi()));
             site.setExt(parseExt(site.getExt()));
+            site.setJar(parseJar(site, spider));
             sites.add(site.trans().sync());
         }
         for (Site site : sites) {
@@ -242,47 +232,9 @@ public class VodConfig {
         return ext;
     }
 
-    public Spider getSpider(Site site) {
-        boolean js = site.getApi().contains(".js");
-        boolean py = site.getApi().contains(".py");
-        boolean csp = site.getApi().startsWith("csp_");
-        if (py) return pyLoader.getSpider(site.getKey(), site.getApi(), site.getExt());
-        else if (js) return jsLoader.getSpider(site.getKey(), site.getApi(), site.getExt(), site.getJar());
-        else if (csp) return jarLoader.getSpider(site.getKey(), site.getApi(), site.getExt(), site.getJar());
-        else return new SpiderNull();
-    }
-
-    public void setRecent(Site site) {
-        boolean js = site.getApi().contains(".js");
-        boolean py = site.getApi().contains(".py");
-        boolean csp = site.getApi().startsWith("csp_");
-        if (js) jsLoader.setRecent(site.getKey());
-        else if (py) pyLoader.setRecent(site.getKey());
-        else if (csp) jarLoader.setRecent(site.getJar());
-    }
-
-    public void setRecent(String jar) {
-        if (jarLoader == null) jarLoader = new JarLoader();
-        jarLoader.parseJar(Util.md5(jar), jar);
-        jarLoader.setRecent(jar);
-    }
-
-    public Object[] proxyLocal(Map<String, String> params) {
-        if ("js".equals(params.get("do"))) {
-            return jsLoader.proxyInvoke(params);
-        } else if ("py".equals(params.get("do"))) {
-            return pyLoader.proxyInvoke(params);
-        } else {
-            return jarLoader.proxyInvoke(params);
-        }
-    }
-
-    public JSONObject jsonExt(String key, LinkedHashMap<String, String> jxs, String url) throws Throwable {
-        return jarLoader.jsonExt(key, jxs, url);
-    }
-
-    public JSONObject jsonExtMix(String flag, String key, String name, LinkedHashMap<String, HashMap<String, String>> jxs, String url) throws Throwable {
-        return jarLoader.jsonExtMix(flag, key, name, jxs, url);
+    private String parseJar(Site site, String spider) {
+        if (site.getJar().isEmpty() && site.getApi().startsWith("csp_")) return spider;
+        return site.getJar();
     }
 
     public List<Doh> getDoh() {
@@ -302,7 +254,7 @@ public class VodConfig {
     }
 
     public void setRules(List<Rule> rules) {
-        for (Rule rule : rules) if ("proxy".equals(rule.getName())) OkHttp.selector().setHosts(rule.getHosts());
+        for (Rule rule : rules) if ("proxy".equals(rule.getName())) OkHttp.selector().addAll(rule.getHosts());
         rules.remove(Rule.create("proxy"));
         this.rules = rules;
     }

@@ -25,6 +25,7 @@ public class DisplayAdapter extends RecyclerView.Adapter<DisplayAdapter.ViewHold
         mItems.add(ResUtil.getString(R.string.play_time));
         mItems.add(ResUtil.getString(R.string.play_netspeed));
         mItems.add(ResUtil.getString(R.string.play_duration));
+        mItems.add(ResUtil.getString(R.string.play_video_title));
         mItems.add(ResUtil.getString(R.string.play_mini_progress));
     }
 
@@ -53,7 +54,8 @@ public class DisplayAdapter extends RecyclerView.Adapter<DisplayAdapter.ViewHold
         if (position == 0) return Setting.isDisplayTime();
         else if (position == 1) return Setting.isDisplaySpeed();
         else if (position == 2) return Setting.isDisplayDuration();
-        else if (position == 3) return Setting.isDisplayMiniProgress();
+        else if (position == 3) return Setting.isDisplayVideoTitle();
+        else if (position == 4) return Setting.isDisplayMiniProgress();
         return false;
     }
 
@@ -61,7 +63,8 @@ public class DisplayAdapter extends RecyclerView.Adapter<DisplayAdapter.ViewHold
         if (position == 0) Setting.putDisplayTime(!Setting.isDisplayTime());
         else if (position == 1) Setting.putDisplaySpeed(!Setting.isDisplaySpeed());
         else if (position == 2) Setting.putDisplayDuration(!Setting.isDisplayDuration());
-        else if (position == 3) Setting.putDisplayMiniProgress(!Setting.isDisplayMiniProgress());
+        else if (position == 3) Setting.putDisplayVideoTitle(!Setting.isDisplayVideoTitle());
+        else if (position == 4) Setting.putDisplayMiniProgress(!Setting.isDisplayMiniProgress());
         notifyItemRangeChanged(0, getItemCount());
     }
 
@@ -70,10 +73,12 @@ public class DisplayAdapter extends RecyclerView.Adapter<DisplayAdapter.ViewHold
         if (position == 0) checked = Setting.isDisplayTime();
         else if (position == 1) checked = Setting.isDisplaySpeed();
         else if (position == 2) checked = Setting.isDisplayDuration();
-        else if (position == 3) checked = Setting.isDisplayMiniProgress();
+        else if (position == 3) checked = Setting.isDisplayVideoTitle();
+        else if (position == 4) checked = Setting.isDisplayMiniProgress();
         Setting.putDisplayTime(!checked);
         Setting.putDisplaySpeed(!checked);
         Setting.putDisplayDuration(!checked);
+        Setting.putDisplayVideoTitle(!checked);
         Setting.putDisplayMiniProgress(!checked);
         notifyItemRangeChanged(0, getItemCount());
         return true;

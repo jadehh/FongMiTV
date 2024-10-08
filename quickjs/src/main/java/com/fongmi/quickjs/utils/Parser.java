@@ -2,10 +2,9 @@ package com.fongmi.quickjs.utils;
 
 import android.text.TextUtils;
 
-import androidx.media3.common.util.UriUtil;
-
 import com.fongmi.quickjs.bean.Cache;
 import com.fongmi.quickjs.bean.Info;
+import com.github.catvod.utils.UriUtil;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -20,9 +19,9 @@ import java.util.regex.Pattern;
 
 public class Parser {
 
-    private final Pattern p1 = Pattern.compile("url\\((.*?)\\)", Pattern.MULTILINE | Pattern.DOTALL);
-    private final Pattern NO_ADD = Pattern.compile(":eq|:lt|:gt|:first|:last|^body$|^#");
-    private final Pattern JOIN_URL = Pattern.compile("(url|src|href|-original|-src|-play|-url|style)$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+    private final Pattern URL = Pattern.compile("url\\((.*?)\\)", Pattern.MULTILINE | Pattern.DOTALL);
+    private final Pattern NO_ADD = Pattern.compile(":eq|:lt|:gt|:first|:last|:not|:even|:odd|:has|:contains|:matches|:empty|^body$|^#");
+    private final Pattern JOIN_URL = Pattern.compile("(url|src|href|-original|-src|-play|-url|style)$|^(data-|url-|src-)", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
     private final Pattern SPEC_URL = Pattern.compile("^(ftp|magnet|thunder|ws):", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
 
     private final Cache cache;
@@ -47,7 +46,9 @@ public class Parser {
     private String parseHikerToJq(String parse, boolean first) {
         if (!parse.contains("&&")) {
             String[] split = parse.split(" ");
-            return (NO_ADD.matcher(split[split.length - 1]).find() || !first) ? parse : parse + ":eq(0)";
+            Matcher m = NO_ADD.matcher(split[split.length - 1]);
+            if (!m.find() && first) parse = parse + ":eq(0)";
+            return parse;
         }
         String[] parses = parse.split("&&");
         List<String> items = new ArrayList<>();
@@ -63,59 +64,7 @@ public class Parser {
         return TextUtils.join(" ", items);
     }
 
-    private Elements parseOneRule(Document doc, String parse, Elements elements) {
-        Info info = getParseInfo(parse);
-        if (parse.contains(":eq")) {
-            if (elements.isEmpty()) {
-                if (info.index < 0) {
-                    Elements r = doc.select(info.rule);
-                    elements = r.eq(r.size() + info.index);
-                } else {
-                    elements = doc.select(info.rule).eq(info.index);
-                }
-            } else {
-                if (info.index < 0) {
-                    Elements r = elements.select(info.rule);
-                    elements = r.eq(r.size() + info.index);
-                } else {
-                    elements = elements.select(info.rule).eq(info.index);
-                }
-            }
-        } else {
-            if (elements.isEmpty()) {
-                elements = doc.select(parse);
-            } else {
-                elements = elements.select(parse);
-            }
-        }
-        if (info.excludes != null && !elements.isEmpty()) {
-            elements = elements.clone();
-            for (String exclude : info.excludes) {
-                elements.select(exclude).remove();
-            }
-        }
-        return elements;
-    }
-
-    public String joinUrl(String parent, String child) {
-        return UriUtil.resolve(parent, child);
-    }
-
-    public List<String> pdfa(String html, String rule) {
-        Document doc = cache.getPdfa(html);
-        rule = parseHikerToJq(rule, false);
-        String[] parses = rule.split(" ");
-        Elements elements = new Elements();
-        for (String parse : parses) {
-            elements = parseOneRule(doc, parse, elements);
-            if (elements.isEmpty()) return Collections.emptyList();
-        }
-        List<String> items = new ArrayList<>();
-        for (Element element : elements) items.add(element.outerHtml());
-        return items;
-    }
-
-    public String pdfh(String html, String rule, String addUrl) {
+    public String parseDomForUrl(String html, String rule, String addUrl) {
         Document doc = cache.getPdfh(html);
         if ("body&&Text".equals(rule) || "Text".equals(rule)) {
             return doc.text();
@@ -143,23 +92,69 @@ public class Parser {
         } else if ("Html".equals(option)) {
             return elements.html();
         } else {
-            String result = elements.attr(option);
-            if (option.toLowerCase().contains("style") && result.contains("url(")) {
-                Matcher matcher = p1.matcher(result);
-                if (matcher.find()) result = matcher.group(1);
-                if (result != null) result = result.replaceAll("^['|\"](.*)['|\"]$", "$1");
-            }
-            if (!TextUtils.isEmpty(result) && !TextUtils.isEmpty(addUrl)) {
-                if (JOIN_URL.matcher(option).find() && !SPEC_URL.matcher(result).find()) {
-                    if (result.contains("http")) result = result.substring(result.indexOf("http"));
-                    else result = joinUrl(addUrl, result);
+            String result = "";
+            for (String s : option.split("[||]")) {
+                result = elements.attr(s);
+                if (s.toLowerCase().contains("style") && result.contains("url(")) {
+                    Matcher m = URL.matcher(result);
+                    if (m.find()) result = m.group(1);
+                    result = result.replaceAll("^['|\"](.*)['|\"]$", "$1");
+                }
+                if (!result.isEmpty() && !addUrl.isEmpty()) {
+                    if (JOIN_URL.matcher(s).find() && !SPEC_URL.matcher(result).find()) {
+                        if (result.contains("http")) {
+                            result = result.substring(result.indexOf("http"));
+                        } else {
+                            result = UriUtil.resolve(addUrl, result);
+                        }
+                    }
+                }
+                if (!result.isEmpty()) {
+                    return result;
                 }
             }
             return result;
         }
     }
 
-    public List<String> pdfl(String html, String rule, String texts, String urls, String urlKey) {
+    public List<String> parseDomForArray(String html, String rule) {
+        Document doc = cache.getPdfa(html);
+        rule = parseHikerToJq(rule, false);
+        String[] parses = rule.split(" ");
+        Elements elements = new Elements();
+        for (String parse : parses) {
+            elements = parseOneRule(doc, parse, elements);
+            if (elements.isEmpty()) return new ArrayList<>();
+        }
+        List<String> items = new ArrayList<>();
+        for (Element element : elements) items.add(element.outerHtml());
+        return items;
+    }
+
+    private Elements parseOneRule(Document doc, String parse, Elements elements) {
+        Info info = getParseInfo(parse);
+        if (elements.isEmpty()) {
+            elements = doc.select(info.rule);
+        } else {
+            elements = elements.select(info.rule);
+        }
+        if (parse.contains(":eq")) {
+            if (info.index < 0) {
+                elements = elements.eq(elements.size() + info.index);
+            } else {
+                elements = elements.eq(info.index);
+            }
+        }
+        if (info.excludes != null && !elements.isEmpty()) {
+            elements = elements.clone();
+            for (int i = 0; i < info.excludes.size(); i++) {
+                elements.select(info.excludes.get(i)).remove();
+            }
+        }
+        return elements;
+    }
+
+    public List<String> parseDomForList(String html, String rule, String texts, String urls, String urlKey) {
         String[] parses = parseHikerToJq(rule, false).split(" ");
         Elements elements = new Elements();
         for (String parse : parses) {
@@ -169,7 +164,7 @@ public class Parser {
         List<String> items = new ArrayList<>();
         for (Element element : elements) {
             html = element.outerHtml();
-            items.add(pdfh(html, texts, "").trim() + '$' + pdfh(html, urls, urlKey));
+            items.add(parseDomForUrl(html, texts, "").trim() + '$' + parseDomForUrl(html, urls, urlKey));
         }
         return items;
     }

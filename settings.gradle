@@ -13,7 +13,7 @@ dependencyResolutionManagement {
         jcenter()
         google()
         flatDir {
-            dirs "$rootDir/app/libs"
+            dirs "$rootDir/app/libs", "$rootDir/quickjs/libs"
         }
         maven {
             url "https://jitpack.io"
@@ -27,6 +27,7 @@ dependencyResolutionManagement {
 include ':app'
 include ':hook'
 include ':tvbus'
+include ':zlive'
 include ':catvod'
 include ':quickjs'
 include ':thunder'

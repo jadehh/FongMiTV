@@ -12,8 +12,10 @@ import androidx.room.PrimaryKey;
 import com.fongmi.android.tv.App;
 import com.fongmi.android.tv.Constant;
 import com.fongmi.android.tv.Setting;
+import com.fongmi.android.tv.api.loader.BaseLoader;
 import com.fongmi.android.tv.db.AppDatabase;
 import com.fongmi.android.tv.gson.ExtAdapter;
+import com.github.catvod.crawler.Spider;
 import com.github.catvod.utils.Json;
 import com.github.catvod.utils.Trans;
 import com.google.gson.JsonElement;
@@ -156,6 +158,10 @@ public class Site implements Parcelable {
         return TextUtils.isEmpty(jar) ? "" : jar;
     }
 
+    public void setJar(String jar) {
+        this.jar = jar;
+    }
+
     public String getClick() {
         return TextUtils.isEmpty(click) ? "" : click;
     }
@@ -273,6 +279,15 @@ public class Site implements Parcelable {
         if (getChangeable() != 0) setChangeable(Math.max(1, item.getChangeable()));
         if (getSearchable() != 0) setSearchable(Math.max(1, item.getSearchable()));
         return this;
+    }
+
+    public Site recent() {
+        BaseLoader.get().setRecent(getKey(), getApi(), getJar());
+        return this;
+    }
+
+    public Spider spider() {
+        return BaseLoader.get().getSpider(getKey(), getApi(), getExt(), getJar());
     }
 
     public static Site find(String key) {

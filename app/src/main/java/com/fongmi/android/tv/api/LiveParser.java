@@ -28,6 +28,7 @@ public class LiveParser {
     private static final Pattern CATCHUP = Pattern.compile(".*catchup=\"(.?|.+?)\".*");
     private static final Pattern TVG_NAME = Pattern.compile(".*tvg-name=\"(.?|.+?)\".*");
     private static final Pattern TVG_LOGO = Pattern.compile(".*tvg-logo=\"(.?|.+?)\".*");
+    private static final Pattern TVG_URL = Pattern.compile(".*x-tvg-url=\"(.?|.+?)\".*");
     private static final Pattern GROUP = Pattern.compile(".*group-title=\"(.?|.+?)\".*");
     private static final Pattern NAME = Pattern.compile(".*,(.+?)$");
 
@@ -37,11 +38,11 @@ public class LiveParser {
         return "";
     }
 
-    public static void start(Live live) {
+    public static void start(Live live) throws Exception {
         if (live.getGroups().size() > 0) return;
         if (live.getType() == 0) text(live, getText(live));
         if (live.getType() == 1) json(live, getText(live));
-        if (live.getType() == 2) proxy(live, getText(live));
+        if (live.getType() == 3) spider(live, getText(live));
     }
 
     public static void text(Live live, String text) {
@@ -67,6 +68,12 @@ public class LiveParser {
         }
     }
 
+    private static void spider(Live live, String text) throws Exception {
+        if (text.isEmpty()) text = live.spider().liveContent();
+        if (Json.valid(text)) json(live, text);
+        else text(live, text);
+    }
+
     private static void m3u(Live live, String text) {
         Setting setting = Setting.create();
         Catchup catchup = Catchup.create();
@@ -78,6 +85,7 @@ public class LiveParser {
             } else if (line.startsWith("#EXTM3U")) {
                 catchup.setType(extract(line, CATCHUP));
                 catchup.setSource(extract(line, CATCHUP_SOURCE));
+                if (live.getEpg().isEmpty()) live.setEpg(extract(line, TVG_URL));
             } else if (line.startsWith("#EXTINF:")) {
                 Group group = live.find(Group.create(extract(line, GROUP), live.isPass()));
                 channel = group.find(Channel.create(extract(line, NAME)));
@@ -111,18 +119,6 @@ public class LiveParser {
                 Channel channel = group.find(Channel.create(split[0]));
                 channel.addUrls(line.substring(index).split("#"));
                 setting.copy(channel);
-            }
-        }
-    }
-
-    private static void proxy(Live live, String text) {
-        int number = 0;
-        for (Live item : Live.arrayFrom(text)) {
-            Group group = live.find(Group.create(item.getGroup(), live.isPass()));
-            for (Channel channel : item.getChannels()) {
-                channel.setNumber(++number);
-                channel.live(live);
-                group.add(channel);
             }
         }
     }
@@ -237,7 +233,7 @@ public class LiveParser {
             try {
                 if (line.startsWith("format=")) format = line.split("format=")[1].trim();
                 if (line.contains("manifest_type=")) format = line.split("manifest_type=")[1].trim();
-                if ("mpd".equals(format)) format = MimeTypes.APPLICATION_MPD;
+                if ("mpd".equals(format) || "dash".equals(format)) format = MimeTypes.APPLICATION_MPD;
                 if ("hls".equals(format)) format = MimeTypes.APPLICATION_M3U8;
             } catch (Exception e) {
                 format = null;

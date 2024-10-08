@@ -146,14 +146,6 @@ public class Setting {
         Prefers.put("scale_live", scale);
     }
 
-    public static int getSubtitle() {
-        return Math.min(Math.max(Prefers.getInt("subtitle", 16), 14), 48);
-    }
-
-    public static void putSubtitle(int subtitle) {
-        Prefers.put("subtitle", subtitle);
-    }
-
     public static int getHttp() {
         return Prefers.getInt("exo_http", 1);
     }
@@ -194,12 +186,28 @@ public class Setting {
         Prefers.put("background", background);
     }
 
+    public static int getRtsp() {
+        return Prefers.getInt("rtsp");
+    }
+
+    public static void putRtsp(int rtsp) {
+        Prefers.put("rtsp", rtsp);
+    }
+
     public static int getSiteMode() {
         return Prefers.getInt("site_mode", 1);
     }
 
     public static void putSiteMode(int mode) {
         Prefers.put("site_mode", mode);
+    }
+
+    public static int getSyncMode() {
+        return Prefers.getInt("sync_mode");
+    }
+
+    public static void putSyncMode(int mode) {
+        Prefers.put("sync_mode", mode);
     }
 
     public static boolean isBootLive() {
@@ -240,6 +248,14 @@ public class Setting {
 
     public static void putUpdate(boolean update) {
         Prefers.put("update", update);
+    }
+
+    public static boolean isPlayWithOthers() {
+        return Prefers.getBoolean("play_with_others", false);
+    }
+
+    public static void putPlayWithOthers(boolean play) {
+        Prefers.put("play_with_others", play);
     }
 
     public static boolean isDanmu() {
@@ -314,6 +330,30 @@ public class Setting {
         Prefers.put("backup_mode", auto);
     }
 
+    public static boolean isZhuyin() {
+        return Prefers.getBoolean("zhuyin");
+    }
+
+    public static void putZhuyin(boolean zhuyin) {
+        Prefers.put("zhuyin", zhuyin);
+    }
+
+    public static float getSubtitleTextSize() {
+        return Prefers.getFloat("subtitle_text_size");
+    }
+
+    public static void putSubtitleTextSize(float value) {
+        Prefers.put("subtitle_text_size", value);
+    }
+
+    public static float getSubtitleBottomPadding() {
+        return Prefers.getFloat("subtitle_bottom_padding");
+    }
+
+    public static void putSubtitleBottomPadding(float value) {
+        Prefers.put("subtitle_bottom_padding", value);
+    }
+
     public static float getThumbnail() {
         return 0.3f * getQuality() + 0.4f;
     }
@@ -364,6 +404,14 @@ public class Setting {
 
     public static void putDisplayMiniProgress(boolean display) {
         Prefers.put("display_mini_progress", display);
+    }
+
+    public static boolean isDisplayVideoTitle() {
+        return Prefers.getBoolean("display_video_title", false);
+    }
+
+    public static void putDisplayVideoTitle(boolean display) {
+        Prefers.put("display_video_title", display);
     }
 
     public static float getPlaySpeed() {
@@ -484,6 +532,14 @@ public class Setting {
 
     public static int getParseWebView() {
         return Prefers.getInt("parse_webview", 0);
+    }
+
+    public static boolean isSiteSearch() {
+        return Prefers.getBoolean("site_search", false);
+    }
+
+    public static void putSiteSearch(boolean search) {
+        Prefers.put("site_search", search);
     }
 
     public static boolean isRemoveAd() {

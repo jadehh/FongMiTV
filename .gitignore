@@ -1,7 +1,8 @@
-.gradle
 .idea
-*build
+.gradle
 *.jks
-/local.properties
+lib-*.aar
+*build
 /media*
 /Release
+/local.properties

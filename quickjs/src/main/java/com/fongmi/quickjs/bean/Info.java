@@ -29,8 +29,9 @@ public class Info {
             pos = rules[0];
         }
         try {
-            index = Integer.parseInt(pos.split("\\(")[1].split("\\)")[0]);
+            index = Integer.parseInt(pos.replace("eq(", "").replace(")", ""));
         } catch (Exception ignored) {
+            index = 0;
         }
     }
 

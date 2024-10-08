@@ -1,6 +1,6 @@
 package com.github.kiulian.downloader.model;
 
-import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
 
 import java.util.List;
 
@@ -22,12 +22,10 @@ public abstract class AbstractVideoDetails {
     public AbstractVideoDetails() {
     }
 
-    public AbstractVideoDetails(JSONObject json) {
-        videoId = json.getString("videoId");
-        if (json.containsKey("lengthSeconds")) {
-            lengthSeconds = json.getIntValue("lengthSeconds");
-        }
-        thumbnails = Utils.parseThumbnails(json.getJSONObject("thumbnail"));
+    public AbstractVideoDetails(JsonObject json) {
+        videoId = json.get("videoId").getAsString();
+        thumbnails = Utils.parseThumbnails(json.getAsJsonObject("thumbnail"));
+        if (json.has("lengthSeconds")) lengthSeconds = json.get("lengthSeconds").getAsInt();
     }
 
     public String videoId() {
@@ -44,10 +42,6 @@ public abstract class AbstractVideoDetails {
 
     public List<String> thumbnails() {
         return thumbnails;
-    }
-
-    public String author() {
-        return author;
     }
 
     public boolean isLive() {

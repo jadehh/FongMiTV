@@ -1,3 +1,6 @@
+# TV
+-keep class com.fongmi.android.tv.bean.** { *; }
+
 # Gson
 -keepattributes Signature
 -keepattributes *Annotation*
@@ -30,30 +33,30 @@
 -keep class okhttp3.** { *; }
 
 # CatVod
+-keep class com.github.catvod.Proxy { *; }
 -keep class com.github.catvod.crawler.** { *; }
 -keep class * extends com.github.catvod.crawler.Spider
 
 # Cling
--keep class org.fourthline.cling.** { *; }
--keep class javax.xml.** { *; }
--dontwarn org.ietf.jgss.**
--dontwarn com.sun.net.**
+-dontwarn javax.**
 -dontwarn sun.net.**
 -dontwarn java.awt.**
--dontwarn javax.**
+-dontwarn com.sun.net.**
+-dontwarn org.ietf.jgss.**
+-keep class org.fourthline.cling.** { *; }
+-keep class javax.xml.** { *; }
 
 # Cronet
 -keep class org.chromium.net.** { *; }
 -keep class com.google.net.cronet.** { *; }
 
 # EXO
--dontwarn org.xmlpull.v1.**
 -dontwarn org.kxml2.io.**
+-dontwarn org.xmlpull.v1.**
 -dontwarn android.content.res.**
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 -keep class org.xmlpull.** { *; }
 -keepclassmembers class org.xmlpull.** { *; }
--keep class androidx.media3.** { *; }
 
 # IJK
 -keep class tv.danmaku.ijk.media.player.** { *; }
@@ -91,9 +94,6 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
-
-# bean
--keep class com.fongmi.android.tv.bean.** { *; }
 
 # x5
 -dontwarn dalvik.**
