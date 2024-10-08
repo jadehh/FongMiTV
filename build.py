@@ -27,6 +27,6 @@ def edit_gradle_file(version):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--version', type=str, default="v2.3.8")  ## 添加
+    parser.add_argument('--version', type=str, default="v2.4.8")  ## 添加
     args = parser.parse_args()
     edit_gradle_file(args.version)
