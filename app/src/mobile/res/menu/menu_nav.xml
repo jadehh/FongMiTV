@@ -19,4 +19,10 @@
         android:title="@string/nav_setting"
         android:visible="false" />
 
+    <item
+        android:id="@+id/download"
+        android:icon="@drawable/ic_action_download"
+        android:title="@string/nav_downloading"
+        android:visible="false" />
+
 </menu>

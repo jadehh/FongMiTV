@@ -45,6 +45,7 @@ import com.fongmi.android.tv.Constant;
 import com.fongmi.android.tv.R;
 import com.fongmi.android.tv.Setting;
 import com.fongmi.android.tv.api.config.VodConfig;
+import com.fongmi.android.tv.bean.Download;
 import com.fongmi.android.tv.bean.Episode;
 import com.fongmi.android.tv.bean.Flag;
 import com.fongmi.android.tv.bean.History;
@@ -67,6 +68,7 @@ import com.fongmi.android.tv.model.SiteViewModel;
 import com.fongmi.android.tv.player.IjkUtil;
 import com.fongmi.android.tv.ui.dialog.PlayerDialog;
 import com.fongmi.android.tv.ui.dialog.SubtitleDialog;
+import com.fongmi.android.tv.player.DownloadSource;
 import com.fongmi.android.tv.utils.Downloader;
 import com.fongmi.android.tv.player.exo.ExoUtil;
 import com.fongmi.android.tv.player.Players;
@@ -103,6 +105,7 @@ import com.fongmi.android.tv.utils.Sniffer;
 import com.fongmi.android.tv.utils.Traffic;
 import com.fongmi.android.tv.utils.UrlUtil;
 import com.fongmi.android.tv.utils.Util;
+import com.fongmi.quickjs.bean.Res;
 import com.github.bassaer.library.MDColor;
 import com.github.catvod.utils.Trans;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -135,7 +138,10 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
     private Observer<Result> mObserveDetail;
     private Observer<Result> mObservePlayer;
     private Observer<Result> mObserveSearch;
-    private Observer<Result> mObserveDownload;
+    private Observer<Result> mObserveOuterDownload;
+
+    private Observer<String> mObserveInnerDownload;
+
     private DanmakuContext mDanmakuContext;
     private EpisodeAdapter mEpisodeAdapter;
     private QualityAdapter mQualityAdapter;
@@ -178,6 +184,11 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
     public static void file(FragmentActivity activity, String path) {
         if (TextUtils.isEmpty(path)) return;
         String name = new File(path).getName();
+        PermissionX.init(activity).permissions(Manifest.permission.WRITE_EXTERNAL_STORAGE).request((allGranted, grantedList, deniedList) -> start(activity, "push_agent", "file://" + path, name));
+    }
+
+    public static void file(FragmentActivity activity, String path,String name) {
+        if (TextUtils.isEmpty(path)) return;
         PermissionX.init(activity).permissions(Manifest.permission.WRITE_EXTERNAL_STORAGE).request((allGranted, grantedList, deniedList) -> start(activity, "push_agent", "file://" + path, name));
     }
 
@@ -333,7 +344,8 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         mBinding.swipeLayout.setEnabled(false);
         mObserveDetail = this::setDetail;
         mObservePlayer = this::setPlayer;
-        mObserveDownload = this::setDownload;
+        mObserveOuterDownload = this::setOuterDownload;
+        mObserveInnerDownload = this::setInnerDownload;
         mObserveSearch = this::setSearch;
         mPlayers = Players.create(this);
         mDialogs = new ArrayList<>();
@@ -363,7 +375,8 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         mBinding.actor.setOnClickListener(view -> onActor());
         mBinding.content.setOnClickListener(view -> onContent());
         mBinding.reverse.setOnClickListener(view -> onReverse());
-        mBinding.download.setOnClickListener(view -> onDownload());
+        mBinding.outerDownload.setOnClickListener(view -> onDownload(Constant.DOWNLOAD_OUTER_TYPE));
+        mBinding.innerDownload.setOnClickListener(view ->  onDownload(Constant.DOWNLOAD_INNER_TYPE));
         mBinding.name.setOnLongClickListener(view -> onChange());
         mBinding.content.setOnLongClickListener(view -> onCopy());
         mBinding.control.cast.setOnClickListener(view -> onCast());
@@ -493,15 +506,23 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         mViewModel.result.observeForever(mObserveDetail);
         mViewModel.player.observeForever(mObservePlayer);
         mViewModel.search.observeForever(mObserveSearch);
-        mViewModel.download.observeForever(mObserveDownload);
+        mViewModel.outerDownload.observeForever(mObserveOuterDownload);
+        mViewModel.innerDownload.observeForever(mObserveInnerDownload);
+
         mViewModel.episode.observe(this, episode -> {
             onItemClick(episode);
             hideSheet();
         });
-        mViewModel.ep.observe(this, episode -> {
+        mViewModel.outerDownloadEp.observe(this, episode -> {
             Notify.progress(this);
             Downloader.get().title(mBinding.name.getText() + "-" + episode.getName());
-            mViewModel.download(getKey(), getFlag().getFlag(), episode.getUrl());
+            mViewModel.outerDownload(getKey(), getFlag().getFlag(), episode.getUrl());
+        });
+
+        mViewModel.innerDownloadEp.observe(this, episode -> {
+            Notify.progress(this);
+            DownloadSource.get().initDownload(this);
+            PermissionX.init(this).permissions(Manifest.permission.WRITE_EXTERNAL_STORAGE).request((allGranted, grantedList, deniedList) ->   mViewModel.innerDownload(getName() + "-" + episode.getName(),getPic(),episode.getUrl(),mPlayers.getHeaders().toString()));
         });
     }
 
@@ -647,8 +668,13 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         mQualityAdapter.addAll(result);
     }
 
-    private void setDownload(Result result) {
+    private void setOuterDownload(Result result) {
         Downloader.get().result(result).start(this);
+    }
+
+    private void setInnerDownload(String msg){
+        Notify.dismiss();
+        Notify.show(msg);
     }
 
     private void checkDanmu(String danmu) {
@@ -751,8 +777,8 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         EpisodeGridDialog.create().reverse(mHistory.isRevSort()).episodes(mEpisodeAdapter.getItems()).show(this);
     }
 
-    private void onDownload() {
-        EpisodeGridDialog.create().reverse(mHistory.isRevSort()).episodes(mEpisodeAdapter.getItems()).download(true).show(this);
+    private void onDownload(int download) {
+        EpisodeGridDialog.create().reverse(mHistory.isRevSort()).episodes(mEpisodeAdapter.getItems()).download(download).show(this);
     }
 
     private void onActor() {

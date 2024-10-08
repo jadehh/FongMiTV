@@ -123,6 +123,8 @@ public class ResUtil {
 
     public static TypedArray getTypedArray(@ArrayRes int resId) {
         return App.get().getResources().obtainTypedArray(resId);
+    public static int getColor(@ColorRes int resId){
+        return App.get().getResources().getColor(resId);
     }
 
     public static Drawable getDrawable(@DrawableRes int resId) {

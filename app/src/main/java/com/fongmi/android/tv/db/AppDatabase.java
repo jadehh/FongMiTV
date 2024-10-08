@@ -14,6 +14,7 @@ import com.fongmi.android.tv.Setting;
 import com.fongmi.android.tv.bean.Config;
 import com.fongmi.android.tv.bean.Device;
 import com.fongmi.android.tv.bean.Download;
+import com.fongmi.android.tv.bean.DownloadTask;
 import com.fongmi.android.tv.bean.History;
 import com.fongmi.android.tv.bean.Keep;
 import com.fongmi.android.tv.bean.Live;
@@ -22,6 +23,7 @@ import com.fongmi.android.tv.bean.Track;
 import com.fongmi.android.tv.db.dao.ConfigDao;
 import com.fongmi.android.tv.db.dao.DeviceDao;
 import com.fongmi.android.tv.db.dao.DownloadDao;
+import com.fongmi.android.tv.db.dao.DownloadTaskDao;
 import com.fongmi.android.tv.db.dao.HistoryDao;
 import com.fongmi.android.tv.db.dao.KeepDao;
 import com.fongmi.android.tv.db.dao.LiveDao;
@@ -36,7 +38,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-@Database(entities = {Keep.class, Site.class, Live.class, Track.class, Config.class, Device.class, History.class, Download.class}, version = AppDatabase.VERSION)
+@Database(entities = {Keep.class, Site.class, Live.class, Track.class, Config.class, Device.class, History.class, Download.class, DownloadTask.class}, version = AppDatabase.VERSION)
 public abstract class AppDatabase extends RoomDatabase {
 
     public static final int VERSION = 31;
@@ -134,6 +136,9 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract HistoryDao getHistoryDao();
 
     public abstract DownloadDao getDownloadDao();
+
+    public abstract DownloadTaskDao getDownloadTaskDao();
+
 
     static final Migration MIGRATION_11_12 = new Migration(11, 12) {
         @Override

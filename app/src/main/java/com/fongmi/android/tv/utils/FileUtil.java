@@ -125,10 +125,22 @@ public class FileUtil {
         return size;
     }
 
-    private static String byteCountToDisplaySize(long size) {
+    public static String byteCountToDisplaySize(long size) {
         if (size <= 0) return "0 KB";
         String[] units = new String[]{"bytes", "KB", "MB", "GB", "TB"};
         int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
         return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+    }
+
+    public static int getFileType(String fileName) {
+        try {
+            String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
+            if (fileExtension.equals("mp4")) return 1;
+            else if (fileExtension.equals("exe")) return 2;
+            else if (fileExtension.equals("zip")) return 3;
+            else return 1;
+        }catch (Exception e){
+            return 1;
+        }
     }
 }
